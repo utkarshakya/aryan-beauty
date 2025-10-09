@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend for Aryan Beauty Parlour",
   "scripts": {
-    "vite": "vite",
+    "vite": "vite --host",
     "tailwind": "npx @tailwindcss/cli -i src/styles/input.css -o src/styles/output.css --watch",
     "dev": "concurrently --names \"VITE,TAILWIND\" --prefix-colors \"red,blue\" \"npm run vite\" \"npm run tailwind\"",
     "build": "vite build",
