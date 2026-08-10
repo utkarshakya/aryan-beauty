@@ -19,9 +19,24 @@ This document records the stable technical direction and important engineering p
 
 ## Application Architecture
 
-Use a Next.js monolith. The customer-facing UI, owner-facing UI, server-side application logic, and API routes live in one application.
+Use a Next.js monolith. The active application lives at the repository root. The customer-facing UI, owner-facing UI, server-side application logic, and API routes live in one application.
 
 Keep boundaries clear inside the monolith rather than introducing separate frontend and backend applications unless a real requirement appears.
+
+The current application is intentionally starting from a clean Next.js foundation rather than migrating the old client/server architecture directly.
+
+## Repository Structure
+
+```text
+AryanBeautyParlour/
+├── app/          # Active Next.js application
+├── public/       # Static assets
+├── docs/         # Product and engineering documentation
+├── legacy/       # Original React/Vite + Express/MongoDB application
+└── ...           # Next.js configuration and project files
+```
+
+The active code is at the repository root. `legacy/` is reference-only and should not be extended as part of new development.
 
 ## Data
 
@@ -49,8 +64,11 @@ Supabase Storage is used for application-managed images and other files when fil
 - Keep AI capabilities modular so they can evolve independently.
 - Update this document when a significant architectural decision changes.
 
-## Current Migration Context
+## Legacy Application
 
-The original application was built with React/Vite, Express, MongoDB/Mongoose, Cloudinary, Redis, and related services.
+The original application is preserved under `legacy/`:
 
-The project is moving to the target Next.js/PostgreSQL architecture. The old implementation is transitional and should not define the long-term architecture.
+- `legacy/client/` — React + Vite frontend
+- `legacy/server/` — Express API with MongoDB/Mongoose and related services
+
+The legacy application is retained for reference only. It can be inspected to recover useful product behavior, UI ideas, business rules, or assets, but its architecture should not be carried into the new application unless a specific decision is made to do so.
