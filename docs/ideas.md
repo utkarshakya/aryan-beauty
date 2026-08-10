@@ -1,42 +1,36 @@
 # Ideas
 
-Working doc: backlog + templates. Replaces the `06`–`08`, `10`, `11` stubs (deleted
-2026-08-08). Use this when shipping features: pick an idea, write a proposal, log lessons.
+This is the backlog for possibilities that are not part of the active high-level plan yet.
 
-## Future ideas (backlog)
+Ideas are not commitments. Promote an idea into `plan.md` only when there is a reason to build it.
 
-- Multi-salon / multi-branch
+## Product Ideas
+
+- Multi-salon / multi-branch support
 - Voice AI booking
-- Deeper analytics dashboards
-- No-show prediction (roadmap Phase 5)
+- Advanced analytics
+- Customer re-engagement
+- No-show prediction
+- More intelligent service recommendations
+- AI business copilot
+- Other features discovered from real salon usage
 
-## Prompt library
+## AI Exploration
 
-Store production prompts with versions (target: `server/` + OpenAI, Phase 2 of roadmap).
-Proposal template:
+Potential learning areas:
 
-```text
-Problem:
-Current process:
-Proposed AI feature:
-Data needed:
-Success metric:
-Lessons learned:
-```
+- Prompt engineering
+- Structured outputs
+- Tool/function calling
+- Retrieval and RAG
+- Agents and workflows
+- Evaluation
+- Automation
+- Prediction / basic ML
 
-## UI/UX notes
+## Rules
 
-Wireframes + design principles live near components as they land. Key rule: public pages
-server-rendered, studio pages Clerk-protected.
-
-## Learning journal
-
-One entry per week. Replace this section each week.
-
-```text
-## 2026-W## — <topic>
-- What I built:
-- Concept learned:
-- Lesson / blocker:
-- Next: 
-```
+- Keep ideas lightweight.
+- Do not turn the backlog into a second roadmap.
+- Real user problems should usually outrank interesting technology.
+- When an idea becomes an active commitment, move it into `plan.md` or a detailed plan in `plans/`.
