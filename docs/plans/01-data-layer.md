@@ -39,20 +39,20 @@ Set up PostgreSQL with Supabase, configure Prisma 7, create the initial database
 - [x] Confirm `prisma/migrations/` was created
 
 ### T6 — Generate Prisma Client
-- [ ] Run `npx prisma generate`
+- [x] Run `npx prisma generate`
 
 ### T7 — Seed initial services
-- [ ] Install `tsx`
-- [ ] Create `prisma/seed.ts`
-- [ ] Add initial services: Haircut, Hair Color, Facial, Manicure, Pedicure, Bridal Makeup
-- [ ] Configure Prisma seed command
-- [ ] Run `npx prisma db seed`
+- [x] Install `tsx`
+- [x] Create `prisma/seed.ts`
+- [x] Add initial services: Haircut, Hair Color, Facial, Manicure, Pedicure, Bridal Makeup
+- [x] Configure Prisma seed command
+- [x] Run `npx prisma db seed`
 
 ### T8 — Verify
-- [ ] Run `npx prisma validate`
-- [ ] Run `npx prisma studio`
-- [ ] Confirm 6 services exist
-- [ ] Confirm Customer and Appointment tables are empty
+- [x] Run `npx prisma validate`
+- [x] Run `npx prisma studio`
+- [x] Confirm 6 services exist
+- [x] Confirm Customer and Appointment tables are empty
 
 ## Done When
 - Prisma 7 is configured and working
