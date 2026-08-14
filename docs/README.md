@@ -11,7 +11,6 @@ These documents describe the product at different levels. Keep them small, curre
 | `architecture.md` | Stable technical decisions and engineering principles |
 | `ideas.md` | Future ideas and possibilities that are not part of the active plan |
 | `plans/` | Detailed implementation plans for individual phases/features |
-| `archive/` | Previous documentation kept only for historical reference |
 
 ## How to use the docs
 
