@@ -18,56 +18,55 @@ Add authentication with Clerk so the owner can sign in to a protected studio are
 ## Tasks
 
 ### T1 — Create Clerk application
-- [ ] Create/log in to Clerk dashboard
-- [ ] Create application named e.g. `Aryan Beauty Parlour`
-- [ ] Copy the two keys from `API Keys`: Publishable Key and Secret Key
+- [x] Create/log in to Clerk dashboard
+- [x] Create application named e.g. `Aryan Beauty`
+- [x] Copy the two keys from `API Keys`: Publishable Key and Secret Key
 
 ### T2 — Install SDK
-- [ ] Run `npm install @clerk/nextjs`
-- [ ] Confirm it registers in `package.json`
+- [x] Run `npm install @clerk/nextjs`
+- [x] Confirm it registers in `package.json`
 
 ### T3 — Configure environment
-- [ ] Add to `.env`:
+- [x] Add to `.env`:
   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<publishable key>`
   - `CLERK_SECRET_KEY=<secret key>`
   - `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`
   - `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up`
   - `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/studio`
   - `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/studio`
-- [ ] Mirror the same keys (with placeholder values) into `.env.example`
-- [ ] Confirm `.env` stays gitignored (already covered by `.env*`)
+- [x] Mirror the same keys (with placeholder values) into `.env.example`
+- [x] Confirm `.env` stays gitignored (already covered by `.env*`)
 
 ### T4 — Create `proxy.ts`
-- [ ] Create `proxy.ts` at repo root (sibling of `app/`)
-- [ ] Import `clerkMiddleware` and `createRouteMatcher` from `@clerk/nextjs/server`
-- [ ] Define public routes: `['/', '/sign-in(.*)', '/sign-up(.*)']`
-- [ ] Export `clerkMiddleware(async (auth, req) => { ... })` that calls `await auth.protect()` for non-public requests
-- [ ] Export `config.matcher` including static-file exclusions, `/(api|trpc)(.*)`, and `/__clerk/(.*)`
-- [ ] Do NOT set a `runtime` config in `proxy.ts` (Next 16 throws on it; proxy defaults to Node.js runtime)
+- [x] Create `proxy.ts` at repo root (sibling of `app/`)
+- [x] Import `clerkMiddleware` from `@clerk/nextjs/server`
+- [x] Keep `clerkMiddleware()` bare (no auth checks) and export `config.matcher` including static-file exclusions, `/(api|trpc)(.*)`, and `/__clerk/(.*)`
+- [x] Do NOT set a `runtime` config in `proxy.ts` (Next 16 throws on it; proxy defaults to Node.js runtime)
+- [x] NOTE: `createRouteMatcher` is deprecated (removed in next major). Auth checks move to each protected resource via `await auth.protect()` per Clerk's resource-based protection model. Proxy still required for Clerk to work but holds no auth logic.
 
 ### T5 — Wrap app in `ClerkProvider`
-- [ ] Modify `app/layout.tsx` to wrap `{children}` in `<ClerkProvider>`
-- [ ] Keep the existing fonts, globals, and metadata in the layout
+- [x] Modify `app/layout.tsx` to wrap `{children}` in `<ClerkProvider>`
+- [x] Keep the existing fonts, globals, and metadata in the layout
 
 ### T6 — Create sign-in and sign-up pages
-- [ ] Create `app/sign-in/[[...sign-in]]/page.tsx` rendering Clerk's `<SignIn />` component
-- [ ] Create `app/sign-up/[[...sign-up]]/page.tsx` rendering Clerk's `<SignUp />` component
-- [ ] Verify the routes match `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
+- [x] Create `app/sign-in/[[...sign-in]]/page.tsx` rendering Clerk's `<SignIn />` component
+- [x] Create `app/sign-up/[[...sign-up]]/page.tsx` rendering Clerk's `<SignUp />` component
+- [x] Verify the routes match `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
 
 ### T7 — Create protected studio area
-- [ ] Create `app/studio/page.tsx`
-- [ ] Server component calls `await auth()` from `@clerk/nextjs/server`
-- [ ] Render a minimal "Studio" placeholder showing the signed-in user id (e.g. `user?.id`) to prove server-side auth works
+- [x] Create `app/studio/page.tsx`
+- [x] Server component calls `await auth.protect()` from `@clerk/nextjs/server` (resource-based check, replaces proxy-level auth since `createRouteMatcher` is deprecated)
+- [x] Render a minimal "Studio" placeholder showing the signed-in user id (e.g. `user?.id`) to prove server-side auth works
 
 ### T8 — Verify
-- [ ] Run `npx prisma validate` (confirm no schema impact)
-- [ ] Run `npm run lint`
-- [ ] Run `npm run build`
-- [ ] Run `npm run dev`
-- [ ] Visiting `/studio` while signed out redirects to `/sign-in`
-- [ ] Signing in redirects to `/studio`
-- [ ] Visiting `/` works signed out (public)
-- [ ] Log out, confirm `/studio` is protected again
+- [x] Run `npx prisma validate` (confirm no schema impact)
+- [x] Run `npm run lint`
+- [x] Run `npm run build`
+- [x] Run `npm run dev`
+- [x] Visiting `/studio` while signed out redirects to `/sign-in`
+- [x] Signing in redirects to `/studio`
+- [x] Visiting `/` works signed out (public)
+- [x] Log out, confirm `/studio` is protected again
 
 ## Files to create or modify
 | File | Action |
@@ -84,11 +83,11 @@ Add authentication with Clerk so the owner can sign in to a protected studio are
 ## Edge cases and failure handling
 - `proxy.ts` must live at the repo root or in `src/`, never inside `app/`. Keep it at the root here.
 - The matcher must include Clerk's frontend API (`/__clerk/(.*)`) so the authentication handshake works, and `/(api|trpc)(.*)` for future API routes.
-- `auth()` from `@clerk/nextjs/server` is async — always `await` it.
+- `auth.protect()` from `@clerk/nextjs/server` is async — always `await` it. Use it in every protected page/route/server action (resource-based auth); `createRouteMatcher` is deprecated and must not return.
 - After changing `proxy.ts`, clear `.next` and restart `npm run dev` if behavior looks stale.
 - Clerk docs fast-path (`npx clerk@latest init --framework next`) exists but we are setting up manually so every file stays intentional.
 - Keyless/dev keys are ephemeral; real keys belong in the Clerk dashboard and, later, in Vercel environment variables when we deploy.
-- Do not rely on the proxy alone for authorization. Later API/route-handler steps must re-check auth server-side with `auth()`.
+- Do not rely on the proxy alone for authorization. Later API/route-handler steps must re-check auth server-side with `auth.protect()`.
 
 ## Done When
 - Clerk SDK installed and env configured
