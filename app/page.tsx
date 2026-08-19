@@ -1,3 +1,13 @@
+import Hero from "./components/Hero";
+import Navbar from "./components/Navbar";
+import ServicesPreview from "./components/ServicesPreview";
+
 export default function Home() {
-  return <h1 className="text-center mt-1">Ping Jessica</h1>;
+  return (
+    <>
+      <Navbar />
+      <Hero />
+      <ServicesPreview />
+    </>
+  );
 }

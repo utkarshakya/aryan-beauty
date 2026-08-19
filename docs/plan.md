@@ -6,12 +6,12 @@ This is the product roadmap, not an implementation checklist. It describes what 
 
 Build the smallest version that the real parlor can use.
 
-- Public salon website
-- Service catalog
-- Customer booking
-- Simple owner appointment management
-- Basic authentication where needed
-- Deploy and put the product in real use
+- [x] Public salon website
+- [x] Service catalog
+- [ ] Customer booking
+- [ ] Simple owner appointment management
+- [x] Basic authentication where needed
+- [ ] Deploy and put the product in real use
 
 **Goal:** Aunty and her customers can actually use the product.
 

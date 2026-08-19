@@ -32,7 +32,7 @@ AryanBeautyParlour/
 ├── app/          # Active Next.js application
 ├── public/       # Static assets
 ├── docs/         # Product and engineering documentation
-├── legacy/       # Original React/Vite + Express/MongoDB application
+├── legacy/       # Legacy Express/MongoDB backend (frontend already removed)
 └── ...           # Next.js configuration and project files
 ```
 
@@ -68,7 +68,12 @@ Supabase Storage is used for application-managed images and other files when fil
 
 The original application is preserved under `legacy/`:
 
-- `legacy/client/` — React + Vite frontend
-- `legacy/server/` — Express API with MongoDB/Mongoose and related services
+- `legacy/server/` — Express API with MongoDB/Mongoose and related services (the original React/Vite frontend has been fully replaced and removed)
 
 The legacy application is retained for reference only. It can be inspected to recover useful product behavior, UI ideas, business rules, or assets, but its architecture should not be carried into the new application unless a specific decision is made to do so.
+
+### Retirement policy
+
+- When a feature or page is rebuilt in the active app, remove the corresponding legacy files that implemented it.
+- Do not run lint or type checks on `legacy/`. It is excluded from ESLint and is not part of the build; it is dead reference code.
+- Legacy code is not extended or maintained. The goal is for `legacy/` to be deleted entirely once every feature it contains has been replaced.

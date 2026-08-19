@@ -21,42 +21,42 @@ Port the legacy public-facing pages (Home, Services) into the Next.js `app/` str
 ## Tasks
 
 ### T1 — Build `Navbar` component
-- [ ] Create `app/components/Navbar.tsx` (Server or Client Component — decide based on whether interactivity, e.g. mobile menu toggle, is needed → likely Client Component for `useState`)
-- [ ] Port nav items: Services (dropdown), About, Contact, Login
-- [ ] Point "Login" to `/sign-in`
-- [ ] Use Next.js `<Link>` from `next/link` instead of `react-router`'s `<Link>`
-- [ ] Decide: install `@heroicons/react` for icons, or use simple text/SVG
+- [x] Create `app/components/Navbar.tsx` (Client Component — `useState` for mobile menu + services dropdown toggle)
+- [x] Port nav items: Services (dropdown), About, Contact, Login
+- [x] Point "Login" to `/sign-in`
+- [x] Use Next.js `<Link>` from `next/link` instead of `react-router`'s `<Link>`
+- [x] Decide: install `@heroicons/react` for icons, or use simple text/SVG — chose plain text/unicode symbols (☰ / ✕), no new dependency
 
 ### T2 — Build `Hero` component
-- [ ] Create `app/components/Hero.tsx`
-- [ ] Port headline, subtext, "Book Appointment" CTA (placeholder for now)
-- [ ] Decide: install `framer-motion` for entrance animation, or use CSS transitions / skip animation
+- [x] Create `app/components/Hero.tsx`
+- [x] Port headline, subtext, "Book Appointment" CTA (placeholder for now)
+- [x] Decide: install `framer-motion` for entrance animation, or use CSS transitions / skip animation — skipped, plain Server Component, no animation
 
 ### T3 — Build `ServicesPreview` component
-- [ ] Create `app/components/ServicesPreview.tsx`
-- [ ] Decide data source: hardcoded teaser copy vs. top N services from DB
-- [ ] If DB-backed: Server Component, `prisma.service.findMany({ take: 3 })`
+- [x] Create `app/components/ServicesPreview.tsx`
+- [x] Decide data source: hardcoded teaser copy vs. top N services from DB — kept hardcoded, no DB fetch added
+- [x] ~~If DB-backed: Server Component, `prisma.service.findMany({ take: 3 })`~~ N/A — stayed hardcoded
 
 ### T4 — Assemble Home page
-- [ ] Update `app/page.tsx` to render `Navbar`, `Hero`, `ServicesPreview` in place of the current default Next.js starter content
-- [ ] Confirm `/` still loads signed-out (public, per Step 2 verification)
+- [x] Update `app/page.tsx` to render `Navbar`, `Hero`, `ServicesPreview` in place of the current default Next.js starter content
+- [x] Confirm `/` still loads signed-out (public, per Step 2 verification)
 
 ### T5 — Build Services page
-- [ ] Create `app/services/page.tsx` as a Server Component
-- [ ] Fetch all services: `const services = await prisma.service.findMany()`
-- [ ] Group/filter by `category` field (Hair, Skin, Makeup, Spa, Nails — matches seed data)
-- [ ] Render category filter buttons (client-side interactivity needed here → likely a small Client Component for the filter state, receiving `services` as a prop from the Server Component parent)
-- [ ] Render service cards: name, description, price, duration — no image, or static placeholder
-- [ ] "Book Now" button — placeholder only (no handler yet)
+- [x] Create `app/services/page.tsx` as a Server Component
+- [x] Fetch all services: `const services = await prisma.service.findMany()`
+- [x] Group/filter by `category` field (Hair, Skin, Makeup, Spa, Nails — matches seed data)
+- [x] Render category filter buttons (client-side interactivity needed here → likely a small Client Component for the filter state, receiving `services` as a prop from the Server Component parent) — `app/components/ServicesFilter.tsx`
+- [x] Render service cards: name, description, price, duration — no image, or static placeholder
+- [x] "Book Now" button — placeholder only (no handler yet)
 
 ### T6 — Verify
-- [ ] Run `npm run lint`
-- [ ] Run `npm run build`
-- [ ] Run `npm run dev`
-- [ ] Visit `/` — Navbar, Hero, ServicesPreview render correctly, signed out
-- [ ] Visit `/services` — real seeded services appear, grouped/filterable by category
-- [ ] Navbar "Login" → lands on `/sign-in`
-- [ ] Confirm `/studio` is still protected (Step 2 untouched)
+- [x] Run `npm run lint`
+- [x] Run `npm run build`
+- [x] Run `npm run dev`
+- [x] Visit `/` — Navbar, Hero, ServicesPreview render correctly, signed out
+- [x] Visit `/services` — real seeded services appear, grouped/filterable by category
+- [x] Navbar "Login" → lands on `/sign-in`
+- [x] Confirm `/studio` is still protected (Step 2 untouched)
 
 ## Files to create or modify
 | File | Action |
