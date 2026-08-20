@@ -81,4 +81,4 @@ Port the legacy public-facing pages (Home, Services) into the Next.js `app/` str
 - Step 2's protected `/studio` behavior is unaffected
 
 ## Next Step
-After public UI: **Customer booking** — build the booking form (name + phone, no account) against the `Appointment` and `Customer` models, per `plan.md` Phase 1.
+After public UI: **Customer booking** — see `04-customer-booking.md`. Build the booking form (name + phone, no account) against the `Appointment` and `Customer` models.
