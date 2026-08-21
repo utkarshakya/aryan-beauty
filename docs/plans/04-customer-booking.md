@@ -22,44 +22,44 @@ Let a customer book an appointment from the public site without creating an acco
 ## Tasks
 
 ### T1 — Schema: unique phone on Customer
-- [ ] Add `@unique` to `Customer.phone` in `prisma/schema.prisma`
-- [ ] Fix `package.json` `prisma:migrate` — it hardcodes `--name init`; subsequent migrations need a real name (e.g. use `prisma migrate dev` and answer the prompt, or make the script name-parameterized)
-- [ ] Check `prisma.config.ts` — `migrations.path` is `"prisma/migratoins"` (typo); fix to `"prisma/migrations"` and confirm existing migration still resolves
-- [ ] Run migration + `npm run prisma:generate`
+- [x] Add `@unique` to `Customer.phone` in `prisma/schema.prisma`
+- [x] Fix `package.json` `prisma:migrate` — it hardcodes `--name init`; subsequent migrations need a real name (e.g. use `prisma migrate dev` and answer the prompt, or make the script name-parameterized)
+- [x] Check `prisma.config.ts` — `migrations.path` is `"prisma/migratoins"` (typo); fix to `"prisma/migrations"` and confirm existing migration still resolves
+- [x] Run migration + `npm run prisma:generate`
 
 ### T2 — Server Action: `createAppointment`
-- [ ] Create `app/actions.ts` with `"use server"`
-- [ ] `createAppointment(prevState, formData)` returning `{ success?: {...} } | { errors?: Record<string, string> }`
-- [ ] Validate: name, phone (10-digit Indian), serviceId exists, startTime future, notes length
-- [ ] Look up service → compute `endTime`
-- [ ] Availability check + create inside `prisma.$transaction(async (tx) => ...)`: find conflicting appointments, `customer.upsert` on phone, `appointment.create`
-- [ ] Return minimal confirmation data only (never raw DB records)
+- [x] Create `app/actions.ts` with `"use server"`
+- [x] `createAppointment(prevState, formData)` returning `{ success?: {...} } | { errors?: Record<string, string> }`
+- [x] Validate: name, phone (10-digit Indian), serviceId exists, startTime future, notes length
+- [x] Look up service → compute `endTime`
+- [x] Availability check + create inside `prisma.$transaction(async (tx) => ...)`: find conflicting appointments, `customer.upsert` on phone, `appointment.create`
+- [x] Return minimal confirmation data only (never raw DB records)
 
 ### T3 — `/book` page (Server Component)
-- [ ] Create `app/book/page.tsx`, `export const dynamic = "force-dynamic"`
-- [ ] Fetch services via `prisma.service.findMany()` for the dropdown
-- [ ] Read `searchParams.serviceId` (note: in Next 16 `searchParams` is a Promise — `await` it) for preselection
-- [ ] Render `Navbar` + `BookingForm` client component
+- [x] Create `app/book/page.tsx`, `export const dynamic = "force-dynamic"`
+- [x] Fetch services via `prisma.service.findMany()` for the dropdown
+- [x] Read `searchParams.serviceId` (note: in Next 16 `searchParams` is a Promise — `await` it) for preselection
+- [x] Render `Navbar` + `BookingForm` client component
 
 ### T4 — `BookingForm` (Client Component)
-- [ ] Create `app/components/BookingForm.tsx`, `"use client"`
-- [ ] `useActionState(createAppointment, initialState)` — fields: service select, name, phone, date, time, notes
-- [ ] Convert date + time → UTC ISO string before submit; pass as hidden field or in submit handler
-- [ ] Pending state on submit button; field-level error display; success state swaps form for a confirmation card
+- [x] Create `app/components/BookingForm.tsx`, `"use client"`
+- [x] `useActionState(createAppointment, initialState)` — fields: service select, name, phone, date, time, notes
+- [x] Convert date + time → UTC ISO string before submit; pass as hidden field or in submit handler
+- [x] Pending state on submit button; field-level error display; success state swaps form for a confirmation card
 
 ### T5 — Wire entry points
-- [ ] `app/components/ServicesFilter.tsx`: change "Book Now" `<button>` → `<Link href={`/book?serviceId=${service.id}`}>`
-- [ ] `app/components/Hero.tsx`: "Book Appointment" `<button>` → `<Link href="/book">`
+- [x] `app/components/ServicesFilter.tsx`: change "Book Now" `<button>` → `<Link href={`/book?serviceId=${service.id}`}>`
+- [x] `app/components/Hero.tsx`: "Book Appointment" `<button>` → `<Link href="/book">`
 
 ### T6 — Verify
-- [ ] `npm run lint`
-- [ ] `npm run build`
-- [ ] `npm run dev`
-- [ ] `/services` → Book Now → `/book?serviceId=...` with service preselected
-- [ ] Submit valid booking → confirmation card; `Appointment` + `Customer` rows created (check `prisma:studio` or SQL)
-- [ ] Booking a slot overlapping an existing non-cancelled appointment → error shown
-- [ ] Past date rejected; invalid phone rejected
-- [ ] `/`, `/services`, `/sign-in`, `/studio` still behave as before (studio still protected)
+- [x] `npm run lint`
+- [x] `npm run build`
+- [x] `npm run dev`
+- [x] `/services` → Book Now → `/book?serviceId=...` with service preselected
+- [x] Submit valid booking → confirmation card; `Appointment` + `Customer` rows created (check `prisma:studio` or SQL)
+- [x] Booking a slot overlapping an existing non-cancelled appointment → error shown
+- [x] Past date rejected; invalid phone rejected
+- [x] `/`, `/services`, `/sign-in`, `/studio` still behave as before (studio still protected)
 
 ## Files to create or modify
 | File | Action |
@@ -84,10 +84,10 @@ Let a customer book an appointment from the public site without creating an acco
 - Don't build double-booking hardening beyond the transaction (no slots UI / capacity config this step — that's owner-management territory).
 
 ## Done When
-- Customer books from `/services` with name + phone; real `Appointment`/`Customer` rows appear
-- Booking still works signed out (public)
-- Overlap, past-time, and invalid-phone submissions are rejected with clear messages
-- Build green; `/`, `/services`, `/studio` unaffected
+- [x] Customer books from `/services` with name + phone; real `Appointment`/`Customer` rows appear
+- [x] Booking still works signed out (public)
+- [x] Overlap, past-time, and invalid-phone submissions are rejected with clear messages
+- [x] Build green; `/`, `/services`, `/studio` unaffected
 
 ## Next Step
 **Owner appointment management** — `/studio` lists appointments and lets the owner confirm/cancel (port `getAppointments` / `updateAppointment` from legacy, using `auth.protect()`). After that, delete the ported `legacy/server` appointment files per the retirement policy.

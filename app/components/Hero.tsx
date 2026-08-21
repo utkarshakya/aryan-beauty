@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="bg-pink-50 py-20">
@@ -8,9 +10,12 @@ export default function Hero() {
         <p className="text-xl text-gray-600 mb-8">
           Professional beauty services tailored just for you
         </p>
-        <button className="bg-pink-600 text-white px-8 py-3 rounded-full hover:bg-pink-700 transition">
+        <Link
+          href="/book"
+          className="inline-block bg-pink-600 text-white px-8 py-3 rounded-full hover:bg-pink-700 transition"
+        >
           Book Appointment
-        </button>
+        </Link>
       </div>
     </section>
   );

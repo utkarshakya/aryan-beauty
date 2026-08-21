@@ -9,7 +9,7 @@
     "lint": "eslint",
     "prisma:version": "prisma --version",
     "prisma:validate": "prisma validate",
-    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio"

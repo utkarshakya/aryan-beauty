@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Service } from "@prisma/client";
 
@@ -67,12 +68,12 @@ export default function ServicesFilter({
                   {service.durationMin} min
                 </span>
               </div>
-              <button
-                type="button"
-                className="mt-4 bg-pink-600 text-white px-6 py-2 rounded-full hover:bg-pink-700 transition-colors"
+              <Link
+                href={`/book?serviceId=${service.id}`}
+                className="mt-4 bg-pink-600 text-white px-6 py-2 rounded-full text-center hover:bg-pink-700 transition-colors"
               >
                 Book Now
-              </button>
+              </Link>
             </div>
           ))}
         </div>
