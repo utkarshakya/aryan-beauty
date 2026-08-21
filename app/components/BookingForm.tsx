@@ -54,9 +54,16 @@ export default function BookingForm({
             <span className="text-gray-600">{phone}</span>
           </p>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 mb-6">
           We will confirm your appointment shortly.
         </p>
+        <button
+          type="button"
+          onClick={() => formAction(new FormData())}
+          className="text-pink-600 hover:text-pink-700 font-medium underline"
+        >
+          Book another appointment
+        </button>
       </div>
     );
   }
@@ -76,9 +83,17 @@ export default function BookingForm({
   return (
     <form action={submit} className="space-y-5">
       {errors.form && (
-        <p className="text-red-600 bg-red-50 rounded-lg px-4 py-3">
-          {errors.form}
-        </p>
+        <div className="flex items-center justify-between text-red-600 bg-red-50 rounded-lg px-4 py-3">
+          <span>{errors.form}</span>
+          <button
+            type="button"
+            onClick={() => formAction(new FormData())}
+            className="text-red-600 hover:text-red-800 font-bold text-xl leading-none p-1"
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <div>
@@ -89,6 +104,7 @@ export default function BookingForm({
           id="serviceId"
           name="serviceId"
           defaultValue={preselectedServiceId ?? ""}
+          required
           className={inputClasses}
         >
           <option value="" disabled>
@@ -128,7 +144,7 @@ export default function BookingForm({
           name="phone"
           type="tel"
           required
-          placeholder="10-digit mobile number"
+          placeholder="10-digit mobile (starts with 6-9)"
           className={inputClasses}
         />
         {errors.phone && <p className={errorClasses}>{errors.phone}</p>}
@@ -144,6 +160,7 @@ export default function BookingForm({
             name="date"
             type="date"
             required
+            min={new Date().toISOString().split("T")[0]}
             className={inputClasses}
           />
         </div>
@@ -156,6 +173,7 @@ export default function BookingForm({
             name="time"
             type="time"
             required
+            step="900"
             className={inputClasses}
           />
         </div>
