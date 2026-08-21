@@ -9,7 +9,7 @@ Build the smallest version that the real parlor can use.
 - [x] Public salon website
 - [x] Service catalog
 - [x] Customer booking
-- [ ] Simple owner appointment management
+- [x] Simple owner appointment management
 - [x] Basic authentication where needed
 - [ ] Deploy and put the product in real use
 

@@ -21,44 +21,44 @@ Let the parlor owner (signed in via Clerk) see and manage bookings at `/studio`:
 ## Tasks
 
 ### T1 — Fetch appointments in `/studio`
-- [ ] Update `app/studio/page.tsx`: read `searchParams.status` (default: `["pending", "confirmed"]`; `"all"` means no status filter)
-- [ ] `prisma.appointment.findMany({ where: { startTime: { gte: startOfToday }, status: statusFilter }, include: { customer: true, service: true }, orderBy: { startTime: "asc" } })`
-- [ ] Pass appointments + current status filter as props to `AppointmentsList`
+- [x] Update `app/studio/page.tsx`: read `searchParams.status` (default: `["pending", "confirmed"]`; `"all"` means no status filter)
+- [x] `prisma.appointment.findMany({ where: { startTime: { gte: startOfToday }, status: statusFilter }, include: { customer: true, service: true }, orderBy: { startTime: "asc" } })`
+- [x] Pass appointments + current status filter as props to `AppointmentsList`
 
 ### T2 — Owner Server Actions
-- [ ] Create `app/studio/actions.ts` with `"use server"`
-- [ ] Helper: `async function requireOwner() { const { userId } = await auth(); if (!userId) throw new Error("Unauthorized"); return userId; }`
-- [ ] `confirmAppointment(id: number)`: `requireOwner()`, `prisma.appointment.update({ where: { id }, data: { status: "confirmed" } })`, `revalidatePath("/studio")`
-- [ ] `cancelAppointment(id: number)`: same shape, sets `status: "cancelled"`
+- [x] Create `app/studio/actions.ts` with `"use server"`
+- [x] Helper: `async function requireOwner() { const { userId } = await auth(); if (!userId) throw new Error("Unauthorized"); return userId; }`
+- [x] `confirmAppointment(id: number)`: `requireOwner()`, `prisma.appointment.update({ where: { id }, data: { status: "confirmed" } })`, `revalidatePath("/studio")`
+- [x] `cancelAppointment(id: number)`: same shape, sets `status: "cancelled"`
 
 ### T3 — `AppointmentsList` component
-- [ ] Create `app/components/AppointmentsList.tsx` — table/list: customer name + phone, service name, date/time, status badge
-- [ ] Status badge colors: Pending (yellow), Confirmed (green), Cancelled (gray)
-- [ ] Confirm button: only when `status === "pending"`, bound via `.bind(null, appointment.id)`
-- [ ] Cancel button: when `status !== "cancelled"`, wrapped with a `confirm()` prompt before submitting
-- [ ] Status filter tabs: All / Pending / Confirmed / Cancelled as links with `?status=...`
-- [ ] Empty state: "No appointments" message
-- [ ] Decide Server vs Client Component: plain `<form action={...}>` buttons need no client state — likely stays a Server Component; only the `confirm()` cancel-guard needs a small Client Component wrapper around the Cancel button specifically
+- [x] Create `app/components/AppointmentsList.tsx` — table/list: customer name + phone, service name, date/time, status badge
+- [x] Status badge colors: Pending (yellow), Confirmed (green), Cancelled (gray)
+- [x] Confirm button: only when `status === "pending"`, bound via `.bind(null, appointment.id)`
+- [x] Cancel button: when `status !== "cancelled"`, wrapped with a `confirm()` prompt before submitting
+- [x] Status filter tabs: All / Pending / Confirmed / Cancelled as links with `?status=...`
+- [x] Empty state: "No appointments" message
+- [x] Decide Server vs Client Component: plain `<form action={...}>` buttons need no client state — likely stays a Server Component; only the `confirm()` cancel-guard needs a small Client Component wrapper around the Cancel button specifically
 
 ### T4 — Verify
-- [ ] `npm run lint`
-- [ ] `npm run build`
-- [ ] `npm run dev`
-- [ ] Book a test appointment (Step 4 flow), confirm it shows in `/studio`
-- [ ] Confirm it → status updates to Confirmed, Confirm button disappears
-- [ ] Cancel it → confirm() prompt appears, then status updates to Cancelled, row stays visible
-- [ ] Sign out → `/studio` redirects to sign-in (auth still enforced)
-- [ ] Cancelled appointment's old time slot becomes bookable again (conflict check already ignores cancelled)
-- [ ] Status filter tabs work: default view excludes cancelled; "All" shows everything
+- [x] `npm run lint`
+- [x] `npm run build`
+- [x] `npm run dev`
+- [x] Book a test appointment (Step 4 flow), confirm it shows in `/studio`
+- [x] Confirm it → status updates to Confirmed, Confirm button disappears
+- [x] Cancel it → confirm() prompt appears, then status updates to Cancelled, row stays visible
+- [x] Sign out → `/studio` redirects to sign-in (auth still enforced)
+- [x] Cancelled appointment's old time slot becomes bookable again (conflict check already ignores cancelled)
+- [x] Status filter tabs work: default view excludes cancelled; "All" shows everything
 
 ### T5 — Legacy cleanup
-- [ ] Grep `legacy/server` for references to appointment files before deleting
-- [ ] Delete `legacy/server/controllers/appointmentController.js`
-- [ ] Delete `legacy/server/routes/appointmentRoutes.js`
-- [ ] Delete `legacy/server/validators/appointmentValidator.js`
-- [ ] Delete `legacy/server/models/appointmentModel.js`
-- [ ] Remove any now-broken imports in `legacy/server` that referenced these files
-- [ ] Confirm nothing else in `legacy/server` still references them
+- [x] Grep `legacy/server` for references to appointment files before deleting
+- [x] Delete `legacy/server/controllers/appointmentController.js`
+- [x] Delete `legacy/server/routes/appointmentRoutes.js`
+- [x] Delete `legacy/server/validators/appointmentValidator.js`
+- [x] Delete `legacy/server/models/appointmentModel.js`
+- [x] Remove any now-broken imports in `legacy/server` that referenced these files
+- [x] Confirm nothing else in `legacy/server` still references them
 
 ## Files to create or modify
 | File | Action |

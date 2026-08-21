@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { Service } from "@prisma/client";
 import { createAppointment, type BookingState } from "@/app/actions";
 
@@ -21,6 +21,7 @@ export default function BookingForm({
     createAppointment,
     initialState,
   );
+  const [formErrorDismissed, setFormErrorDismissed] = useState(false);
 
   const errors = state && "errors" in state ? state.errors : {};
 
@@ -59,7 +60,7 @@ export default function BookingForm({
         </p>
         <button
           type="button"
-          onClick={() => formAction(new FormData())}
+          onClick={() => window.location.reload()}
           className="text-pink-600 hover:text-pink-700 font-medium underline"
         >
           Book another appointment
@@ -82,12 +83,12 @@ export default function BookingForm({
 
   return (
     <form action={submit} className="space-y-5">
-      {errors.form && (
+      {errors.form && !formErrorDismissed && (
         <div className="flex items-center justify-between text-red-600 bg-red-50 rounded-lg px-4 py-3">
           <span>{errors.form}</span>
           <button
             type="button"
-            onClick={() => formAction(new FormData())}
+            onClick={() => setFormErrorDismissed(true)}
             className="text-red-600 hover:text-red-800 font-bold text-xl leading-none p-1"
             aria-label="Dismiss error"
           >
