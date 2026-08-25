@@ -15,7 +15,7 @@ This document records the stable technical direction and important engineering p
 - **Payments:** Razorpay when payments are introduced
 - **Email:** SMTP when notifications are introduced
 - **AI:** OpenAI API when AI features are introduced
-- **Deployment:** Vercel
+- **Deployment:** Netlify
 
 ## Application Architecture
 

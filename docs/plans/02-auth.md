@@ -86,7 +86,7 @@ Add authentication with Clerk so the owner can sign in to a protected studio are
 - `auth.protect()` from `@clerk/nextjs/server` is async — always `await` it. Use it in every protected page/route/server action (resource-based auth); `createRouteMatcher` is deprecated and must not return.
 - After changing `proxy.ts`, clear `.next` and restart `npm run dev` if behavior looks stale.
 - Clerk docs fast-path (`npx clerk@latest init --framework next`) exists but we are setting up manually so every file stays intentional.
-- Keyless/dev keys are ephemeral; real keys belong in the Clerk dashboard and, later, in Vercel environment variables when we deploy.
+- Keyless/dev keys are ephemeral; real keys belong in the Clerk dashboard and, later, in Netlify environment variables when we deploy.
 - Do not rely on the proxy alone for authorization. Later API/route-handler steps must re-check auth server-side with `auth.protect()`.
 
 ## Done When

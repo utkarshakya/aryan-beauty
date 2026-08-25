@@ -11,7 +11,7 @@ Build the smallest version that the real parlor can use.
 - [x] Customer booking
 - [x] Simple owner appointment management
 - [x] Basic authentication where needed
-- [ ] Deploy and put the product in real use
+- [x] Deploy and put the product in real use
 
 **Goal:** Aunty and her customers can actually use the product.
 
