@@ -28,15 +28,14 @@ The current application is intentionally starting from a clean Next.js foundatio
 ## Repository Structure
 
 ```text
-AryanBeautyParlour/
+unknown/
 ├── app/          # Active Next.js application
 ├── public/       # Static assets
 ├── docs/         # Product and engineering documentation
-├── legacy/       # Legacy Express/MongoDB backend (frontend already removed)
 └── ...           # Next.js configuration and project files
 ```
 
-The active code is at the repository root. `legacy/` is reference-only and should not be extended as part of new development.
+The active code is at the repository root.
 
 ## Data
 
@@ -64,16 +63,16 @@ Supabase Storage is used for application-managed images and other files when fil
 - Keep AI capabilities modular so they can evolve independently.
 - Update this document when a significant architectural decision changes.
 
-## Legacy Application
+## Platform Notes
 
-The original application is preserved under `legacy/`:
-
-- `legacy/server/` — Express API with MongoDB/Mongoose and related services (the original React/Vite frontend has been fully replaced and removed)
-
-The legacy application is retained for reference only. It can be inspected to recover useful product behavior, UI ideas, business rules, or assets, but its architecture should not be carried into the new application unless a specific decision is made to do so.
-
-### Retirement policy
-
-- When a feature or page is rebuilt in the active app, remove the corresponding legacy files that implemented it.
-- Do not run lint or type checks on `legacy/`. It is excluded from ESLint and is not part of the build; it is dead reference code.
-- Legacy code is not extended or maintained. The goal is for `legacy/` to be deleted entirely once every feature it contains has been replaced.
+- **Next.js 16 middleware:** the middleware file is `proxy.ts` at the repo root (not `middleware.ts`, not inside `app/`). It must not set a `runtime` config — Next 16 throws on it.
+- **Auth enforcement:** `createRouteMatcher` is deprecated in this Clerk/Next setup. Auth is enforced per-resource: every protected page/server action calls `await auth.protect()` or checks `await auth()` itself. `proxy.ts` holds no auth logic — it only exists so Clerk's handshake works.
+- **`searchParams`:** in Next 16 App Router pages, `searchParams` is a `Promise` and must be awaited before use.
+- **Prisma 7.9.1 + `prisma.config.ts`:** the datasource block only supports a `url` property. Do NOT add `directUrl` to it — this Prisma version does not support that property on the datasource config object.
+- **Connection strings:** `DATABASE_URL` (Supabase transaction pooler) is used by the running app at all times. `DIRECT_URL` (Supabase direct connection) is used only for CLI commands (`prisma migrate deploy`, etc.), never referenced in application code or `prisma.config.ts`.
+- **`Appointment.status`:** intentionally a plain `String`, not a Prisma enum, so new status values don't require a migration. Do not convert it to an enum without an explicit request.
+- **Appointment overlap check:** a slot is unavailable if `existing.startTime < newEnd && existing.endTime > newStart`, ignoring rows where `status === "cancelled"`. This runs inside a Prisma interactive transaction alongside the customer upsert and appointment create.
+- **Customer lookup:** uses `customer.upsert` keyed on the unique `phone` field (find-or-create; repeat bookings overwrite the stored name).
+- **Auth model:** any authenticated Clerk user is treated as the parlor owner. There is no role system — an intentional decision for a single-owner parlor, not a gap to fill.
+- **Netlify build command:** `prisma generate && next build`.
+- **Netlify env vars** — secret: `DATABASE_URL`, `CLERK_SECRET_KEY`. Public (`NEXT_PUBLIC_*`): the Clerk publishable key and sign-in/up/redirect URLs.

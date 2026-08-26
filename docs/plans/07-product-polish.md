@@ -103,7 +103,9 @@ Topics should include:
 - visual hierarchy, typography, spacing, contrast, and interaction feedback;
 - practical product UX patterns for booking flows and dashboards.
 
-We may add curated `design.md` and skill/reference documents to the repository or agent workspace, but only from legitimate documentation/reference material and only when useful.
+This phase produces understanding, not documents. Concepts are taught conversationally and applied as needed; nothing from Phase 1 gets persisted as a standing doc. The one durable design artifact (`DESIGN.md`) belongs to Phase 2, after real decisions exist to document.
+
+Do not pull premade design/aesthetic skills from external skill registries (e.g. skills.sh, typeui.sh). Those ship a pre-baked visual identity (glassmorphism, brutalism, etc.) chosen for someone else's brief, which works against both a distinctive Aryan Beauty identity and the goal of Utkarsh making these calls himself with guidance.
 
 The purpose is not to copy a popular website. The purpose is to teach reusable design principles and patterns.
 
@@ -239,21 +241,17 @@ Sub-plan: `15-demo-readiness.md`
 
 ## Design knowledge and agent skills
 
-Design knowledge belongs in this phase, specifically Phase 1, rather than being mixed into the implementation plans.
+Design knowledge belongs in this phase, specifically Phase 2, once real decisions exist to document — not Phase 1.
 
 Recommended structure:
 
 ```text
 docs/
   design/
-    principles.md
-    tailwind.md
-    nextjs-ui.md
-    accessibility.md
-    inspiration.md
+    DESIGN.md
 ```
 
-Use these as learning/reference material, not as instructions to blindly reproduce another site's design.
+`DESIGN.md` holds project-specific decisions only: color tokens (semantic layer, not just background/foreground), typography roles, spacing/radius scale, container widths, and conventions for button/input/card/status-badge components. It is not a place to restate official framework documentation, which goes stale and duplicates docs that are one search away.
 
 ### About popular-site design.md files
 

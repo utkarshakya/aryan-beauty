@@ -2,7 +2,7 @@
 
 This is the backlog for possibilities that are not part of the active high-level plan yet.
 
-Ideas are not commitments. Promote an idea into `plan.md` only when there is a reason to build it.
+Ideas are not commitments. Promote an idea into `product.md` only when there is a reason to build it.
 
 ## Product Ideas
 
@@ -33,4 +33,4 @@ Potential learning areas:
 - Keep ideas lightweight.
 - Do not turn the backlog into a second roadmap.
 - Real user problems should usually outrank interesting technology.
-- When an idea becomes an active commitment, move it into `plan.md` or a detailed plan in `plans/`.
+- When an idea becomes an active commitment, move it into `product.md` or a detailed plan in `plans/`.
