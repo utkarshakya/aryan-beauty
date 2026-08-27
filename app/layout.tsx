@@ -14,8 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aryan Beauty",
-  description: "Professional beauty services tailored just for you",
+  title: {
+    default: "Aryan Beauty — Beauty Parlour & Online Booking",
+    template: "%s | Aryan Beauty",
+  },
+  description:
+    "Book appointments for hair, skin, nail and beauty services at Aryan Beauty — no account needed.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

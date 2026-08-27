@@ -1,8 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Service } from "@prisma/client";
+import PageHeader from "./PageHeader";
+import ServiceCard from "./ServiceCard";
+import EmptyServices from "./EmptyServices";
+import Container from "./ui/Container";
 
 const ALL_CATEGORIES = "All";
 
@@ -23,61 +26,52 @@ export default function ServicesFilter({
       : services.filter((s) => s.category === activeCategory);
 
   return (
-    <main className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">
-          Our Services
-        </h1>
-        <p className="text-center text-gray-600 mb-10">
-          Explore our range of professional beauty services
-        </p>
+    <Container className="py-16 sm:py-20">
+      <PageHeader
+        title="Our Services"
+        subtitle="Browse our range of professional beauty services and book online."
+      />
 
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-5 py-2 rounded-full font-medium transition-colors ${
-                activeCategory === category
-                  ? "bg-pink-600 text-white"
-                  : "bg-pink-50 text-gray-700 hover:bg-pink-100"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+      {services.length === 0 ? (
+        <EmptyServices />
+      ) : (
+        <>
+          <div
+            className="mb-3 flex flex-wrap justify-center gap-2"
+            role="group"
+            aria-label="Filter services by category"
+          >
+            {categories.map((category) => {
+              const active = activeCategory === category;
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                  aria-pressed={active}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                    active
+                      ? "bg-primary text-white"
+                      : "bg-primary-soft text-foreground hover:bg-primary-soft-strong"
+                  }`}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mb-10 text-center text-sm text-muted" role="status">
+            Showing {filteredServices.length}{" "}
+            {filteredServices.length === 1 ? "service" : "services"}
+          </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map((service) => (
-            <div
-              key={service.id}
-              className="bg-pink-50 rounded-xl p-6 flex flex-col"
-            >
-              <h3 className="text-lg font-semibold text-gray-800">
-                {service.name}
-              </h3>
-              <p className="text-gray-600 mt-2 flex-1">
-                {service.description}
-              </p>
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-pink-600 font-semibold">
-                  ₹{Math.round(service.price)}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {service.durationMin} min
-                </span>
-              </div>
-              <Link
-                href={`/book?serviceId=${service.id}`}
-                className="mt-4 bg-pink-600 text-white px-6 py-2 rounded-full text-center hover:bg-pink-700 transition-colors"
-              >
-                Book Now
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </main>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredServices.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
+        </>
+      )}
+    </Container>
   );
 }

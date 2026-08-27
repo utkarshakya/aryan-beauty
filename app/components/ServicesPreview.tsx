@@ -1,25 +1,37 @@
-const previewServices = [
-  { name: "Haircut & Styling", price: "₹500" },
-  { name: "Facial Treatment", price: "₹800" },
-  { name: "Manicure & Pedicure", price: "₹600" },
-];
+import ServiceCard from "./ServiceCard";
+import Container from "./ui/Container";
+import { ButtonLink } from "./ui/Button";
+import type { Service } from "@prisma/client";
 
-export default function ServicesPreview() {
+export default function ServicesPreview({
+  services,
+}: {
+  services: Service[];
+}) {
+  if (services.length === 0) return null;
+
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-10">
-          Popular Services
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {previewServices.map((s) => (
-            <div key={s.name} className="bg-pink-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-800">{s.name}</h3>
-              <p className="text-pink-600 mt-2">{s.price}</p>
-            </div>
+    <section className="py-16 sm:py-20">
+      <Container>
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Our Services
+            </h2>
+            <p className="mt-2 text-muted">
+              Real prices, booked in under a minute.
+            </p>
+          </div>
+          <ButtonLink href="/services" variant="secondary">
+            View all services
+          </ButtonLink>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => (
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

@@ -16,10 +16,16 @@ export type BookingState =
 const INDIAN_PHONE_RE = /^[6-9]\d{9}$/;
 const NOTES_MAX = 100;
 
+const initialState: BookingState = { errors: {} };
+
 export async function createAppointment(
   _prevState: BookingState,
   formData: FormData,
 ): Promise<BookingState> {
+  if (formData.get("__reset")) {
+    return initialState;
+  }
+
   const serviceId = Number(formData.get("serviceId"));
   const name = String(formData.get("name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -41,7 +47,7 @@ export async function createAppointment(
   if (!startTimeRaw || Number.isNaN(startTime.getTime())) {
     errors.startTime = "Please pick a date and time";
   } else if (startTime <= new Date()) {
-    errors.startTime = "Start time must be in the future";
+    errors.startTime = "Please pick a date and time in the future";
   }
   if (notes.length > NOTES_MAX) {
     errors.notes = `Notes must be ${NOTES_MAX} characters or fewer`;
@@ -102,10 +108,15 @@ export async function createAppointment(
     };
   } catch (error) {
     if (error instanceof Error && error.message === "Time slot unavailable") {
-      return { errors: { startTime: "Time slot unavailable" } };
+      return {
+        errors: {
+          startTime:
+            "Sorry, that time is already booked. Please choose another slot.",
+        },
+      };
     }
     if (error instanceof Error && error.message === "Service not found") {
-      return { errors: { serviceId: "Service not found" } };
+      return { errors: { serviceId: "This service is no longer available. Please pick another." } };
     }
     return { errors: { form: "Something went wrong. Please try again." } };
   }

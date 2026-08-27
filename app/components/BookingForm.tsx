@@ -3,12 +3,34 @@
 import { useActionState, useState } from "react";
 import type { Service } from "@prisma/client";
 import { createAppointment, type BookingState } from "@/app/actions";
+import { Button, ButtonLink } from "./ui/Button";
+import { business } from "@/lib/business";
 
 const initialState: BookingState = { errors: {} };
 
 const inputClasses =
-  "w-full px-4 py-2 rounded-lg border border-pink-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-400";
-const errorClasses = "mt-1 text-sm text-red-600";
+  "w-full rounded-lg border bg-background px-4 py-2.5 text-foreground placeholder:text-muted/70 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary";
+const validInputClasses = `${inputClasses} border-border`;
+const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
+const errorTextClasses = "mt-1.5 text-sm text-danger";
+
+function CheckIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-6 w-6"
+      aria-hidden="true"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
 
 export default function BookingForm({
   services,
@@ -21,9 +43,15 @@ export default function BookingForm({
     createAppointment,
     initialState,
   );
-  const [formErrorDismissed, setFormErrorDismissed] = useState(false);
+  const [dismissedError, setDismissedError] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState(
+    preselectedServiceId ?? "",
+  );
 
   const errors = state && "errors" in state ? state.errors : {};
+  const selectedService = services.find(
+    (service) => service.id === Number(selectedServiceId),
+  );
 
   if (state && "success" in state) {
     const { serviceName, startTime, name, phone } = state.success;
@@ -33,38 +61,71 @@ export default function BookingForm({
     });
 
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Booking Confirmed
-        </h2>
-        <p className="text-gray-600 mb-2">Thank you, {name}!</p>
-        <p className="text-gray-600 mb-2">
-          We have received your appointment request.
-        </p>
-        <div className="bg-white rounded-lg p-4 my-6 text-left space-y-1">
-          <p>
-            <span className="font-semibold text-gray-800">Service:</span>{" "}
-            <span className="text-gray-600">{serviceName}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-gray-800">Date & time:</span>{" "}
-            <span className="text-gray-600">{formatted}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-gray-800">Phone:</span>{" "}
-            <span className="text-gray-600">{phone}</span>
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-xl border border-success/30 bg-success-soft p-6 sm:p-8"
+      >
+        <div className="flex flex-col items-center text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-success text-white">
+            <CheckIcon />
+          </span>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight">
+            Booking request sent
+          </h2>
+          <p className="mt-2 text-muted">Thank you, {name}!</p>
+        </div>
+
+        <dl className="mt-6 space-y-2 rounded-lg border border-border bg-background p-4 text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="font-medium text-foreground">Service</dt>
+            <dd className="text-right text-muted">{serviceName}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="font-medium text-foreground">When</dt>
+            <dd className="text-right text-muted">{formatted}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="font-medium text-foreground">Phone</dt>
+            <dd className="text-right text-muted">{phone}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-6 rounded-lg bg-success-soft p-4 text-sm">
+          <p className="font-medium text-foreground">What happens next?</p>
+          <p className="mt-1 text-muted">
+            We&apos;ll call you on {phone} shortly to confirm your appointment.
+            If the time isn&apos;t available, we&apos;ll help you pick another
+            slot.
           </p>
         </div>
-        <p className="text-sm text-gray-500 mb-6">
-          We will confirm your appointment shortly.
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Questions?{" "}
+          <a
+            href={business.phoneHref}
+            className="font-medium text-primary transition-colors hover:text-primary-strong"
+          >
+            Call us on {business.phoneDisplay}
+          </a>
         </p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="text-pink-600 hover:text-pink-700 font-medium underline"
-        >
-          Book another appointment
-        </button>
+
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              const resetData = new FormData();
+              resetData.set("__reset", "1");
+              formAction(resetData);
+            }}
+          >
+            Book another appointment
+          </Button>
+          <ButtonLink href="/services" variant="ghost">
+            Browse services
+          </ButtonLink>
+        </div>
       </div>
     );
   }
@@ -83,30 +144,46 @@ export default function BookingForm({
 
   return (
     <form action={submit} className="space-y-5">
-      {errors.form && !formErrorDismissed && (
-        <div className="flex items-center justify-between text-red-600 bg-red-50 rounded-lg px-4 py-3">
+      {errors.form && errors.form !== dismissedError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger"
+        >
           <span>{errors.form}</span>
           <button
             type="button"
-            onClick={() => setFormErrorDismissed(true)}
-            className="text-red-600 hover:text-red-800 font-bold text-xl leading-none p-1"
+            onClick={() => setDismissedError(errors.form ?? null)}
+            className="rounded-full p-1 font-bold leading-none transition-colors hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
             aria-label="Dismiss error"
           >
-            ×
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
         </div>
       )}
 
       <div>
-        <label htmlFor="serviceId" className="block text-gray-700 mb-1">
+        <label htmlFor="serviceId" className="mb-1.5 block text-sm font-medium">
           Service
         </label>
         <select
           id="serviceId"
           name="serviceId"
           defaultValue={preselectedServiceId ?? ""}
+          onChange={(event) => setSelectedServiceId(event.target.value)}
           required
-          className={inputClasses}
+          aria-invalid={Boolean(errors.serviceId) || undefined}
+          className={errors.serviceId ? errorInputClasses : validInputClasses}
         >
           <option value="" disabled>
             Select a service
@@ -118,72 +195,99 @@ export default function BookingForm({
             </option>
           ))}
         </select>
-        {errors.serviceId && <p className={errorClasses}>{errors.serviceId}</p>}
+        {selectedService && (
+          <p className="mt-1.5 text-sm text-muted">
+            Takes about {selectedService.durationMin} minutes.
+          </p>
+        )}
+        {errors.serviceId && (
+          <p className={errorTextClasses}>{errors.serviceId}</p>
+        )}
       </div>
 
-      <div>
-        <label htmlFor="name" className="block text-gray-700 mb-1">
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          placeholder="Your name"
-          className={inputClasses}
-        />
-        {errors.name && <p className={errorClasses}>{errors.name}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="phone" className="block text-gray-700 mb-1">
-          Phone
-        </label>
-        <input
-          id="phone"
-          name="phone"
-          type="tel"
-          required
-          placeholder="10-digit mobile (starts with 6-9)"
-          className={inputClasses}
-        />
-        {errors.phone && <p className={errorClasses}>{errors.phone}</p>}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="date" className="block text-gray-700 mb-1">
-            Date
+          <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
+            Name
           </label>
           <input
-            id="date"
-            name="date"
-            type="date"
+            id="name"
+            name="name"
+            type="text"
             required
-            min={new Date().toISOString().split("T")[0]}
-            className={inputClasses}
+            autoComplete="name"
+            placeholder="Your name"
+            aria-invalid={Boolean(errors.name) || undefined}
+            className={errors.name ? errorInputClasses : validInputClasses}
           />
+          {errors.name && <p className={errorTextClasses}>{errors.name}</p>}
         </div>
+
         <div>
-          <label htmlFor="time" className="block text-gray-700 mb-1">
-            Time
+          <label htmlFor="phone" className="mb-1.5 block text-sm font-medium">
+            Phone
           </label>
           <input
-            id="time"
-            name="time"
-            type="time"
+            id="phone"
+            name="phone"
+            type="tel"
             required
-            step="900"
-            className={inputClasses}
+            autoComplete="tel"
+            inputMode="numeric"
+            placeholder="10-digit mobile number"
+            aria-invalid={Boolean(errors.phone) || undefined}
+            className={errors.phone ? errorInputClasses : validInputClasses}
           />
+          {errors.phone && <p className={errorTextClasses}>{errors.phone}</p>}
         </div>
       </div>
-      {errors.startTime && <p className={errorClasses}>{errors.startTime}</p>}
+
+      <div className="space-y-1">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="date" className="mb-1.5 block text-sm font-medium">
+              Date
+            </label>
+            <input
+              id="date"
+              name="date"
+              type="date"
+              required
+              aria-invalid={Boolean(errors.startTime) || undefined}
+              className={errors.startTime ? errorInputClasses : validInputClasses}
+            />
+          </div>
+          <div>
+            <label htmlFor="time" className="mb-1.5 block text-sm font-medium">
+              Time
+            </label>
+            <input
+              id="time"
+              name="time"
+              type="time"
+              required
+              step="900"
+              aria-invalid={Boolean(errors.startTime) || undefined}
+              className={errors.startTime ? errorInputClasses : validInputClasses}
+            />
+          </div>
+        </div>
+        <p className="text-sm text-muted">
+          Open {business.hoursDays}, {business.hoursTime}.
+        </p>
+        {errors.startTime && (
+          <p
+            role="alert"
+            className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger"
+          >
+            {errors.startTime}
+          </p>
+        )}
+      </div>
 
       <div>
-        <label htmlFor="notes" className="block text-gray-700 mb-1">
-          Notes <span className="text-gray-400">(optional)</span>
+        <label htmlFor="notes" className="mb-1.5 block text-sm font-medium">
+          Notes <span className="font-normal text-muted">(optional)</span>
         </label>
         <textarea
           id="notes"
@@ -191,18 +295,15 @@ export default function BookingForm({
           rows={3}
           maxLength={100}
           placeholder="Anything we should know?"
-          className={inputClasses}
+          aria-invalid={Boolean(errors.notes) || undefined}
+          className={errors.notes ? errorInputClasses : validInputClasses}
         />
-        {errors.notes && <p className={errorClasses}>{errors.notes}</p>}
+        {errors.notes && <p className={errorTextClasses}>{errors.notes}</p>}
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full bg-pink-600 text-white px-6 py-3 rounded-full hover:bg-pink-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {pending ? "Booking..." : "Confirm Booking"}
-      </button>
+      <Button type="submit" disabled={pending} className="w-full" size="lg">
+        {pending ? "Booking…" : "Confirm Booking"}
+      </Button>
     </form>
   );
 }

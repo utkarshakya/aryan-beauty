@@ -1,97 +1,131 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import Container from "./ui/Container";
+import { ButtonLink } from "./ui/Button";
 
-const navigationItems = [
-  { name: "Services", href: "/services" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
-  { name: "Login", href: "/sign-in" },
-];
+const navLinks = [{ name: "Services", href: "/services" }];
 
-const serviceCategories = [
-  { name: "Hair", href: "/services" },
-  { name: "Skin", href: "/services" },
-  { name: "Spa", href: "/services" },
-  { name: "Nails", href: "/services" },
-];
+function NavLink({ name, href }: { name: string; href: string }) {
+  const pathname = usePathname();
+  const active = pathname === href;
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={`rounded-full px-4 py-2 transition-colors hover:bg-primary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        active ? "font-medium text-primary" : "text-foreground"
+      }`}
+    >
+      {name}
+    </Link>
+  );
+}
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const { isSignedIn, isLoaded } = useUser();
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-40 bg-pink-50 shadow-md">
-      <div className="hidden md:flex items-center space-x-1">
-        {navigationItems.map((item) => {
-          if (item.name === "Services") {
-            return (
-              <div
-                key={item.name}
-                className="relative"
-                onMouseEnter={() => setIsServicesDropdownOpen(true)}
-                onMouseLeave={() => setIsServicesDropdownOpen(false)}
+    <header className="sticky top-0 z-40 border-b border-border bg-background">
+      <Container>
+        <div className="flex h-16 items-center justify-between">
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Aryan <span className="text-primary">Beauty</span>
+          </Link>
+
+          <nav
+            className="hidden items-center gap-1 md:flex"
+            aria-label="Main navigation"
+          >
+            {navLinks.map((link) => (
+              <NavLink key={link.href} {...link} />
+            ))}
+            <Link
+              href="/sign-in"
+              className="rounded-full px-4 py-2 text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Owner Login
+            </Link>
+            <ButtonLink href="/book" className="ml-2">
+              Book Now
+            </ButtonLink>
+          </nav>
+
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full p-2 text-foreground transition-colors hover:bg-neutral-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            {menuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="h-6 w-6"
+                aria-hidden="true"
               >
-                <button className="px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-100 rounded-full transition-colors">
-                  {item.name}
-                </button>
-                {isServicesDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-pink-100 p-2">
-                    {serviceCategories.map((cat) => (
-                      <Link
-                        key={cat.name}
-                        href={cat.href}
-                        className="block px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-50 rounded-lg"
-                      >
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          }
-
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="px-4 py-2 text-gray-700 hover:text-pink-600 hover:bg-pink-100 rounded-full transition-colors"
-            >
-              {item.name}
-            </Link>
-          );
-        })}
-      </div>
-
-      <button
-        className="md:hidden p-2 text-gray-700 hover:text-pink-600"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-expanded={isMobileMenuOpen}
-        aria-label="Toggle navigation menu"
-      >
-        {isMobileMenuOpen ? "✕" : "☰"}
-      </button>
-
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="py-4 space-y-2">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-3 text-gray-700 hover:text-pink-600 hover:bg-pink-100 rounded-xl"
-            >
-              {item.name}
-            </Link>
-          ))}
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="h-6 w-6"
+                aria-hidden="true"
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            )}
+          </button>
         </div>
-      </div>
-    </nav>
+      </Container>
+
+      {menuOpen && (
+        <div id="mobile-menu" className="border-t border-border md:hidden">
+          <nav aria-label="Mobile navigation">
+            <Container className="space-y-1 py-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="block rounded-lg px-4 py-3 text-foreground transition-colors hover:bg-primary-soft hover:text-primary"
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <Link
+                href="/sign-in"
+                onClick={closeMenu}
+                className="block rounded-lg px-4 py-3 text-sm text-muted transition-colors hover:text-foreground"
+              >
+                Owner Login
+              </Link>
+            </Container>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }
