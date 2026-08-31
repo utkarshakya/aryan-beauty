@@ -9,11 +9,7 @@ const getUserIds = (value: string | undefined) =>
     .filter(Boolean);
 
 const getSuperAdminUserIds = () => {
-  // Keep the previous variable as a fallback so the existing account is not
-  // locked out before SUPER_ADMIN_CLERK_USER_IDS is added to the environment.
-  return getUserIds(
-    process.env.SUPER_ADMIN_CLERK_USER_IDS ?? process.env.ADMIN_CLERK_USER_IDS,
-  );
+  return getUserIds(process.env.SUPER_ADMIN_CLERK_USER_IDS);
 };
 
 const getBootstrapAdminUserIds = () =>
@@ -58,6 +54,20 @@ export async function requireAdmin() {
       appUser.role !== "admin" &&
       appUser.role !== "staff")
   ) {
+    redirect("/");
+  }
+
+  return currentUserId;
+}
+
+export async function requireOwnerAdmin() {
+  const currentUserId = await requireAdmin();
+  const appUser = await prisma.user.findUnique({
+    where: { clerkUserId: currentUserId },
+    select: { role: true },
+  });
+
+  if (!appUser || (appUser.role !== "super_admin" && appUser.role !== "admin")) {
     redirect("/");
   }
 

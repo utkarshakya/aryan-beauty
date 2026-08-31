@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 export default async function ServicesPage() {
   const services = await prisma.service.findMany({
+    where: { active: true },
     orderBy: [{ category: "asc" }, { name: "asc" }],
   });
 

@@ -49,6 +49,7 @@ model Service {
   price       Float
   durationMin Int
   category    String   @default("Other")
+  active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   appointments Appointment[]
 }

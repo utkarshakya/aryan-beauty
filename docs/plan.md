@@ -2,6 +2,17 @@
 
 This is the implementation plan for the first real deployment of Unknown Beauty: one small beauty parlour operated by the owner's family. It is intentionally simpler than a SaaS architecture. The product should become useful for this parlour first; multi-business support is a later possibility.
 
+## Progress update — 31 August 2026
+
+- Phase 1 role activation is complete and verified with the real Clerk accounts.
+- Phase 2 customer appointment experience is complete: customers can view upcoming/history appointments and securely cancel future bookings.
+- Phase 3 is partially complete: the customer booking link is available in the signed-in navigation; broader navigation and polish remain.
+- Phase 4 service management is now in progress.
+- Service-management slice 1 is complete: active/inactive services, owner-only create/edit/toggle controls, and active-service filtering in public and booking flows.
+- The migration `20260831130000_add_service_active_flag` has been applied and the service-management page is working.
+
+Current checkpoint: role activation, customer appointments, and service-management slice 1 are complete. The next planned work is Phase 3 customer-facing navigation and polish, followed by the remaining service-management improvements and business settings. The detailed checklists below remain the source of the intended scope and order.
+
 ## Current baseline
 
 - Public pages exist for the home page, services, and booking.

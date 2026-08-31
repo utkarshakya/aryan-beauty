@@ -49,9 +49,12 @@ export default async function AdminPage({
 
   return (
     <div className="container mx-auto px-3 py-5 sm:px-6 sm:py-8">
-      <h1 className="mb-5 text-2xl font-bold text-foreground sm:mb-6 sm:text-3xl">
-        Appointments
-      </h1>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
+        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Appointments</h1>
+        <a href="/admin/services" className="rounded-full border border-border px-4 py-2 text-sm font-medium text-primary hover:bg-primary-soft">
+          Manage services
+        </a>
+      </div>
       <AppointmentsList
         appointments={appointments}
         currentStatus={statusParam}

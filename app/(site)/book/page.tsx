@@ -22,6 +22,7 @@ export default async function BookPage({
   await auth.protect();
 
   const services = await prisma.service.findMany({
+    where: { active: true },
     orderBy: [{ category: "asc" }, { name: "asc" }],
   });
 

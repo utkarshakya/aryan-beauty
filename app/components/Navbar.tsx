@@ -10,7 +10,15 @@ export default function Navbar() {
 
   const authControl = isLoaded ? (
     isSignedIn ? (
-      <UserButton />
+      <div className="flex items-center gap-2">
+        <Link
+          href="/appointments"
+          className="inline-flex rounded-full px-2 py-2 text-xs font-medium text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:px-3 sm:text-sm"
+        >
+          My bookings
+        </Link>
+        <UserButton />
+      </div>
     ) : (
       <Link
         href="/sign-in"

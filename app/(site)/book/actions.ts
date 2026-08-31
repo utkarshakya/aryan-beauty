@@ -20,7 +20,7 @@ export async function getAvailableSlots(
     return [];
   }
 
-  const service = await prisma.service.findUnique({ where: { id: serviceId } });
+  const service = await prisma.service.findFirst({ where: { id: serviceId, active: true } });
   if (!service) return [];
 
   const opening = dateAtBusinessTime(date, business.openingHour);
@@ -142,7 +142,7 @@ export async function createAppointment(
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      const service = await tx.service.findUnique({ where: { id: serviceId } });
+      const service = await tx.service.findFirst({ where: { id: serviceId, active: true } });
       if (!service) {
         throw new Error("Service not found");
       }
