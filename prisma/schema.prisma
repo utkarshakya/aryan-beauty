@@ -6,13 +6,39 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  super_admin
+  admin
+  staff
+  customer
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  clerkUserId String     @unique
+  role        UserRole   @default(customer)
+  status      UserStatus @default(active)
+  name        String?
+  email       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  customer    Customer?
+}
+
 model Customer {
   id           Int           @id @default(autoincrement())
   clerkUserId  String?       @unique
+  userId       Int?          @unique
   name         String
   phone        String?
   email        String?
   createdAt    DateTime      @default(now())
+  user         User?         @relation(fields: [userId], references: [id])
   appointments Appointment[]
 }
 

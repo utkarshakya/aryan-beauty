@@ -9,8 +9,8 @@
     "lint": "eslint",
     "prisma:version": "prisma --version",
     "prisma:validate": "prisma validate",
-    "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio"
   },
