@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import BookingForm from "@/app/components/BookingForm";
 import Container from "@/app/components/ui/Container";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Book an Appointment",
   description:
-    "Book your appointment at Aryan Beauty online — no account needed, just your name and phone number.",
+    "Book your appointment at Unknown Beauty online.",
 };
 
 export default async function BookPage({
@@ -18,6 +19,8 @@ export default async function BookPage({
 }: {
   searchParams: Promise<{ serviceId?: string }>;
 }) {
+  await auth.protect();
+
   const services = await prisma.service.findMany({
     orderBy: [{ category: "asc" }, { name: "asc" }],
   });
@@ -29,7 +32,7 @@ export default async function BookPage({
     <Container size="narrow" className="py-16 sm:py-20">
       <PageHeader
         title="Book an Appointment"
-        subtitle="No account needed — just your name and phone number."
+        subtitle="Choose a service, date, and time that works for you."
       />
       {services.length === 0 ? (
         <EmptyServices />
@@ -42,4 +45,3 @@ export default async function BookPage({
     </Container>
   );
 }
-

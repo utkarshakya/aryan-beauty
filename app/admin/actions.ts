@@ -1,29 +1,23 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
-async function requireOwner() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-  return userId;
-}
+import { requireAdmin } from "@/lib/auth";
 
 export async function confirmAppointment(id: number) {
-  await requireOwner();
+  await requireAdmin();
   await prisma.appointment.update({
     where: { id },
     data: { status: "confirmed" },
   });
-  revalidatePath("/studio");
+  revalidatePath("/admin");
 }
 
 export async function cancelAppointment(id: number) {
-  await requireOwner();
+  await requireAdmin();
   await prisma.appointment.update({
     where: { id },
     data: { status: "cancelled" },
   });
-  revalidatePath("/studio");
+  revalidatePath("/admin");
 }

@@ -1,5 +1,5 @@
 export const business = {
-  name: "Aryan Beauty",
+  name: "Unknown Beauty",
   tagline: "Your neighbourhood beauty parlour",
   description:
     "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
@@ -8,5 +8,9 @@ export const business = {
   addressLine1: "Shop 12, Main Market Road",
   addressLine2: "",
   hoursDays: "Monday – Sunday",
-  hoursTime: "9:00 AM – 7:00 PM",
+  hoursTime: "10:00 AM – 7:00 PM",
+  timezone: "Asia/Kolkata",
+  openingHour: 10,
+  closingHour: 19,
+  slotIntervalMin: 30,
 } as const;

@@ -1,7 +1,7 @@
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
-export default function SiteLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;

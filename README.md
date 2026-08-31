@@ -1,8 +1,8 @@
-# Aryan Beauty — Parlor Booking System
+# Unknown — Parlor Booking System
 
 Booking and management system for a real beauty parlor: customers book
 appointments online without an account, and the owner manages them from a
-protected studio dashboard.
+protected admin dashboard.
 
 Built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma, Supabase
 PostgreSQL, and Clerk authentication. Deployed on Netlify.

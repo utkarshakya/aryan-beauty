@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aryan Beauty — Beauty Parlour & Online Booking",
-    template: "%s | Aryan Beauty",
+    default: "Unknown Beauty — Beauty Parlour & Online Booking",
+    template: "%s | Unknown Beauty",
   },
   description:
-    "Book appointments for hair, skin, nail and beauty services at Aryan Beauty — no account needed.",
+    "Book appointments for hair, skin, nail and beauty services at Unknown Beauty — no account needed.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

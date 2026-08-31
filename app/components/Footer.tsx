@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
           <div>
             <p className="text-lg font-bold tracking-tight">
-              Aryan <span className="text-primary">Beauty</span>
+              Unknown <span className="text-primary">Beauty</span>
             </p>
             <p className="mt-2 text-sm text-muted">{business.tagline}.</p>
           </div>

@@ -47,7 +47,7 @@ The database should evolve with the product. Do not create a large schema for hy
 
 Clerk handles authentication.
 
-Owner/studio functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication.
+Admin functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication.
 
 ## Storage
 
@@ -72,7 +72,7 @@ Supabase Storage is used for application-managed images and other files when fil
 - **Connection strings:** `DATABASE_URL` (Supabase transaction pooler) is used by the running app at all times. `DIRECT_URL` (Supabase direct connection) is used only for CLI commands (`prisma migrate deploy`, etc.), never referenced in application code or `prisma.config.ts`.
 - **`Appointment.status`:** intentionally a plain `String`, not a Prisma enum, so new status values don't require a migration. Do not convert it to an enum without an explicit request.
 - **Appointment overlap check:** a slot is unavailable if `existing.startTime < newEnd && existing.endTime > newStart`, ignoring rows where `status === "cancelled"`. This runs inside a Prisma interactive transaction alongside the customer upsert and appointment create.
-- **Customer lookup:** uses `customer.upsert` keyed on the unique `phone` field (find-or-create; repeat bookings overwrite the stored name).
-- **Auth model:** any authenticated Clerk user is treated as the parlor owner. There is no role system — an intentional decision for a single-owner parlor, not a gap to fill.
+- **Customer lookup:** signed-in customers use `customer.upsert` keyed on the unique `clerkUserId` field. Phone is optional contact data and is not an identity key.
+- **Auth model:** Clerk handles authentication, while admin access is authorized by the comma-separated `ADMIN_CLERK_USER_IDS` allowlist. Normal signed-in users can book but cannot access admin routes.
 - **Netlify build command:** `prisma generate && next build`.
 - **Netlify env vars** — secret: `DATABASE_URL`, `CLERK_SECRET_KEY`. Public (`NEXT_PUBLIC_*`): the Clerk publishable key and sign-in/up/redirect URLs.

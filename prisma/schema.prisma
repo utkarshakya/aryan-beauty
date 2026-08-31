@@ -8,8 +8,9 @@ datasource db {
 
 model Customer {
   id           Int           @id @default(autoincrement())
+  clerkUserId  String?       @unique
   name         String
-  phone        String        @unique
+  phone        String?
   email        String?
   createdAt    DateTime      @default(now())
   appointments Appointment[]

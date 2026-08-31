@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Browse hair, skin, nail and beauty services at Aryan Beauty with transparent prices and durations.",
+    "Browse hair, skin, nail and beauty services at Unknown Beauty with transparent prices and durations.",
 };
 
 export default async function ServicesPage() {
@@ -17,4 +17,3 @@ export default async function ServicesPage() {
 
   return <ServicesFilter services={services} />;
 }
-

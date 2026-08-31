@@ -1,8 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import type { Service } from "@prisma/client";
-import { createAppointment, type BookingState } from "@/app/actions";
+import {
+  createAppointment,
+  getAvailableSlots,
+  type BookingState,
+  type TimeSlot,
+} from "@/app/(site)/book/actions";
 import { Button, ButtonLink } from "./ui/Button";
 import { business } from "@/lib/business";
 
@@ -47,11 +52,37 @@ export default function BookingForm({
   const [selectedServiceId, setSelectedServiceId] = useState(
     preselectedServiceId ?? "",
   );
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [slotState, setSlotState] = useState<{
+    key: string;
+    slots: TimeSlot[];
+  }>({ key: "", slots: [] });
 
   const errors = state && "errors" in state ? state.errors : {};
   const selectedService = services.find(
     (service) => service.id === Number(selectedServiceId),
   );
+
+  const slotKey = `${selectedServiceId}:${selectedDate}`;
+  const slots = slotState.key === slotKey ? slotState.slots : [];
+  const loadingSlots = Boolean(
+    selectedDate && selectedServiceId && slotState.key !== slotKey,
+  );
+
+  useEffect(() => {
+    if (!selectedDate || !selectedServiceId) return;
+
+    let active = true;
+    getAvailableSlots(Number(selectedServiceId), selectedDate)
+      .then((availableSlots) => {
+        if (active) setSlotState({ key: slotKey, slots: availableSlots });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedDate, selectedServiceId, slotKey]);
 
   if (state && "success" in state) {
     const { serviceName, startTime, name, phone } = state.success;
@@ -85,18 +116,20 @@ export default function BookingForm({
             <dt className="font-medium text-foreground">When</dt>
             <dd className="text-right text-muted">{formatted}</dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt className="font-medium text-foreground">Phone</dt>
-            <dd className="text-right text-muted">{phone}</dd>
-          </div>
+          {phone && (
+            <div className="flex justify-between gap-4">
+              <dt className="font-medium text-foreground">Phone</dt>
+              <dd className="text-right text-muted">{phone}</dd>
+            </div>
+          )}
         </dl>
 
         <div className="mt-6 rounded-lg bg-success-soft p-4 text-sm">
           <p className="font-medium text-foreground">What happens next?</p>
           <p className="mt-1 text-muted">
-            We&apos;ll call you on {phone} shortly to confirm your appointment.
-            If the time isn&apos;t available, we&apos;ll help you pick another
-            slot.
+            We&apos;ll contact you using your account details to confirm your
+            appointment. If the time isn&apos;t available, we&apos;ll help you pick
+            another slot.
           </p>
         </div>
 
@@ -131,14 +164,6 @@ export default function BookingForm({
   }
 
   const submit = (formData: FormData) => {
-    const date = String(formData.get("date") ?? "");
-    const time = String(formData.get("time") ?? "");
-    if (date && time) {
-      const startTime = new Date(`${date}T${time}`);
-      if (!Number.isNaN(startTime.getTime())) {
-        formData.set("startTime", startTime.toISOString());
-      }
-    }
     formAction(formData);
   };
 
@@ -180,7 +205,10 @@ export default function BookingForm({
           id="serviceId"
           name="serviceId"
           defaultValue={preselectedServiceId ?? ""}
-          onChange={(event) => setSelectedServiceId(event.target.value)}
+          onChange={(event) => {
+            setSelectedServiceId(event.target.value);
+            setSelectedSlot("");
+          }}
           required
           aria-invalid={Boolean(errors.serviceId) || undefined}
           className={errors.serviceId ? errorInputClasses : validInputClasses}
@@ -205,33 +233,15 @@ export default function BookingForm({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
-            Name
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            autoComplete="name"
-            placeholder="Your name"
-            aria-invalid={Boolean(errors.name) || undefined}
-            className={errors.name ? errorInputClasses : validInputClasses}
-          />
-          {errors.name && <p className={errorTextClasses}>{errors.name}</p>}
-        </div>
-
+      <div>
         <div>
           <label htmlFor="phone" className="mb-1.5 block text-sm font-medium">
-            Phone
+            Mobile <span className="font-normal text-muted">(optional)</span>
           </label>
           <input
             id="phone"
             name="phone"
             type="tel"
-            required
             autoComplete="tel"
             inputMode="numeric"
             placeholder="10-digit mobile number"
@@ -242,35 +252,56 @@ export default function BookingForm({
         </div>
       </div>
 
-      <div className="space-y-1">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="date" className="mb-1.5 block text-sm font-medium">
-              Date
-            </label>
-            <input
-              id="date"
-              name="date"
-              type="date"
-              required
-              aria-invalid={Boolean(errors.startTime) || undefined}
-              className={errors.startTime ? errorInputClasses : validInputClasses}
-            />
-          </div>
-          <div>
-            <label htmlFor="time" className="mb-1.5 block text-sm font-medium">
-              Time
-            </label>
-            <input
-              id="time"
-              name="time"
-              type="time"
-              required
-              step="900"
-              aria-invalid={Boolean(errors.startTime) || undefined}
-              className={errors.startTime ? errorInputClasses : validInputClasses}
-            />
-          </div>
+      <div className="space-y-3">
+        <div>
+          <label htmlFor="date" className="mb-1.5 block text-sm font-medium">
+            Date
+          </label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            min={new Date().toLocaleDateString("en-CA")}
+            value={selectedDate}
+            onChange={(event) => {
+              setSelectedDate(event.target.value);
+              setSelectedSlot("");
+            }}
+            required
+            aria-invalid={Boolean(errors.startTime) || undefined}
+            className={errors.startTime ? errorInputClasses : validInputClasses}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="startTime" className="mb-1.5 block text-sm font-medium">
+            Available time
+          </label>
+          <select
+            id="startTime"
+            name="startTime"
+            value={selectedSlot}
+            onChange={(event) => setSelectedSlot(event.target.value)}
+            disabled={!selectedDate || !selectedServiceId || loadingSlots}
+            required
+            aria-invalid={Boolean(errors.startTime) || undefined}
+            className={errors.startTime ? errorInputClasses : validInputClasses}
+          >
+            <option value="">
+              {loadingSlots
+                ? "Finding available times..."
+                : !selectedDate
+                  ? "Choose a date first"
+                  : slots.length === 0
+                    ? "No times available"
+                    : "Select a time"}
+            </option>
+            {slots.map((slot) => (
+              <option key={slot.value} value={slot.value}>
+                {slot.label}
+              </option>
+            ))}
+          </select>
         </div>
         <p className="text-sm text-muted">
           Open {business.hoursDays}, {business.hoursTime}.
@@ -283,22 +314,6 @@ export default function BookingForm({
             {errors.startTime}
           </p>
         )}
-      </div>
-
-      <div>
-        <label htmlFor="notes" className="mb-1.5 block text-sm font-medium">
-          Notes <span className="font-normal text-muted">(optional)</span>
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          maxLength={100}
-          placeholder="Anything we should know?"
-          aria-invalid={Boolean(errors.notes) || undefined}
-          className={errors.notes ? errorInputClasses : validInputClasses}
-        />
-        {errors.notes && <p className={errorTextClasses}>{errors.notes}</p>}
       </div>
 
       <Button type="submit" disabled={pending} className="w-full" size="lg">

@@ -30,7 +30,7 @@ This is the product roadmap, not an implementation checklist. It describes what 
 
 Turns the technically functional V1 into a product that feels credible to a real beauty parlour customer and is comfortably usable by the owner, ahead of a demonstration to the parlour owner and any public launch.
 
-Status: product audit complete and agreed as the factual baseline. Currently working through design foundation, product visual language, customer experience redesign, owner/studio experience redesign, UX reliability and edge cases, real-device review, and demo readiness. This phase takes the place of the original "Learn From Real Usage" step: usability fixes, booking-experience improvements, and owner-workflow improvements now happen inside V1.1.
+Status: product audit complete and agreed as the factual baseline. Currently working through design foundation, product visual language, customer experience redesign, admin experience redesign, UX reliability and edge cases, real-device review, and demo readiness. This phase takes the place of the original "Learn From Real Usage" step: usability fixes, booking-experience improvements, and owner-workflow improvements now happen inside V1.1.
 
 ### Phase 3 — Grow the Salon System
 
