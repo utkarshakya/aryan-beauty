@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Hero from "@/app/components/Hero";
 import ServicesPreview from "@/app/components/ServicesPreview";
-import VisitInfo from "@/app/components/VisitInfo";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +14,6 @@ export default async function Home() {
     <>
       <Hero />
       <ServicesPreview services={services} />
-      <VisitInfo />
     </>
   );
 }

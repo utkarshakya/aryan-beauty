@@ -168,7 +168,10 @@ export default function BookingForm({
   };
 
   return (
-    <form action={submit} className="space-y-5">
+    <form
+      action={submit}
+      className="space-y-5 rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-8"
+    >
       {errors.form && errors.form !== dismissedError && (
         <div
           role="alert"

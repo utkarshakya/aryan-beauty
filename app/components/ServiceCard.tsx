@@ -3,7 +3,7 @@ import type { Service } from "@prisma/client";
 
 export default function ServiceCard({ service }: { service: Service }) {
   return (
-    <article className="flex flex-col rounded-xl border border-border bg-background p-6">
+    <article className="flex flex-col rounded-xl border border-border bg-background p-6 shadow-sm transition-shadow hover:shadow-md">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {service.category}
       </p>

@@ -5,8 +5,8 @@ import { business } from "@/lib/business";
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-muted-soft">
-      <Container className="py-12">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+      <Container className="py-10">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-6">
           <div>
             <p className="text-lg font-bold tracking-tight">
               Unknown <span className="text-primary">Beauty</span>
@@ -16,7 +16,7 @@ export default function Footer() {
 
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
-              Visit us
+              Visit
             </h2>
             <address className="mt-2 space-y-1 text-sm not-italic text-muted">
               <p>
@@ -62,7 +62,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <p className="mt-10 border-t border-border pt-6 text-xs text-muted">
+        <p className="mt-8 border-t border-border pt-5 text-xs text-muted">
           © {new Date().getFullYear()} {business.name}. All rights reserved.
         </p>
       </Container>

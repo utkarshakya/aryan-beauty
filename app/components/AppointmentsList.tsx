@@ -18,9 +18,9 @@ type AppointmentsListProps = {
 };
 
 const STATUS_BADGE_CLASSES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-gray-100 text-gray-800",
+  pending: "bg-warning-soft text-warning",
+  confirmed: "bg-success-soft text-success",
+  cancelled: "bg-neutral-soft text-neutral",
 };
 
 const statusTabs: { value: "all" | "pending" | "confirmed" | "cancelled"; label: string }[] = [
@@ -37,7 +37,7 @@ export default function AppointmentsList({
   return (
     <div className="space-y-4">
       <nav
-        className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 sm:gap-4 sm:pb-2"
+        className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-4 sm:pb-2"
         aria-label="Appointment status filters"
       >
         {statusTabs.map((tab) => (
@@ -47,7 +47,7 @@ export default function AppointmentsList({
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               currentStatus === tab.value
                 ? "bg-pink-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
+                : "text-muted hover:bg-neutral-soft"
             }`}
           >
             {tab.label}
@@ -56,19 +56,19 @@ export default function AppointmentsList({
       </nav>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl bg-white p-6 text-center text-gray-500 shadow-sm sm:p-8">
+        <div className="rounded-xl border border-border bg-background p-6 text-center text-muted shadow-sm sm:p-8">
           No appointments
         </div>
       ) : (
       <>
       <div className="space-y-3 md:hidden">
         {appointments.map((appointment) => (
-          <article key={appointment.id} className="rounded-xl bg-white p-4 shadow-sm">
+          <article key={appointment.id} className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate font-medium text-gray-800">{appointment.customer.name}</p>
+                <p className="truncate font-medium text-foreground">{appointment.customer.name}</p>
                 {appointment.customer.phone && (
-                  <p className="mt-1 text-sm text-gray-500">{appointment.customer.phone}</p>
+                  <p className="mt-1 text-sm text-muted">{appointment.customer.phone}</p>
                 )}
               </div>
               <span
@@ -78,18 +78,18 @@ export default function AppointmentsList({
               </span>
             </div>
 
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 text-sm">
+            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-sm">
               <div>
-                <dt className="text-gray-500">Service</dt>
-                <dd className="mt-1 font-medium text-gray-800">{appointment.service.name}</dd>
+                <dt className="text-muted">Service</dt>
+                <dd className="mt-1 font-medium text-foreground">{appointment.service.name}</dd>
               </div>
               <div>
-                <dt className="text-gray-500">Price</dt>
-                <dd className="mt-1 font-medium text-gray-800">₹{Math.round(appointment.service.price)}</dd>
+                <dt className="text-muted">Price</dt>
+                <dd className="mt-1 font-medium text-foreground">₹{Math.round(appointment.service.price)}</dd>
               </div>
               <div className="col-span-2">
-                <dt className="text-gray-500">Date &amp; time</dt>
-                <dd className="mt-1 text-gray-700">
+                <dt className="text-muted">Date &amp; time</dt>
+                <dd className="mt-1 text-foreground">
                   {new Date(appointment.startTime).toLocaleDateString("en-IN", {
                     weekday: "short",
                     day: "numeric",
@@ -106,7 +106,7 @@ export default function AppointmentsList({
             </dl>
 
             {appointment.status !== "cancelled" && (
-              <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-3">
+              <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-border pt-3">
                 {appointment.status === "pending" && (
                   <form action={confirmAppointment.bind(null, appointment.id)}>
                     <button type="submit" className="font-medium text-green-600 underline hover:text-green-800">
@@ -124,7 +124,7 @@ export default function AppointmentsList({
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[700px] text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
+            <tr className="border-b border-border text-left text-muted">
               <th className="pb-3 font-medium">Customer</th>
               <th className="pb-3 font-medium">Service</th>
               <th className="pb-3 font-medium">Date & Time</th>
@@ -134,20 +134,20 @@ export default function AppointmentsList({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {appointments.map((appointment) => (
-              <tr key={appointment.id} className="hover:bg-gray-50">
+                <tr key={appointment.id} className="hover:bg-neutral-soft">
                 <td className="py-4">
-                  <p className="font-medium text-gray-800">{appointment.customer.name}</p>
+                  <p className="font-medium text-foreground">{appointment.customer.name}</p>
                   {appointment.customer.phone && (
-                    <p className="text-gray-500">{appointment.customer.phone}</p>
+                    <p className="text-muted">{appointment.customer.phone}</p>
                   )}
                 </td>
                 <td className="py-4">
-                  <p className="font-medium text-gray-800">{appointment.service.name}</p>
-                  <p className="text-gray-500">
+                  <p className="font-medium text-foreground">{appointment.service.name}</p>
+                  <p className="text-muted">
                     {appointment.service.durationMin} min · ₹{Math.round(appointment.service.price)}
                   </p>
                 </td>
-                <td className="py-4 text-gray-700">
+                <td className="py-4 text-foreground">
                   <p>
                     {new Date(appointment.startTime).toLocaleDateString("en-IN", {
                       weekday: "short",

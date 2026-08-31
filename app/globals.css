@@ -1,25 +1,27 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #1f2937;
-  --color-muted: #6b7280;
-  --color-muted-soft: #f9fafb;
-  --color-border: #e5e7eb;
+  --color-background: #fff8f5;
+  --color-foreground: #2a1b24;
+  --color-muted: #66545d;
+  --color-muted-soft: #f8eeeb;
+  --color-border: #e2c9c5;
 
-  --color-primary: #db2777;
-  --color-primary-strong: #be185d;
-  --color-primary-soft: #fdf2f8;
-  --color-primary-soft-strong: #fce7f3;
+  --color-primary: #d94675;
+  --color-primary-strong: #b8325c;
+  --color-primary-soft: #fde1e9;
+  --color-primary-soft-strong: #f8c6d4;
 
-  --color-success: #15803d;
-  --color-success-soft: #f0fdf4;
-  --color-warning: #b45309;
-  --color-warning-soft: #fef3c7;
-  --color-danger: #dc2626;
-  --color-danger-soft: #fef2f2;
-  --color-neutral: #4b5563;
-  --color-neutral-soft: #f3f4f6;
+  --color-success: #2f7a58;
+  --color-success-soft: #e3f3e9;
+  --color-warning: #a96508;
+  --color-warning-soft: #fff0c7;
+  --color-danger: #c43f4b;
+  --color-danger-soft: #fce4e6;
+  --color-neutral: #66545d;
+  --color-neutral-soft: #eee3e2;
 }
 
 @theme inline {
@@ -31,4 +33,29 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --color-background: #17131a;
+  --color-foreground: #f9f2f2;
+  --color-muted: #b9aab0;
+  --color-muted-soft: #241d25;
+  --color-border: #3a303a;
+
+  --color-primary: #f06f9a;
+  --color-primary-strong: #ff9fbb;
+  --color-primary-soft: #3a1d2b;
+  --color-primary-soft-strong: #54253b;
+
+  --color-success: #70d39d;
+  --color-success-soft: #173b29;
+  --color-warning: #f2c25f;
+  --color-warning-soft: #3d2d12;
+  --color-danger: #ff858d;
+  --color-danger-soft: #482027;
+  --color-neutral: #c7b5bd;
+  --color-neutral-soft: #382d38;
 }

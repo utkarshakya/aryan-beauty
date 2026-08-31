@@ -47,7 +47,9 @@ The database should evolve with the product. Do not create a large schema for hy
 
 Clerk handles authentication.
 
-Admin functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication.
+Clerk handles authentication. Application roles are stored in the Prisma `User` model and linked to Clerk through `clerkUserId`. The product creator's super-admin Clerk ID is kept in protected environment configuration. Bootstrap admin IDs may be used to create initial admin records, after which ordinary admin and staff access is read from the database.
+
+Admin functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication. Every protected page and server action must check the current user's role and active status on the server. Client-side navigation visibility is only a usability feature and is not an authorization boundary.
 
 ## Storage
 
@@ -73,6 +75,6 @@ Supabase Storage is used for application-managed images and other files when fil
 - **`Appointment.status`:** intentionally a plain `String`, not a Prisma enum, so new status values don't require a migration. Do not convert it to an enum without an explicit request.
 - **Appointment overlap check:** a slot is unavailable if `existing.startTime < newEnd && existing.endTime > newStart`, ignoring rows where `status === "cancelled"`. This runs inside a Prisma interactive transaction alongside the customer upsert and appointment create.
 - **Customer lookup:** signed-in customers use `customer.upsert` keyed on the unique `clerkUserId` field. Phone is optional contact data and is not an identity key.
-- **Auth model:** Clerk handles authentication, while admin access is authorized by the comma-separated `ADMIN_CLERK_USER_IDS` allowlist. Normal signed-in users can book but cannot access admin routes.
+- **Auth model:** Clerk handles authentication. The Prisma `User` model stores `super_admin`, `admin`, `staff`, and `customer` roles plus account status. The super admin is identified by protected Clerk user ID configuration; bootstrap admin IDs are only for initial setup. Normal signed-in users can book but cannot access admin routes unless they have an active authorized role.
 - **Netlify build command:** `prisma generate && next build`.
 - **Netlify env vars** — secret: `DATABASE_URL`, `CLERK_SECRET_KEY`. Public (`NEXT_PUBLIC_*`): the Clerk publishable key and sign-in/up/redirect URLs.

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 import Container from "./ui/Container";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
@@ -31,7 +32,10 @@ export default function Navbar() {
             Unknown <span className="text-primary">Beauty</span>
           </Link>
 
-          <div>{authControl}</div>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            {authControl}
+          </div>
         </div>
       </Container>
     </header>
