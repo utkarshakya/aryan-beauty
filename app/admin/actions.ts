@@ -11,6 +11,7 @@ export async function confirmAppointment(id: number) {
     data: { status: "confirmed" },
   });
   revalidatePath("/admin");
+  revalidatePath("/admin/dashboard");
 }
 
 export async function cancelAppointment(id: number) {
@@ -20,4 +21,5 @@ export async function cancelAppointment(id: number) {
     data: { status: "cancelled" },
   });
   revalidatePath("/admin");
+  revalidatePath("/admin/dashboard");
 }

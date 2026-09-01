@@ -57,14 +57,14 @@ export default async function AppointmentsPage() {
   ) ?? [];
 
   return (
-    <Container size="narrow" className="py-12 sm:py-16">
+    <Container size="narrow" className="py-10 sm:py-16">
       <PageHeader
         title="My Appointments"
         subtitle="Keep track of your upcoming visits and booking history."
       />
 
       {!customer || customer.appointments.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-background p-8 text-center shadow-sm">
+        <div className="rounded-2xl border border-border bg-background p-5 text-center shadow-sm sm:p-8">
           <h2 className="text-lg font-semibold text-foreground">No appointments yet</h2>
           <p className="mt-2 text-muted">Your booked appointments will appear here.</p>
           <div className="mt-6">
@@ -77,7 +77,7 @@ export default async function AppointmentsPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-10">
+        <div className="space-y-7 sm:space-y-10">
           <AppointmentGroup title="Upcoming" appointments={upcoming} />
           {history.length > 0 && <AppointmentGroup title="History" appointments={history} />}
         </div>
@@ -101,11 +101,11 @@ function AppointmentGroup({
 }) {
   return (
     <section aria-labelledby={`${title.toLowerCase()}-appointments`}>
-      <h2 id={`${title.toLowerCase()}-appointments`} className="mb-4 text-xl font-semibold text-foreground">
+      <h2 id={`${title.toLowerCase()}-appointments`} className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">
         {title}
       </h2>
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
+        <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted sm:p-6 sm:text-sm">
           No upcoming appointments.
         </div>
       ) : (
@@ -113,7 +113,7 @@ function AppointmentGroup({
           {appointments.map((appointment) => (
             <article
               key={appointment.id}
-              className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+              className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>

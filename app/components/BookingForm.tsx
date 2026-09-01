@@ -14,7 +14,7 @@ import { business } from "@/lib/business";
 const initialState: BookingState = { errors: {} };
 
 const inputClasses =
-  "w-full rounded-lg border bg-background px-4 py-2.5 text-foreground placeholder:text-muted/70 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary";
+  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:px-4 sm:py-2.5";
 const validInputClasses = `${inputClasses} border-border`;
 const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
 const errorTextClasses = "mt-1.5 text-sm text-danger";
@@ -95,19 +95,19 @@ export default function BookingForm({
       <div
         role="status"
         aria-live="polite"
-        className="rounded-xl border border-success/30 bg-success-soft p-6 sm:p-8"
+        className="rounded-xl border border-success/30 bg-success-soft p-4 sm:p-8"
       >
         <div className="flex flex-col items-center text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-success text-white">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-success text-white sm:h-12 sm:w-12">
             <CheckIcon />
           </span>
-          <h2 className="mt-4 text-2xl font-bold tracking-tight">
+          <h2 className="mt-3 text-xl font-bold tracking-tight sm:mt-4 sm:text-2xl">
             Booking request sent
           </h2>
           <p className="mt-2 text-muted">Thank you, {name}!</p>
         </div>
 
-        <dl className="mt-6 space-y-2 rounded-lg border border-border bg-background p-4 text-sm">
+        <dl className="mt-5 space-y-2 rounded-lg border border-border bg-background p-3 text-xs sm:mt-6 sm:p-4 sm:text-sm">
           <div className="flex justify-between gap-4">
             <dt className="font-medium text-foreground">Service</dt>
             <dd className="text-right text-muted">{serviceName}</dd>
@@ -124,7 +124,7 @@ export default function BookingForm({
           )}
         </dl>
 
-        <div className="mt-6 rounded-lg bg-success-soft p-4 text-sm">
+        <div className="mt-5 rounded-lg bg-success-soft p-3 text-xs sm:mt-6 sm:p-4 sm:text-sm">
           <p className="font-medium text-foreground">What happens next?</p>
           <p className="mt-1 text-muted">
             We&apos;ll contact you using your account details to confirm your
@@ -133,7 +133,7 @@ export default function BookingForm({
           </p>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted">
+        <p className="mt-5 text-center text-xs text-muted sm:mt-6 sm:text-sm">
           Questions?{" "}
           <a
             href={business.phoneHref}
@@ -143,7 +143,7 @@ export default function BookingForm({
           </a>
         </p>
 
-        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-6 sm:flex-row sm:gap-3">
           <Button
             type="button"
             variant="secondary"
@@ -170,12 +170,12 @@ export default function BookingForm({
   return (
     <form
       action={submit}
-      className="space-y-5 rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-8"
+      className="space-y-4 rounded-2xl border border-border bg-background p-4 shadow-sm sm:space-y-5 sm:p-8"
     >
       {errors.form && errors.form !== dismissedError && (
         <div
           role="alert"
-          className="flex items-center justify-between gap-3 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger"
+          className="flex items-center justify-between gap-3 rounded-lg bg-danger-soft px-3 py-2.5 text-xs text-danger sm:px-4 sm:py-3 sm:text-sm"
         >
           <span>{errors.form}</span>
           <button

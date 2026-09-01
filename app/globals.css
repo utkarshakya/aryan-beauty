@@ -36,6 +36,12 @@ body {
   transition: background-color 180ms ease, color 180ms ease;
 }
 
+@media (max-width: 639px) {
+  html {
+    font-size: 93.75%;
+  }
+}
+
 html.dark {
   color-scheme: dark;
 

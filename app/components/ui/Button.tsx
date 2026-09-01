@@ -7,8 +7,8 @@ const baseClasses =
   "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60";
 
 const sizeClasses = {
-  md: "px-5 py-2.5 text-sm",
-  lg: "px-7 py-3 text-base",
+  md: "px-4 py-2.5 text-xs sm:px-5 sm:text-sm",
+  lg: "px-6 py-3 text-sm sm:px-7 sm:text-base",
 } as const;
 
 const variantClasses: Record<ButtonVariant, string> = {

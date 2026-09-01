@@ -3,8 +3,8 @@ import { business } from "@/lib/business";
 
 export default function EmptyServices() {
   return (
-    <div className="rounded-xl border border-border bg-muted-soft p-8 text-center sm:p-12">
-      <h2 className="text-xl font-semibold">Our service menu is being updated</h2>
+    <div className="rounded-xl border border-border bg-muted-soft p-5 text-center sm:p-12">
+      <h2 className="text-lg font-semibold sm:text-xl">Our service menu is being updated</h2>
       <p className="mx-auto mt-3 max-w-sm text-sm text-muted">
         We haven&apos;t published our services yet. Please call us and we&apos;ll
         be happy to help you book your visit.

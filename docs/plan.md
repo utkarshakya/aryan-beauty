@@ -111,11 +111,11 @@ Status: in progress.
 - [x] Add the optional relationship between `User` and `Customer`.
 - [x] Add server checks for active `super_admin`, `admin`, and `staff` users.
 - [x] Remove the unused `/studio` route.
-- [ ] Put the real super-admin Clerk ID in `.env`.
-- [ ] Put the aunt's Clerk ID in the bootstrap-admin environment variable.
-- [ ] Sign in as the aunt once to create her database user record.
-- [ ] Confirm that the aunt can access appointments but cannot access super-admin-only actions.
-- [ ] Decide whether the bootstrap admin ID should be removed from the environment after its database record exists.
+- [x] Put the real super-admin Clerk ID in `.env`.
+- [x] Put the aunt's Clerk ID in the bootstrap-admin environment variable.
+- [x] Sign in as the aunt once to create her database user record.
+- [x] Confirm that the aunt can access appointments but cannot access super-admin-only actions.
+- [x] Decide whether the bootstrap admin ID should be removed from the environment after its database record exists.
 
 ### Phase 2 — Customer appointment experience
 

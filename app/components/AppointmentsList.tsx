@@ -37,14 +37,14 @@ export default function AppointmentsList({
   return (
     <div className="space-y-4">
       <nav
-        className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-4 sm:pb-2"
+        className="flex flex-wrap gap-1.5 border-b border-border pb-2 sm:gap-4 sm:pb-2"
         aria-label="Appointment status filters"
       >
         {statusTabs.map((tab) => (
           <Link
             key={tab.value}
             href={`/admin?status=${tab.value}`}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:py-2 sm:text-sm ${
               currentStatus === tab.value
                 ? "bg-pink-600 text-white"
                 : "text-muted hover:bg-neutral-soft"
@@ -56,14 +56,14 @@ export default function AppointmentsList({
       </nav>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-border bg-background p-6 text-center text-muted shadow-sm sm:p-8">
+        <div className="rounded-xl border border-border bg-background p-5 text-center text-sm text-muted shadow-sm sm:p-8">
           No appointments
         </div>
       ) : (
       <>
       <div className="space-y-3 md:hidden">
         {appointments.map((appointment) => (
-          <article key={appointment.id} className="rounded-xl border border-border bg-background p-4 shadow-sm">
+          <article key={appointment.id} className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-medium text-foreground">{appointment.customer.name}</p>
@@ -78,7 +78,7 @@ export default function AppointmentsList({
               </span>
             </div>
 
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-sm">
+            <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs sm:mt-4 sm:gap-3 sm:text-sm">
               <div>
                 <dt className="text-muted">Service</dt>
                 <dd className="mt-1 font-medium text-foreground">{appointment.service.name}</dd>

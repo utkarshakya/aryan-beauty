@@ -17,8 +17,8 @@ export default function Error({
   }, [error]);
 
   return (
-    <Container size="narrow" className="py-24 text-center">
-      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+    <Container size="narrow" className="py-16 text-center sm:py-24">
+      <h1 className="text-xl font-bold tracking-tight sm:text-3xl">
         Something went wrong
       </h1>
       <p className="mx-auto mt-3 max-w-md text-muted">

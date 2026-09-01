@@ -30,7 +30,7 @@ export default async function BookPage({
   const preselectedServiceId = serviceId ? Number(serviceId) : undefined;
 
   return (
-    <Container size="narrow" className="py-16 sm:py-20">
+    <Container size="narrow" className="py-12 sm:py-20">
       <PageHeader
         title="Book an Appointment"
         subtitle="Choose a service, date, and time that works for you."

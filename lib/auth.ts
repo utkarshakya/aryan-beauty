@@ -15,6 +15,23 @@ const getSuperAdminUserIds = () => {
 const getBootstrapAdminUserIds = () =>
   getUserIds(process.env.BOOTSTRAP_ADMIN_CLERK_USER_IDS);
 
+export async function hasAdminAccess(userId: string | null) {
+  if (!userId) return false;
+  if (getSuperAdminUserIds().includes(userId) || getBootstrapAdminUserIds().includes(userId)) {
+    return true;
+  }
+
+  const appUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: { role: true, status: true },
+  });
+
+  return Boolean(
+    appUser?.status === "active" &&
+      (appUser.role === "super_admin" || appUser.role === "admin" || appUser.role === "staff"),
+  );
+}
+
 export async function requireAdmin() {
   const { userId } = await auth();
 

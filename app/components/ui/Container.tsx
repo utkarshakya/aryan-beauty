@@ -16,7 +16,7 @@ export default function Container({
 }) {
   return (
     <div
-      className={`mx-auto w-full ${widthClasses[size]} px-4${className ? ` ${className}` : ""}`}
+      className={`mx-auto w-full ${widthClasses[size]} px-3 sm:px-4${className ? ` ${className}` : ""}`}
     >
       {children}
     </div>

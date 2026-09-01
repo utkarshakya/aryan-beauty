@@ -16,25 +16,25 @@ export default async function ManageServicesPage() {
   const services = await prisma.service.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] });
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 py-5 sm:px-6 sm:py-8">
+    <div className="container mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href="/admin" className="text-sm font-medium text-primary hover:text-primary-strong">
             ← Back to appointments
           </Link>
-          <h1 className="mt-3 text-2xl font-bold text-foreground sm:text-3xl">Manage services</h1>
-          <p className="mt-2 text-muted">Keep your public service menu and prices up to date.</p>
+          <h1 className="mt-2 text-xl font-bold text-foreground sm:mt-3 sm:text-3xl">Manage services</h1>
+          <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">Keep your public service menu and prices up to date.</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
         <section className="space-y-4" aria-labelledby="services-heading">
           <h2 id="services-heading" className="text-lg font-semibold text-foreground">Current services</h2>
           {services.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border p-6 text-center text-muted">No services yet.</p>
           ) : (
             services.map((service) => (
-              <article key={service.id} className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5">
+              <article key={service.id} className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-semibold text-foreground">{service.name}</h3>
@@ -60,7 +60,7 @@ export default async function ManageServicesPage() {
           )}
         </section>
 
-        <section className="h-fit rounded-xl border border-border bg-background p-5 shadow-sm sm:p-6" aria-labelledby="add-service-heading">
+        <section className="h-fit rounded-xl border border-border bg-background p-4 shadow-sm sm:p-6" aria-labelledby="add-service-heading">
           <h2 id="add-service-heading" className="text-lg font-semibold text-foreground">Add a service</h2>
           <p className="mt-1 text-sm text-muted">New services are visible to customers immediately.</p>
           <form action={createService} className="mt-5 space-y-4">

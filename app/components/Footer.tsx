@@ -5,13 +5,13 @@ import { business } from "@/lib/business";
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-muted-soft">
-      <Container className="py-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-6">
+      <Container className="py-8 sm:py-10">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-6">
           <div>
-            <p className="text-lg font-bold tracking-tight">
+            <p className="text-base font-bold tracking-tight sm:text-lg">
               Unknown <span className="text-primary">Beauty</span>
             </p>
-            <p className="mt-2 text-sm text-muted">{business.tagline}.</p>
+            <p className="mt-1 text-xs text-muted sm:mt-2 sm:text-sm">{business.tagline}.</p>
           </div>
 
           <div>
