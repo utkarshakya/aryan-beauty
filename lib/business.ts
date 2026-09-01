@@ -13,4 +13,5 @@ export const business = {
   openingHour: 10,
   closingHour: 19,
   slotIntervalMin: 30,
+  cancellationCutoffHours: 24,
 } as const;

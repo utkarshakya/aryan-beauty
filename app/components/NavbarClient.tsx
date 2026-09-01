@@ -22,8 +22,7 @@ export default function NavbarClient({ canAccessAdmin }: { canAccessAdmin: boole
               <Link href="/services" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Services</Link>
               <Link href="/book" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Book</Link>
               {isSignedIn && <Link href="/appointments" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">My bookings</Link>}
-              {canAccessAdmin && <Link href="/admin/dashboard" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Admin dashboard</Link>}
-              {canAccessAdmin && <Link href="/admin/services" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Manage services</Link>}
+              {canAccessAdmin && <Link href="/admin" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Admin</Link>}
             </nav>
             <ThemeToggle />
             <div className="hidden sm:block">{authControl}</div>
@@ -40,8 +39,7 @@ export default function NavbarClient({ canAccessAdmin }: { canAccessAdmin: boole
             <Link href="/services" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">Services</Link>
             <Link href="/book" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">Book an appointment</Link>
             {isSignedIn && <Link href="/appointments" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">My bookings</Link>}
-            {canAccessAdmin && <Link href="/admin/dashboard" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">Admin dashboard</Link>}
-            {canAccessAdmin && <Link href="/admin/services" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">Manage services</Link>}
+            {canAccessAdmin && <Link href="/admin" onClick={closeMenu} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-neutral-soft">Admin</Link>}
             {isLoaded && <div className="border-t border-border pt-1">{authControl}</div>}
           </nav>
         )}
