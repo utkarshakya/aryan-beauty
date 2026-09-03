@@ -23,7 +23,7 @@ export default function NotFound() {
       <p className="mt-8 text-sm text-muted">
         Looking for something?{" "}
         <Link
-          href="/book"
+          href="/appointments"
           className="font-medium text-primary transition-colors hover:text-primary-strong"
         >
           Book an appointment

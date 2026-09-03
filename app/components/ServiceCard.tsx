@@ -19,7 +19,7 @@ export default function ServiceCard({ service }: { service: Service }) {
         </span>
         <span className="text-sm text-muted">{service.durationMin} min</span>
       </div>
-      <ButtonLink href={`/book?serviceId=${service.id}`} className="mt-5 w-full">
+      <ButtonLink href={`/appointments?serviceId=${service.id}`} className="mt-5 w-full">
         Book Now
       </ButtonLink>
     </article>

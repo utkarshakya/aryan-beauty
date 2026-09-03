@@ -25,7 +25,7 @@ export async function createService(formData: FormData) {
   await prisma.service.create({ data: readService(formData) });
   revalidatePath("/admin/services");
   revalidatePath("/services");
-  revalidatePath("/book");
+  revalidatePath("/appointments");
   revalidatePath("/");
 }
 
@@ -35,7 +35,7 @@ export async function updateService(id: number, formData: FormData) {
   await prisma.service.update({ where: { id }, data: readService(formData) });
   revalidatePath("/admin/services");
   revalidatePath("/services");
-  revalidatePath("/book");
+  revalidatePath("/appointments");
   revalidatePath("/");
 }
 
@@ -45,6 +45,6 @@ export async function toggleService(id: number, active: boolean) {
   await prisma.service.update({ where: { id }, data: { active } });
   revalidatePath("/admin/services");
   revalidatePath("/services");
-  revalidatePath("/book");
+  revalidatePath("/appointments");
   revalidatePath("/");
 }

@@ -19,7 +19,7 @@ export default function Hero() {
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:mt-8 sm:flex-row sm:gap-3">
             <ButtonLink
-              href="/book"
+              href="/appointments"
               size="lg"
               className="w-full max-w-[320px] sm:w-auto sm:max-w-none"
             >

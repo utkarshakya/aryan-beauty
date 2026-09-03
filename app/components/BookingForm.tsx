@@ -7,7 +7,7 @@ import {
   getAvailableSlots,
   type BookingState,
   type TimeSlot,
-} from "@/app/(site)/book/actions";
+} from "@/app/(site)/appointments/actions";
 import { Button, ButtonLink } from "./ui/Button";
 import { business } from "@/lib/business";
 

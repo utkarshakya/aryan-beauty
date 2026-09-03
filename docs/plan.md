@@ -6,12 +6,12 @@ This is the implementation plan for the first real deployment of Unknown Beauty:
 
 - Phase 1 role activation is complete and verified with the real Clerk accounts.
 - Phase 2 customer appointment experience is complete: customers can view upcoming/history appointments and securely cancel future bookings.
-- Phase 3 is mostly complete: the consolidated `/appointments` page is built (booking form, upcoming, history). Navigation links point to `/appointments`. Auth redirects send regular users to `/appointments`. `/book` redirects to `/appointments`. Loading states and error/not-found pages are in place. Responsive and accessibility review remains.
+- Phase 3 is mostly complete: the consolidated `/appointments` page is built (booking form, upcoming, history). Navigation links point to `/appointments`. Auth redirects send regular users to `/appointments`. `/book` redirects to `/appointments`. Loading states and error/not-found pages are in place. Button-first booking pattern with aria-labels and focus handling done. Full responsive review remains.
 - Phase 4 service management is now in progress.
 - Service-management slice 1 is complete: active/inactive services, owner-only create/edit/toggle controls, and active-service filtering in public and booking flows.
 - The migration `20260831130000_add_service_active_flag` has been applied and the service-management page is working.
 
-Current checkpoint: role activation, customer appointments, service-management slice 1, and the consolidated appointment page are complete. The remaining Phase 3 work is responsive/accessibility review. After that, continue with the remaining service-management improvements and business settings. The detailed checklists below remain the source of the intended scope and order.
+Current checkpoint: role activation, customer appointments, service-management slice 1, and the consolidated appointment page are complete. Phase 3 responsive/accessibility review is partially done (button aria-labels, focus handling in BookAppointmentSection). The remaining Phase 3 work is a full responsive pass across phone/tablet/desktop. After that, continue with the remaining service-management improvements and business settings. The detailed checklists below remain the source of the intended scope and order.
 
 ## Current baseline
 
@@ -200,8 +200,9 @@ Data requirements (single server query each):
 - [x] Verify booking flow works on the consolidated page (slot selection, submission, confirmation state).
 - [x] Update all navigation links (Navbar, Hero, Footer) to point to `/appointments`.
 - [x] Fix auth redirect: regular users go to `/appointments` after sign-in.
-- [ ] Add loading states for booking and appointment actions (global loading.tsx exists; inline loading already in BookingForm and CancelAppointmentButton).
-- [ ] Add error and not-found states for protected pages (global error.tsx and not-found.tsx exist).
+- [x] Add loading states for booking and appointment actions (global loading.tsx exists; inline loading already in BookingForm and CancelAppointmentButton).
+- [x] Add error and not-found states for protected pages (global error.tsx and not-found.tsx exist).
+- [x] Button aria-labels and focus handling in BookAppointmentSection.
 - [ ] Review all customer pages on phone, tablet, and desktop widths.
 - [ ] Check keyboard navigation, visible focus states, labels, and readable contrast.
 - [ ] Test the full customer flow: sign in → see booking form → see upcoming → see history → cancel.

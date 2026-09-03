@@ -9,5 +9,5 @@ export default async function AuthRedirectPage() {
     redirect("/admin");
   }
 
-  redirect("/");
+  redirect("/appointments");
 }
