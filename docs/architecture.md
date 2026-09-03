@@ -37,6 +37,14 @@ unknown/
 
 The active code is at the repository root.
 
+### Component placement
+
+- **Default:** keep components page-specific, colocated with the route that uses them (e.g. `app/(site)/appointments/CancelAppointmentButton.tsx`).
+- **Move to `app/components/`** only when a component is imported by two or more different routes or route groups.
+- Shared UI primitives (`Button`, `Container`, etc.) live in `app/components/ui/`.
+
+This keeps the global components folder small and makes it obvious which components are page-local versus shared.
+
 ## Data
 
 PostgreSQL is the primary application database. Prisma is used to model and access application data.

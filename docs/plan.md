@@ -2,16 +2,16 @@
 
 This is the implementation plan for the first real deployment of Unknown Beauty: one small beauty parlour operated by the owner's family. It is intentionally simpler than a SaaS architecture. The product should become useful for this parlour first; multi-business support is a later possibility.
 
-## Progress update — 31 August 2026
+## Progress update — 3 September 2026
 
 - Phase 1 role activation is complete and verified with the real Clerk accounts.
 - Phase 2 customer appointment experience is complete: customers can view upcoming/history appointments and securely cancel future bookings.
-- Phase 3 is partially complete: the customer booking link is available in the signed-in navigation; broader navigation and polish remain.
+- Phase 3 is mostly complete: the consolidated `/appointments` page is built (booking form, upcoming, history). Navigation links point to `/appointments`. Auth redirects send regular users to `/appointments`. `/book` redirects to `/appointments`. Loading states and error/not-found pages are in place. Responsive and accessibility review remains.
 - Phase 4 service management is now in progress.
 - Service-management slice 1 is complete: active/inactive services, owner-only create/edit/toggle controls, and active-service filtering in public and booking flows.
 - The migration `20260831130000_add_service_active_flag` has been applied and the service-management page is working.
 
-Current checkpoint: role activation, customer appointments, and service-management slice 1 are complete. The next planned work is Phase 3 customer-facing navigation and polish, followed by the remaining service-management improvements and business settings. The detailed checklists below remain the source of the intended scope and order.
+Current checkpoint: role activation, customer appointments, service-management slice 1, and the consolidated appointment page are complete. The remaining Phase 3 work is responsive/accessibility review. After that, continue with the remaining service-management improvements and business settings. The detailed checklists below remain the source of the intended scope and order.
 
 ## Current baseline
 
@@ -157,13 +157,54 @@ Definition of done:
 
 ### Phase 3 — Customer-facing navigation and polish
 
+#### Consolidated appointment page (design decision)
+
+The customer's primary screen is a single `/appointments` page that brings together booking, upcoming appointments, and recent history. This replaces the current split between `/book` and `/appointments` — customers no longer need to navigate between two pages to see the full picture. The old `/book` route stays functional as a redirect to `/appointments` so existing links do not break.
+
+Page layout (top to bottom):
+1. **Page header** — "My Appointments" title and subtitle.
+2. **Book new appointment** — reuse the existing `BookingForm` component (already accepts a `services[]` prop). Fetch active services in the server component and pass them down.
+3. **Upcoming appointments** — all future, non-cancelled appointments with cancel support.
+4. **Recent history** — last 10 past/cancelled appointments.
+
+Component breakdown:
+- Extract `AppointmentGroup` from the current `appointments/page.tsx` into `app/components/AppointmentGroup.tsx` so it is reusable by both sections.
+- `BookingForm` is already a standalone component — no changes needed.
+- `CancelAppointmentButton` and its server action remain unchanged.
+
+Data requirements (single server query each):
+- Customer + appointments (with service included, ordered by `startTime desc`) — split into upcoming and history in the page component.
+- Active services list — for `BookingForm`.
+
+#### Navigation and auth
+
 - Add clear links for Home, Services, Book, and My Appointments.
 - Keep admin links out of the customer navigation unless the current user is authorized.
 - Make sign-in and sign-up redirects return users to the useful destination.
+
+#### Usability and polish
+
 - Add loading states for booking and appointment actions.
 - Add error and not-found states for protected pages.
 - Review all customer pages on phone, tablet, and desktop widths.
 - Check keyboard navigation, visible focus states, labels, and readable contrast.
+
+#### Checklist
+
+- [x] Extract `AppointmentGroup` into `app/components/AppointmentGroup.tsx`.
+- [x] Fetch active services in the appointments page server component.
+- [x] Add `BookingForm` section at the top of `/appointments`.
+- [x] Limit history to the last 10 appointments in the Prisma query.
+- [x] Redirect `/book` to `/appointments` (preserve `serviceId` query param).
+- [x] Verify cancel action still works on the consolidated page.
+- [x] Verify booking flow works on the consolidated page (slot selection, submission, confirmation state).
+- [x] Update all navigation links (Navbar, Hero, Footer) to point to `/appointments`.
+- [x] Fix auth redirect: regular users go to `/appointments` after sign-in.
+- [ ] Add loading states for booking and appointment actions (global loading.tsx exists; inline loading already in BookingForm and CancelAppointmentButton).
+- [ ] Add error and not-found states for protected pages (global error.tsx and not-found.tsx exist).
+- [ ] Review all customer pages on phone, tablet, and desktop widths.
+- [ ] Check keyboard navigation, visible focus states, labels, and readable contrast.
+- [ ] Test the full customer flow: sign in → see booking form → see upcoming → see history → cancel.
 
 ### Phase 4 — Service management for the owner
 
@@ -271,11 +312,12 @@ These can be considered after the first parlour has used the product and exposed
 
 When implementation resumes, use this order:
 
-1. Verify the real Clerk IDs and role activation.
-2. Build the customer “My Appointments” backend and page.
-3. Add customer navigation and polish.
-4. Build service management.
-5. Build business settings.
-6. Improve the owner appointment workflow.
-7. Build staff management.
-8. Run security, accessibility, mobile, and production checks.
+1. ~~Verify the real Clerk IDs and role activation.~~
+2. ~~Build the customer "My Appointments" backend and page.~~
+3. ~~Consolidate the appointment page: merge booking form, upcoming, and history into `/appointments` (extract `AppointmentGroup` component, fetch services, limit history to 10).~~
+4. Complete Phase 3 responsive/accessibility review.
+5. Build service management (remaining slices).
+6. Build business settings.
+7. Improve the owner appointment workflow.
+8. Build staff management.
+9. Run security, accessibility, mobile, and production checks.
