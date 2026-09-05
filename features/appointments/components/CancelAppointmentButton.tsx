@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { cancelMyAppointment } from "./actions";
-import type { CancellationState } from "./actions";
+import { cancelMyAppointment } from "../actions";
+import type { CancellationState } from "../types";
 
 const initialState: CancellationState = {};
 

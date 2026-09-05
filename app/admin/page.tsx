@@ -1,7 +1,11 @@
-import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
-import AppointmentsList from "@/app/components/AppointmentsList";
+import AdminAppointmentsList from "@/features/appointments/components/AdminAppointmentsList";
+import {
+  getAdminAppointments,
+  getAdminAppointmentCounts,
+  getUpcomingAppointments,
+} from "@/features/appointments/actions/admin";
 
 type StatusFilter = "default" | "all" | "pending" | "confirmed" | "cancelled";
 
@@ -39,36 +43,17 @@ export default async function AdminPage({
 
   const [
     appointments,
-    todayAppointments,
-    pendingAppointments,
-    confirmedAppointments,
-    activeServices,
+    {
+      todayAppointments,
+      pendingAppointments,
+      confirmedAppointments,
+      activeServices,
+    },
     upcomingAppointments,
   ] = await Promise.all([
-    prisma.appointment.findMany({
-      where: {
-        startTime: { gte: today },
-        ...(statusFilter ? { status: { in: statusFilter } } : {}),
-      },
-      include: { customer: true, service: true },
-      orderBy: { startTime: "asc" },
-    }),
-    prisma.appointment.count({
-      where: { startTime: { gte: today }, status: { not: "cancelled" } },
-    }),
-    prisma.appointment.count({
-      where: { status: "pending", startTime: { gte: today } },
-    }),
-    prisma.appointment.count({
-      where: { status: "confirmed", startTime: { gte: today } },
-    }),
-    prisma.service.count({ where: { active: true } }),
-    prisma.appointment.findMany({
-      where: { startTime: { gte: today }, status: { not: "cancelled" } },
-      include: { customer: true, service: true },
-      orderBy: { startTime: "asc" },
-      take: 5,
-    }),
+    getAdminAppointments(statusFilter, today),
+    getAdminAppointmentCounts(today),
+    getUpcomingAppointments(today),
   ]);
 
   return (
@@ -165,7 +150,7 @@ export default async function AdminPage({
       <h2 className="mb-5 mt-8 text-xl font-bold text-foreground sm:mt-10 sm:text-2xl">
         Appointments
       </h2>
-      <AppointmentsList
+      <AdminAppointmentsList
         appointments={appointments}
         currentStatus={statusParam}
       />

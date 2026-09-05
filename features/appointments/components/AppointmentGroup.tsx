@@ -37,7 +37,9 @@ export default function AppointmentGroup({
   appointments: Appointment[];
 }) {
   return (
-    <section aria-labelledby={`${title.toLowerCase().replace(/\s+/g, "-")}-appointments`}>
+    <section
+      aria-labelledby={`${title.toLowerCase().replace(/\s+/g, "-")}-appointments`}
+    >
       <h2
         id={`${title.toLowerCase().replace(/\s+/g, "-")}-appointments`}
         className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl"
@@ -57,30 +59,36 @@ export default function AppointmentGroup({
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold text-foreground">{appointment.service.name}</h3>
+                  <h3 className="font-semibold text-foreground">
+                    {appointment.service.name}
+                  </h3>
                   <p className="mt-1 text-sm text-muted">
-                    {appointment.service.durationMin} minutes · ₹{Math.round(appointment.service.price)}
+                    {appointment.service.durationMin} minutes · ₹
+                    {Math.round(appointment.service.price)}
                   </p>
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses[appointment.status] ?? "bg-neutral-soft text-neutral"}`}
                 >
-                  {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                  {appointment.status.charAt(0).toUpperCase() +
+                    appointment.status.slice(1)}
                 </span>
               </div>
 
               <div className="mt-4 border-t border-border pt-3 text-sm text-foreground">
                 <p>{formatDate(appointment.startTime)}</p>
                 <p className="mt-1 text-muted">
-                  {formatTime(appointment.startTime)} – {formatTime(appointment.endTime)}
+                  {formatTime(appointment.startTime)} –{" "}
+                  {formatTime(appointment.endTime)}
                 </p>
               </div>
 
-              {appointment.status !== "cancelled" && appointment.startTime > new Date() && (
-                <div className="mt-4 border-t border-border pt-3">
-                  <CancelAppointmentButton appointmentId={appointment.id} />
-                </div>
-              )}
+              {appointment.status !== "cancelled" &&
+                appointment.startTime > new Date() && (
+                  <div className="mt-4 border-t border-border pt-3">
+                    <CancelAppointmentButton appointmentId={appointment.id} />
+                  </div>
+                )}
             </article>
           ))}
         </div>

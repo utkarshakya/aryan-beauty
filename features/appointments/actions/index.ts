@@ -4,85 +4,35 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { business } from "@/lib/business";
+import {
+  getAvailableSlots,
+  createAppointmentTx,
+  cancelAppointment,
+} from "../db/queries";
+export type { BookingState, CancellationState, TimeSlot } from "../types";
+import { BookingState, CancellationState, TimeSlot } from "../types";
 
-// --- Booking ---
+const INDIAN_PHONE_RE = new RegExp("^[6-9]\\d{9}$");
 
-export type TimeSlot = { value: string; label: string };
+const initialState: BookingState = { errors: {} };
 
-const dateAtBusinessTime = (date: string, hour: number) =>
-  new Date(`${date}T${String(hour).padStart(2, "0")}:00:00+05:30`);
+const DATE_RE = new RegExp("^\\d{4}-\\d{2}-\\d{2}$");
 
-export async function getAvailableSlots(
+export { getAvailableSlots };
+
+export async function getAvailableSlotsAction(
   serviceId: number,
   date: string,
 ): Promise<TimeSlot[]> {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  if (!Number.isInteger(serviceId) || serviceId <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  if (!Number.isInteger(serviceId) || serviceId <= 0 || !DATE_RE.test(date)) {
     return [];
   }
 
-  const service = await prisma.service.findFirst({ where: { id: serviceId, active: true } });
-  if (!service) return [];
-
-  const opening = dateAtBusinessTime(date, business.openingHour);
-  const closing = dateAtBusinessTime(date, business.closingHour);
-  const appointments = await prisma.appointment.findMany({
-    where: {
-      status: { not: "cancelled" },
-      startTime: { lt: closing },
-      endTime: { gt: opening },
-    },
-    select: { startTime: true, endTime: true },
-  });
-
-  const slots: TimeSlot[] = [];
-  const durationMs = service.durationMin * 60_000;
-  const intervalMs = business.slotIntervalMin * 60_000;
-  const now = Date.now();
-
-  for (
-    let start = opening.getTime();
-    start + durationMs <= closing.getTime();
-    start += intervalMs
-  ) {
-    const end = start + durationMs;
-    const unavailable = appointments.some(
-      (appointment) =>
-        appointment.startTime.getTime() < end &&
-        appointment.endTime.getTime() > start,
-    );
-    if (start > now && !unavailable) {
-      const startDate = new Date(start);
-      slots.push({
-        value: startDate.toISOString(),
-        label: startDate.toLocaleTimeString("en-IN", {
-          timeZone: business.timezone,
-          hour: "numeric",
-          minute: "2-digit",
-        }),
-      });
-    }
-  }
-
-  return slots;
+  return getAvailableSlots(serviceId, date);
 }
-
-export type BookingState =
-  | {
-      success: {
-        serviceName: string;
-        startTime: string;
-        name: string;
-        phone: string | null;
-      };
-    }
-  | { errors: Record<string, string> };
-
-const INDIAN_PHONE_RE = /^[6-9]\d{9}$/;
-
-const initialState: BookingState = { errors: {} };
 
 export async function createAppointment(
   _prevState: BookingState,
@@ -138,14 +88,17 @@ export async function createAppointment(
   if (!availableSlots.some((slot) => slot.value === startTime.toISOString())) {
     return {
       errors: {
-        startTime: "That time is no longer available. Please choose another slot.",
+        startTime:
+          "That time is no longer available. Please choose another slot.",
       },
     };
   }
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      const service = await tx.service.findFirst({ where: { id: serviceId, active: true } });
+      const service = await tx.service.findFirst({
+        where: { id: serviceId, active: true },
+      });
       if (!service) {
         throw new Error("Service not found");
       }
@@ -165,7 +118,9 @@ export async function createAppointment(
         throw new Error("Time slot unavailable");
       }
 
-      const appUser = await tx.user.findUnique({ where: { clerkUserId: userId } });
+      const appUser = await tx.user.findUnique({
+        where: { clerkUserId: userId },
+      });
       if (!appUser) throw new Error("User not found");
 
       const customer = await tx.customer.upsert({
@@ -179,13 +134,11 @@ export async function createAppointment(
         },
       });
 
-      await tx.appointment.create({
-        data: {
-          customerId: customer.id,
-          serviceId: service.id,
-          startTime,
-          endTime,
-        },
+      await createAppointmentTx(tx, {
+        customerId: customer.id,
+        serviceId: service.id,
+        startTime,
+        endTime,
       });
 
       return { serviceName: service.name, startTime };
@@ -209,47 +162,42 @@ export async function createAppointment(
       };
     }
     if (error instanceof Error && error.message === "Service not found") {
-      return { errors: { serviceId: "This service is no longer available. Please pick another." } };
+      return {
+        errors: {
+          serviceId:
+            "This service is no longer available. Please pick another.",
+        },
+      };
     }
     return { errors: { form: "Something went wrong. Please try again." } };
   }
 }
-
-// --- Cancellation ---
-
-export type CancellationState = {
-  success?: string;
-  error?: string;
-};
 
 export async function cancelMyAppointment(
   _previousState: CancellationState,
   formData: FormData,
 ): Promise<CancellationState> {
   const { userId } = await auth();
-  if (!userId) return { error: "Please sign in again to cancel this appointment." };
+  if (!userId)
+    return { error: "Please sign in again to cancel this appointment." };
 
   const appointmentId = Number(formData.get("appointmentId"));
   if (!Number.isInteger(appointmentId) || appointmentId <= 0) {
     return { error: "That appointment could not be found." };
   }
 
-  const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId } });
-    if (!appUser) return { error: "User not found" };
+  const appUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+  if (!appUser) return { error: "User not found" };
 
-    const result = await prisma.appointment.updateMany({
-      where: {
-        id: appointmentId,
-        status: { not: "cancelled" },
-        startTime: {
-          gt: new Date(Date.now() + business.cancellationCutoffHours * 60 * 60 * 1000),
-        },
-        customer: { userId: appUser.id },
-      },
-      data: { status: "cancelled" },
-    });
+  const cancelled = await cancelAppointment(
+    appointmentId,
+    appUser.id,
+    business.cancellationCutoffHours,
+  );
 
-  if (result.count === 0) {
+  if (!cancelled) {
     return {
       error: `Appointments can only be cancelled more than ${business.cancellationCutoffHours} hours before the visit.`,
     };

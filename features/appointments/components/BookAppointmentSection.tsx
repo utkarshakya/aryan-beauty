@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { Service } from "@prisma/client";
-import BookingForm from "@/app/components/BookingForm";
+import BookingForm from "./BookingForm";
 
 export default function BookAppointmentSection({
   services,
@@ -17,14 +17,19 @@ export default function BookAppointmentSection({
   if (open) {
     return (
       <div ref={formRef}>
-        <BookingForm services={services} preselectedServiceId={preselectedServiceId} />
+        <BookingForm
+          services={services}
+          preselectedServiceId={preselectedServiceId}
+        />
       </div>
     );
   }
 
   return (
     <div className="rounded-2xl border border-border bg-background p-4 text-center shadow-sm sm:p-6">
-      <p className="text-sm text-muted">Choose a service, pick a date and time, and confirm your booking.</p>
+      <p className="text-sm text-muted">
+        Choose a service, pick a date and time, and confirm your booking.
+      </p>
       <button
         type="button"
         onClick={() => setOpen(true)}

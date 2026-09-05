@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { requireOwnerAdmin } from "@/lib/auth";
-import { createService } from "./actions";
-import ServiceEditor from "./ServiceEditor";
+import { getServicesAction } from "@/features/services-catalog/actions";
+import ServiceEditor from "@/features/services-catalog/components/ServiceEditor";
+import ServiceForm from "@/features/services-catalog/components/ServiceForm";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function ManageServicesPage() {
   await requireOwnerAdmin();
-  const services = await prisma.service.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] });
+  const services = await getServicesAction();
 
   return (
     <div className="container mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
@@ -41,13 +41,7 @@ export default async function ManageServicesPage() {
         <section className="h-fit rounded-xl border border-border bg-background p-4 shadow-sm sm:p-6" aria-labelledby="add-service-heading">
           <h2 id="add-service-heading" className="text-lg font-semibold text-foreground">Add a service</h2>
           <p className="mt-1 text-sm text-muted">New services are visible to customers immediately.</p>
-          <form action={createService} className="mt-5 space-y-4">
-            <label className="block text-sm font-medium text-foreground">Name<input name="name" required className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 font-normal text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" /></label>
-            <label className="block text-sm font-medium text-foreground">Category<input name="category" defaultValue="Other" className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 font-normal text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" /></label>
-            <div className="grid grid-cols-2 gap-3"><label className="text-sm font-medium text-foreground">Price<input name="price" type="number" min="0" step="1" required className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 font-normal text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" /></label><label className="text-sm font-medium text-foreground">Minutes<input name="durationMin" type="number" min="1" step="1" required className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 font-normal text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" /></label></div>
-            <label className="block text-sm font-medium text-foreground">Description<textarea name="description" rows={3} className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 font-normal text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" /></label>
-            <button type="submit" className="w-full rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-strong">Add service</button>
-          </form>
+          <ServiceForm />
         </section>
       </div>
     </div>

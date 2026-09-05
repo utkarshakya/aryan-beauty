@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import Container from "@/app/components/ui/Container";
+import Container from "@/components/ui/Container";
 import PageHeader from "@/app/components/PageHeader";
-import BookAppointmentSection from "./BookAppointmentSection";
-import AppointmentGroup from "./AppointmentGroup";
+import BookAppointmentSection from "@/features/appointments/components/BookAppointmentSection";
+import AppointmentGroup from "@/features/appointments/components/AppointmentGroup";
 import EmptyServices from "@/app/components/EmptyServices";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,9 @@ export default async function AppointmentsPage({
     await auth.protect();
   }
 
-  const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId! } });
+  const appUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId! },
+  });
   if (!appUser) {
     await auth.protect();
   }
@@ -68,13 +70,19 @@ export default async function AppointmentsPage({
 
       <div className="space-y-7 sm:space-y-10">
         <section aria-labelledby="book-new">
-          <h2 id="book-new" className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">
+          <h2
+            id="book-new"
+            className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl"
+          >
             Book new appointment
           </h2>
           {services.length === 0 ? (
             <EmptyServices />
           ) : (
-            <BookAppointmentSection services={services} preselectedServiceId={preselectedServiceId} />
+            <BookAppointmentSection
+              services={services}
+              preselectedServiceId={preselectedServiceId}
+            />
           )}
         </section>
 

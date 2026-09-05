@@ -1,4 +1,6 @@
-import { confirmAppointment } from "@/app/admin/actions";
+"use client";
+
+import { confirmAppointment } from "../actions/admin";
 import CancelButton from "./CancelButton";
 import Link from "next/link";
 
@@ -33,7 +35,7 @@ const statusTabs: {
   { value: "cancelled", label: "Cancelled" },
 ];
 
-export default function AppointmentsList({
+export default function AdminAppointmentsList({
   appointments,
   currentStatus,
 }: AppointmentsListProps) {
@@ -104,7 +106,7 @@ export default function AppointmentsList({
                     </dd>
                   </div>
                   <div className="col-span-2">
-                    <dt className="text-muted">Date &amp; time</dt>
+                    <dt className="text-muted">Date & time</dt>
                     <dd className="mt-1 text-foreground">
                       {new Date(appointment.startTime).toLocaleDateString(
                         "en-IN",
@@ -161,11 +163,11 @@ export default function AppointmentsList({
             <table className="w-full min-w-175 text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-muted">
-              <th className="px-3 py-3 font-medium">Customer</th>
-              <th className="px-3 py-3 font-medium">Service</th>
-              <th className="px-3 py-3 font-medium">Date & Time</th>
-              <th className="px-3 py-3 font-medium">Status</th>
-              <th className="px-3 py-3 font-medium text-right">Actions</th>
+                  <th className="px-3 py-3 font-medium">Customer</th>
+                  <th className="px-3 py-3 font-medium">Service</th>
+                  <th className="px-3 py-3 font-medium">Date & Time</th>
+                  <th className="px-3 py-3 font-medium">Status</th>
+                  <th className="px-3 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

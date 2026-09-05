@@ -7,8 +7,8 @@ import {
   getAvailableSlots,
   type BookingState,
   type TimeSlot,
-} from "@/app/(site)/appointments/actions";
-import { Button, ButtonLink } from "./ui/Button";
+} from "../actions";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { business } from "@/lib/business";
 
 const initialState: BookingState = { errors: {} };
@@ -74,10 +74,11 @@ export default function BookingForm({
     if (!selectedDate || !selectedServiceId) return;
 
     let active = true;
-    getAvailableSlots(Number(selectedServiceId), selectedDate)
-      .then((availableSlots) => {
+    getAvailableSlots(Number(selectedServiceId), selectedDate).then(
+      (availableSlots) => {
         if (active) setSlotState({ key: slotKey, slots: availableSlots });
-      });
+      },
+    );
 
     return () => {
       active = false;
@@ -128,8 +129,8 @@ export default function BookingForm({
           <p className="font-medium text-foreground">What happens next?</p>
           <p className="mt-1 text-muted">
             We&apos;ll contact you using your account details to confirm your
-            appointment. If the time isn&apos;t available, we&apos;ll help you pick
-            another slot.
+            appointment. If the time isn&apos;t available, we&apos;ll help you
+            pick another slot.
           </p>
         </div>
 
@@ -277,7 +278,10 @@ export default function BookingForm({
         </div>
 
         <div>
-          <label htmlFor="startTime" className="mb-1.5 block text-sm font-medium">
+          <label
+            htmlFor="startTime"
+            className="mb-1.5 block text-sm font-medium"
+          >
             Available time
           </label>
           <select

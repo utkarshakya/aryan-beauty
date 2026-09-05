@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
-import { UserRole, UserStatus } from "@prisma/client";
+import type { UserRole, UserStatus } from "@prisma/client";
 
 export async function upsertUserFromClerk(
   clerkUserId: string,
-  data: { email: string; name?: string; role?: UserRole }
+  data: { email: string; name?: string; role?: UserRole },
 ) {
   const { email, name, role = "customer" } = data;
 
@@ -37,7 +37,10 @@ export async function upsertUserFromClerk(
       });
     }
 
-    await syncPublicMetadata(clerkUserId, { role: user.role, status: user.status });
+    await syncPublicMetadata(clerkUserId, {
+      role: user.role,
+      status: user.status,
+    });
 
     return user;
   });
@@ -45,7 +48,7 @@ export async function upsertUserFromClerk(
 
 export async function syncPublicMetadata(
   clerkUserId: string,
-  metadata: { role: UserRole; status: UserStatus }
+  metadata: { role: UserRole; status: UserStatus },
 ) {
   const client = await clerkClient();
   await client.users.updateUserMetadata(clerkUserId, {
@@ -63,18 +66,18 @@ export async function softDeleteUser(clerkUserId: string) {
       data: { status: "disabled" },
     });
 
-    await syncPublicMetadata(clerkUserId, { role: user.role, status: "disabled" });
+    await syncPublicMetadata(clerkUserId, {
+      role: user.role,
+      status: "disabled",
+    });
 
     return user;
   });
 }
 
-export async function updateUserRole(
-  clerkUserId: string,
-  role: UserRole
-) {
+export async function updateUserRole(clerkUserId: string, role: UserRole) {
   const client = await clerkClient();
-  
+
   const user = await prisma.user.update({
     where: { clerkUserId },
     data: { role },
