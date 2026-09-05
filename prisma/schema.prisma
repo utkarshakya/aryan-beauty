@@ -6,18 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  super_admin
-  admin
-  staff
-  customer
-}
-
-enum UserStatus {
-  active
-  disabled
-}
-
 model User {
   id          Int        @id @default(autoincrement())
   clerkUserId String     @unique
@@ -32,7 +20,6 @@ model User {
 
 model Customer {
   id           Int           @id @default(autoincrement())
-  clerkUserId  String?       @unique
   userId       Int?          @unique
   name         String
   phone        String?
@@ -43,27 +30,40 @@ model Customer {
 }
 
 model Service {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String   @default("")
-  price       Float
-  durationMin Int
-  category    String   @default("Other")
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String        @default("")
+  price        Float
+  durationMin  Int
+  category     String        @default("Other")
+  createdAt    DateTime      @default(now())
+  active       Boolean       @default(true)
   appointments Appointment[]
 }
 
 model Appointment {
   id         Int      @id @default(autoincrement())
-  customer   Customer @relation(fields: [customerId], references: [id])
   customerId Int
-  service    Service  @relation(fields: [serviceId], references: [id])
   serviceId  Int
   startTime  DateTime
-  endTime    DateTime
   status     String   @default("pending")
   notes      String   @default("")
   createdAt  DateTime @default(now())
+  endTime    DateTime
+  customer   Customer @relation(fields: [customerId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
+
   @@index([startTime])
+}
+
+enum UserRole {
+  super_admin
+  admin
+  staff
+  customer
+}
+
+enum UserStatus {
+  active
+  disabled
 }

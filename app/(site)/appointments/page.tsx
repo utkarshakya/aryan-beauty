@@ -28,9 +28,14 @@ export default async function AppointmentsPage({
     await auth.protect();
   }
 
+  const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId! } });
+  if (!appUser) {
+    await auth.protect();
+  }
+
   const [customer, services] = await Promise.all([
     prisma.customer.findUnique({
-      where: { clerkUserId: userId! },
+      where: { userId: appUser!.id },
       include: {
         appointments: {
           include: { service: true },

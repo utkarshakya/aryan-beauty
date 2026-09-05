@@ -165,11 +165,14 @@ export async function createAppointment(
         throw new Error("Time slot unavailable");
       }
 
+      const appUser = await tx.user.findUnique({ where: { clerkUserId: userId } });
+      if (!appUser) throw new Error("User not found");
+
       const customer = await tx.customer.upsert({
-        where: { clerkUserId: userId },
+        where: { userId: appUser.id },
         update: { name, phone: phone || null, email: accountEmail },
         create: {
-          clerkUserId: userId,
+          userId: appUser.id,
           name,
           phone: phone || null,
           email: accountEmail,
@@ -231,17 +234,20 @@ export async function cancelMyAppointment(
     return { error: "That appointment could not be found." };
   }
 
-  const result = await prisma.appointment.updateMany({
-    where: {
-      id: appointmentId,
-      status: { not: "cancelled" },
-      startTime: {
-        gt: new Date(Date.now() + business.cancellationCutoffHours * 60 * 60 * 1000),
+  const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId } });
+    if (!appUser) return { error: "User not found" };
+
+    const result = await prisma.appointment.updateMany({
+      where: {
+        id: appointmentId,
+        status: { not: "cancelled" },
+        startTime: {
+          gt: new Date(Date.now() + business.cancellationCutoffHours * 60 * 60 * 1000),
+        },
+        customer: { userId: appUser.id },
       },
-      customer: { clerkUserId: userId },
-    },
-    data: { status: "cancelled" },
-  });
+      data: { status: "cancelled" },
+    });
 
   if (result.count === 0) {
     return {
