@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Container from "./ui/Container";
+import Container from "@/components/ui/Container";
 import { business } from "@/lib/business";
 
 export default function Footer() {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useState } from "react";
-import Container from "./ui/Container";
+import Container from "@/components/ui/Container";
 import ThemeToggle from "./ThemeToggle";
 
 export default function NavbarClient({ canAccessAdmin }: { canAccessAdmin: boolean }) {

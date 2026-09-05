@@ -1,4 +1,4 @@
-import { ButtonLink } from "./ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import type { Service } from "@prisma/client";
 
 export default function ServiceCard({ service }: { service: Service }) {

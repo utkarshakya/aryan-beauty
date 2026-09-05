@@ -1,5 +1,5 @@
-import Container from "./ui/Container";
-import { ButtonLink } from "./ui/Button";
+import Container from "@/components/ui/Container";
+import { ButtonLink } from "@/components/ui/Button";
 import { business } from "@/lib/business";
 
 export default function Hero() {

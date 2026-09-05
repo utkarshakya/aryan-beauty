@@ -5,7 +5,7 @@ import type { Service } from "@prisma/client";
 import PageHeader from "./PageHeader";
 import ServiceCard from "./ServiceCard";
 import EmptyServices from "./EmptyServices";
-import Container from "./ui/Container";
+import Container from "@/components/ui/Container";
 
 const ALL_CATEGORIES = "All";
 

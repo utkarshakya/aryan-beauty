@@ -1,4 +1,4 @@
-import { ButtonLink } from "./ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { business } from "@/lib/business";
 
 export default function EmptyServices() {

@@ -1,6 +1,6 @@
 import ServiceCard from "./ServiceCard";
-import Container from "./ui/Container";
-import { ButtonLink } from "./ui/Button";
+import Container from "@/components/ui/Container";
+import { ButtonLink } from "@/components/ui/Button";
 import type { Service } from "@prisma/client";
 
 export default function ServicesPreview({ services }: { services: Service[] }) {
