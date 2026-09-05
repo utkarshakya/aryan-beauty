@@ -29,21 +29,20 @@ The current application is intentionally starting from a clean Next.js foundatio
 
 ```text
 unknown/
-├── app/          # Active Next.js application
+├── app/          # Thin Next.js routing layer (pages, layouts, route groups, API routes)
+├── features/     # Feature domain modules (auth, appointments, customers, services-catalog)
+├── components/   # Shared UI primitives and layout wrappers (ui/, layout/)
+├── lib/          # Infrastructure singletons (prisma.ts, utils.ts)
 ├── public/       # Static assets
 ├── docs/         # Product and engineering documentation
-└── ...           # Next.js configuration and project files
+└── prisma/       # Database schema and migrations
 ```
 
-The active code is at the repository root.
+### Feature Architecture & Component Placement
 
-### Component placement
-
-- **Default:** keep components page-specific, colocated with the route that uses them (e.g. `app/(site)/appointments/CancelAppointmentButton.tsx`).
-- **Move to `app/components/`** only when a component is imported by two or more different routes or route groups.
-- Shared UI primitives (`Button`, `Container`, etc.) live in `app/components/ui/`.
-
-This keeps the global components folder small and makes it obvious which components are page-local versus shared.
+- **`features/`:** Contains domain modules (`auth`, `appointments`, `customers`, `services-catalog`). Each feature folder encapsulates its DB queries (`services.ts`), server actions (`actions.ts`), UI components (`components/`), and types (`types.ts`).
+- **`app/`:** Kept thin and focused strictly on routing. Pages consume feature components and feature service functions.
+- **Shared UI:** Generic, feature-agnostic components (`Button`, `Container`, `Input`) live in `components/ui/`.
 
 ## Data
 
@@ -53,9 +52,11 @@ The database should evolve with the product. Do not create a large schema for hy
 
 ## Authentication and Access
 
-Clerk handles authentication.
+Clerk handles authentication. 
 
-Clerk handles authentication. Application roles are stored in the Prisma `User` model and linked to Clerk through `clerkUserId`. The product creator's super-admin Clerk ID is kept in protected environment configuration. Bootstrap admin IDs may be used to create initial admin records, after which ordinary admin and staff access is read from the database.
+Application users are synced to the Prisma `User` model (`clerkUserId`) and linked to `Customer` profiles. Account creation and sync are handled automatically via Clerk Webhooks (`/api/webhooks/clerk`) and on-demand fallback sync (`getOrCreateUser`).
+
+The product creator's super-admin Clerk ID is kept in protected environment configuration. Bootstrap admin IDs may be used to create initial admin records, after which ordinary admin and staff access is read from the database.
 
 Admin functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication. Every protected page and server action must check the current user's role and active status on the server. Client-side navigation visibility is only a usability feature and is not an authorization boundary.
 
@@ -83,7 +84,7 @@ Supabase Storage is used for application-managed images and other files when fil
 - **`Appointment.status`:** intentionally a plain `String`, not a Prisma enum, so new status values don't require a migration. Do not convert it to an enum without an explicit request.
 - **`Service.active`:** services are soft-hidden with an `active` boolean instead of being deleted. Public service and booking queries must include only active services; historical appointments continue to reference inactive services.
 - **Appointment overlap check:** a slot is unavailable if `existing.startTime < newEnd && existing.endTime > newStart`, ignoring rows where `status === "cancelled"`. This runs inside a Prisma interactive transaction alongside the customer upsert and appointment create.
-- **Customer lookup:** signed-in customers use `customer.upsert` keyed on the unique `clerkUserId` field. Phone is optional contact data and is not an identity key.
-- **Auth model:** Clerk handles authentication. The Prisma `User` model stores `super_admin`, `admin`, `staff`, and `customer` roles plus account status. The super admin is identified by protected Clerk user ID configuration; bootstrap admin IDs are only for initial setup. Normal signed-in users can book but cannot access admin routes unless they have an active authorized role.
+- **Customer lookup:** `User` owns `clerkUserId`. `Customer` connects to `User` via `userId`. Signed-in customers fetch their profile using `customer.findUnique({ where: { userId } })` or `clerkUserId` relation. Phone is optional contact data and is not an identity key.
+- **Auth model:** Clerk handles authentication. The Prisma `User` model stores `super_admin`, `admin`, `staff`, and `customer` roles plus account status. Users are synced via Clerk Webhooks (`/api/webhooks/clerk`) or lazy fallback sync (`getOrCreateUser`). Normal signed-in users can book but cannot access admin routes unless authorized.
 - **Netlify build command:** `prisma generate && next build`.
 - **Netlify env vars** — secret: `DATABASE_URL`, `CLERK_SECRET_KEY`. Public (`NEXT_PUBLIC_*`): the Clerk publishable key and sign-in/up/redirect URLs.
