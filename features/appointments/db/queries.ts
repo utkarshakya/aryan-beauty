@@ -12,7 +12,7 @@ export async function getAppointmentsByCustomerId(
   });
 }
 
-export async function getUpcomingAppointments(
+export async function getUpcomingAppointmentsByCustomer(
   customerId: number,
   now: Date = new Date()
 ): Promise<AppointmentWithRelations[]> {
@@ -27,7 +27,7 @@ export async function getRecentHistory(
   limit: number = 10
 ): Promise<AppointmentWithRelations[]> {
   const appointments = await getAppointmentsByCustomerId(customerId);
-  const upcoming = await getUpcomingAppointments(customerId);
+  const upcoming = await getUpcomingAppointmentsByCustomer(customerId);
   const upcomingIds = new Set(upcoming.map((a) => a.id));
   return appointments
     .filter((a) => !upcomingIds.has(a.id))
@@ -127,5 +127,17 @@ export async function confirmAppointment(appointmentId: number) {
   return prisma.appointment.update({
     where: { id: appointmentId },
     data: { status: "confirmed" },
+  });
+}
+
+export async function getCustomerWithAppointments(customerId: number) {
+  return prisma.customer.findUnique({
+    where: { id: customerId },
+    include: {
+      appointments: {
+        include: { service: true },
+        orderBy: { startTime: "desc" },
+      },
+    },
   });
 }

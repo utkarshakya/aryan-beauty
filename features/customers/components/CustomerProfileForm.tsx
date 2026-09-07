@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateMyProfile } from "../actions";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/shared/ui";
 
 const initialState = { errors: {} as Record<string, string> };
 

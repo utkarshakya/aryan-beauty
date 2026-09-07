@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { UserRole, SessionClaims } from "@/shared/types/auth";
 
 const getUserIds = (value: string | undefined) =>
   (value ?? "")
@@ -15,13 +16,6 @@ const getSuperAdminUserIds = () => {
 const getBootstrapAdminUserIds = () =>
   getUserIds(process.env.BOOTSTRAP_ADMIN_CLERK_USER_IDS);
 
-type SessionClaims = {
-  metadata: {
-    role: "super_admin" | "admin" | "staff" | "customer";
-    status: "active" | "disabled";
-  };
-};
-
 async function getClaims(): Promise<SessionClaims | null> {
   const { sessionClaims } = await auth();
   return (sessionClaims as unknown as SessionClaims) ?? null;
@@ -35,7 +29,7 @@ export async function hasAdminAccess(userId: string | null) {
 
   const claims = await getClaims();
   if (claims?.metadata?.role && claims?.metadata?.status === "active") {
-    return ["super_admin", "admin", "staff"].includes(claims.metadata.role);
+    return (["super_admin", "admin", "staff"] as UserRole[]).includes(claims.metadata.role);
   }
 
   const appUser = await prisma.user.findUnique({
@@ -82,7 +76,7 @@ export async function requireAdmin() {
   if (
     !metadata ||
     metadata.status !== "active" ||
-    !["super_admin", "admin", "staff"].includes(metadata.role)
+    !(["super_admin", "admin", "staff"] as UserRole[]).includes(metadata.role)
   ) {
     const appUser = await prisma.user.findUnique({
       where: { clerkUserId: currentUserId },
@@ -109,7 +103,7 @@ export async function requireOwnerAdmin() {
   const claims = sessionClaims as unknown as SessionClaims | null;
   const metadata = claims?.metadata;
 
-  if (metadata?.role && ["super_admin", "admin"].includes(metadata.role)) {
+  if (metadata?.role && (["super_admin", "admin"] as UserRole[]).includes(metadata.role)) {
     return currentUserId;
   }
 

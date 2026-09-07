@@ -1,6 +1,6 @@
 "use client";
 
-import { confirmAppointment } from "../actions/admin";
+import { confirmAppointment } from "../actions";
 import CancelButton from "./CancelButton";
 import Link from "next/link";
 

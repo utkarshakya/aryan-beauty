@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
-import { getServicesAction } from "@/features/services-catalog/actions";
-import ServiceEditor from "@/features/services-catalog/components/ServiceEditor";
-import ServiceForm from "@/features/services-catalog/components/ServiceForm";
+import { getServicesAction, ServiceEditor, ServiceForm } from "@/features/services-catalog";
 
 export const dynamic = "force-dynamic";
 

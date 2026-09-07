@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import Container from "@/components/ui/Container";
+import Container from "@/shared/ui/Container";
 import PageHeader from "@/app/components/PageHeader";
-import BookAppointmentSection from "@/features/appointments/components/BookAppointmentSection";
-import AppointmentGroup from "@/features/appointments/components/AppointmentGroup";
+import { BookAppointmentSection, AppointmentGroup } from "@/features/appointments";
 import EmptyServices from "@/app/components/EmptyServices";
 
 export const dynamic = "force-dynamic";

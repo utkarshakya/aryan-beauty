@@ -8,8 +8,8 @@ import {
   type BookingState,
   type TimeSlot,
 } from "../actions";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { business } from "@/lib/business";
+import { Button, ButtonLink } from "@/shared/ui";
+import { business } from "@/shared/config";
 
 const initialState: BookingState = { errors: {} };
 

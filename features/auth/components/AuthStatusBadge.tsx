@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRole, UserStatus } from "@/features/auth/types";
+import { UserRole, UserStatus } from "@/features/auth";
 
 const ROLE_LABELS: Record<UserRole, string> = {
   super_admin: "Super Admin",

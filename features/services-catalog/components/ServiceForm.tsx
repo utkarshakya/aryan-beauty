@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createServiceAction } from "../actions";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/shared/ui";
 
 export default function ServiceForm() {
   const [name, setName] = useState("");

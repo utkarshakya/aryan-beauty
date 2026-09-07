@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { updateServiceAction, toggleServiceAction } from "../actions";
 import { Service } from "@prisma/client";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/shared/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
   const [editing, setEditing] = useState(false);

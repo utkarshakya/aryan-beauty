@@ -1,6 +1,6 @@
 "use client";
 
-import { cancelAppointment } from "../actions/admin";
+import { adminCancelAppointment as cancelAppointment } from "../actions";
 
 export default function CancelButton({ appointmentId }: { appointmentId: number }) {
   const handleSubmit = async () => {

@@ -4,6 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { business } from "@/lib/business";
+import { requireAdmin } from "@/lib/auth";
 import {
   getAvailableSlots,
   createAppointmentTx,
@@ -206,4 +207,76 @@ export async function cancelMyAppointment(
   revalidatePath("/appointments");
   revalidatePath("/admin");
   return { success: "Appointment cancelled successfully." };
+}
+
+// --- Admin Actions ---
+
+export async function confirmAppointment(id: number) {
+  await requireAdmin();
+  await prisma.appointment.update({
+    where: { id },
+    data: { status: "confirmed" },
+  });
+  revalidatePath("/admin");
+}
+
+export async function adminCancelAppointment(id: number) {
+  await requireAdmin();
+  await prisma.appointment.update({
+    where: { id },
+    data: { status: "cancelled" },
+  });
+  revalidatePath("/admin");
+}
+
+export async function getAdminAppointments(
+  statusFilter: string[] | undefined,
+  startTime: Date,
+) {
+  await requireAdmin();
+  return prisma.appointment.findMany({
+    where: {
+      startTime: { gte: startTime },
+      ...(statusFilter ? { status: { in: statusFilter } } : {}),
+    },
+    include: { customer: true, service: true },
+    orderBy: { startTime: "asc" },
+  });
+}
+
+export async function getAdminAppointmentCounts(startTime: Date) {
+  await requireAdmin();
+  const [
+    todayAppointments,
+    pendingAppointments,
+    confirmedAppointments,
+    activeServices,
+  ] = await Promise.all([
+    prisma.appointment.count({
+      where: { startTime: { gte: startTime }, status: { not: "cancelled" } },
+    }),
+    prisma.appointment.count({
+      where: { status: "pending", startTime: { gte: startTime } },
+    }),
+    prisma.appointment.count({
+      where: { status: "confirmed", startTime: { gte: startTime } },
+    }),
+    prisma.service.count({ where: { active: true } }),
+  ]);
+  return {
+    todayAppointments,
+    pendingAppointments,
+    confirmedAppointments,
+    activeServices,
+  };
+}
+
+export async function getUpcomingAppointments(startTime: Date) {
+  await requireAdmin();
+  return prisma.appointment.findMany({
+    where: { startTime: { gte: startTime }, status: { not: "cancelled" } },
+    include: { customer: true, service: true },
+    orderBy: { startTime: "asc" },
+    take: 5,
+  });
 }

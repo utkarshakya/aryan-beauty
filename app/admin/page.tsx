@@ -1,11 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
-import AdminAppointmentsList from "@/features/appointments/components/AdminAppointmentsList";
-import {
-  getAdminAppointments,
-  getAdminAppointmentCounts,
-  getUpcomingAppointments,
-} from "@/features/appointments/actions/admin";
+import { AdminAppointmentsList, getAdminAppointments, getAdminAppointmentCounts, getUpcomingAppointments } from "@/features/appointments";
 
 type StatusFilter = "default" | "all" | "pending" | "confirmed" | "cancelled";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { updateUserRole } from "@/features/auth/services/sync";
-import { UserRole } from "@/features/auth/types";
+import { updateUserRole } from "@/features/auth/server";
+import { UserRole } from "@/features/auth";
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: "customer", label: "Customer" },

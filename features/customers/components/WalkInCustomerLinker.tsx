@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getWalkInCustomersAction, linkWalkInCustomerAction } from "../actions";
 import { WalkInCustomer } from "../types";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/shared/ui";
 
 export default function WalkInCustomerLinker() {
   const [walkInCustomers, setWalkInCustomers] = useState<WalkInCustomer[]>([]);
