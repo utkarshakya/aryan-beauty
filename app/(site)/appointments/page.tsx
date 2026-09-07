@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { requireActiveUser } from "@/lib/auth";
 import Container from "@/shared/ui/Container";
 import PageHeader from "@/app/components/PageHeader";
 import { BookAppointmentSection, AppointmentGroup } from "@/features/appointments";
@@ -22,21 +22,14 @@ export default async function AppointmentsPage({
 }) {
   const { serviceId } = await searchParams;
   const preselectedServiceId = serviceId ? Number(serviceId) : undefined;
-  const { userId } = await auth();
-  if (!userId) {
-    await auth.protect();
-  }
+  const userId = await requireActiveUser();
 
   const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId! },
+    where: { clerkUserId: userId },
   });
-  if (!appUser) {
-    await auth.protect();
-  }
-
   const [customer, services] = await Promise.all([
     prisma.customer.findUnique({
-      where: { userId: appUser!.id },
+      where: { userId: appUser?.id ?? -1 },
       include: {
         appointments: {
           include: { service: true },
@@ -85,21 +78,17 @@ export default async function AppointmentsPage({
           )}
         </section>
 
-        {!customer || customer.appointments.length === 0 ? null : (
-          <>
-            <AppointmentGroup
-              title="Upcoming"
-              emptyMessage="No upcoming appointments."
-              appointments={upcoming}
-            />
-            {history.length > 0 && (
-              <AppointmentGroup
-                title="Recent history"
-                emptyMessage="No past appointments."
-                appointments={history}
-              />
-            )}
-          </>
+        <AppointmentGroup
+          title="Upcoming"
+          emptyMessage="No upcoming appointments. Choose a service above to book your first visit."
+          appointments={upcoming}
+        />
+        {history.length > 0 && (
+          <AppointmentGroup
+            title="Recent history"
+            emptyMessage="No past appointments."
+            appointments={history}
+          />
         )}
       </div>
     </Container>

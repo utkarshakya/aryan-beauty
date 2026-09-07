@@ -33,4 +33,5 @@ Potential learning areas:
 - Keep ideas lightweight.
 - Do not turn the backlog into a second roadmap.
 - Real user problems should usually outrank interesting technology.
-- When an idea becomes an active commitment, move it into `product.md` or a detailed plan in `plans/`.
+- When an idea becomes an active commitment, move it into `product.md` or add
+  it to the active checklist in `plan.md`.

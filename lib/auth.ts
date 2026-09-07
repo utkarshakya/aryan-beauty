@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { UserRole, SessionClaims } from "@/shared/types/auth";
 
 const getUserIds = (value: string | undefined) =>
   (value ?? "")
@@ -16,26 +15,45 @@ const getSuperAdminUserIds = () => {
 const getBootstrapAdminUserIds = () =>
   getUserIds(process.env.BOOTSTRAP_ADMIN_CLERK_USER_IDS);
 
-async function getClaims(): Promise<SessionClaims | null> {
-  const { sessionClaims } = await auth();
-  return (sessionClaims as unknown as SessionClaims) ?? null;
+type AppUserAccess = {
+  role: "super_admin" | "admin" | "staff" | "customer";
+  status: "active" | "disabled";
+};
+
+/**
+ * The database is the authority for ordinary roles and disabled accounts.
+ * Environment IDs exist only to provision the first privileged records and
+ * to guarantee that the configured super admin can recover access.
+ */
+async function getAppUserAccess(userId: string): Promise<AppUserAccess | null> {
+  if (getSuperAdminUserIds().includes(userId)) {
+    return prisma.user.upsert({
+      where: { clerkUserId: userId },
+      create: { clerkUserId: userId, role: "super_admin", status: "active" },
+      update: { role: "super_admin", status: "active" },
+      select: { role: true, status: true },
+    });
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: { role: true, status: true },
+  });
+  if (existingUser) return existingUser;
+
+  // Bootstrap is a one-time provisioning fallback. Once the record exists,
+  // its database role and status control access, including disabling it.
+  if (!getBootstrapAdminUserIds().includes(userId)) return null;
+
+  return prisma.user.create({
+    data: { clerkUserId: userId, role: "admin", status: "active" },
+    select: { role: true, status: true },
+  });
 }
 
 export async function hasAdminAccess(userId: string | null) {
   if (!userId) return false;
-  if (getSuperAdminUserIds().includes(userId) || getBootstrapAdminUserIds().includes(userId)) {
-    return true;
-  }
-
-  const claims = await getClaims();
-  if (claims?.metadata?.role && claims?.metadata?.status === "active") {
-    return (["super_admin", "admin", "staff"] as UserRole[]).includes(claims.metadata.role);
-  }
-
-  const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-    select: { role: true, status: true },
-  });
+  const appUser = await getAppUserAccess(userId);
 
   return Boolean(
     appUser?.status === "active" &&
@@ -43,55 +61,37 @@ export async function hasAdminAccess(userId: string | null) {
   );
 }
 
+export async function requireActiveUser() {
+  const { userId } = await auth();
+  if (!userId) await auth.protect();
+
+  const currentUserId = userId!;
+  const appUser = await getAppUserAccess(currentUserId);
+  if (!appUser || appUser.status !== "active") {
+    redirect("/");
+  }
+
+  return currentUserId;
+}
+
 export async function requireAdmin() {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
     await auth.protect();
   }
 
   const currentUserId = userId!;
-  const isSuperAdmin = getSuperAdminUserIds().includes(currentUserId);
-
-  if (isSuperAdmin) {
-    await prisma.user.upsert({
-      where: { clerkUserId: currentUserId },
-      create: { clerkUserId: currentUserId, role: "super_admin" },
-      update: { role: "super_admin", status: "active" },
-    });
-    return currentUserId;
-  }
-
-  if (getBootstrapAdminUserIds().includes(currentUserId)) {
-    await prisma.user.upsert({
-      where: { clerkUserId: currentUserId },
-      create: { clerkUserId: currentUserId, role: "admin" },
-      update: { role: "admin", status: "active" },
-    });
-  }
-
-  const claims = sessionClaims as unknown as SessionClaims | null;
-  const metadata = claims?.metadata;
+  const appUser = await getAppUserAccess(currentUserId);
 
   if (
-    !metadata ||
-    metadata.status !== "active" ||
-    !(["super_admin", "admin", "staff"] as UserRole[]).includes(metadata.role)
+    !appUser ||
+    appUser.status !== "active" ||
+    (appUser.role !== "super_admin" &&
+      appUser.role !== "admin" &&
+      appUser.role !== "staff")
   ) {
-    const appUser = await prisma.user.findUnique({
-      where: { clerkUserId: currentUserId },
-      select: { role: true, status: true },
-    });
-
-    if (
-      !appUser ||
-      appUser.status !== "active" ||
-      (appUser.role !== "super_admin" &&
-        appUser.role !== "admin" &&
-        appUser.role !== "staff")
-    ) {
-      redirect("/");
-    }
+    redirect("/");
   }
 
   return currentUserId;
@@ -99,22 +99,24 @@ export async function requireAdmin() {
 
 export async function requireOwnerAdmin() {
   const currentUserId = await requireAdmin();
-  const { sessionClaims } = await auth();
-  const claims = sessionClaims as unknown as SessionClaims | null;
-  const metadata = claims?.metadata;
-
-  if (metadata?.role && (["super_admin", "admin"] as UserRole[]).includes(metadata.role)) {
-    return currentUserId;
-  }
-
-  const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: currentUserId },
-    select: { role: true },
-  });
+  const appUser = await getAppUserAccess(currentUserId);
 
   if (!appUser || (appUser.role !== "super_admin" && appUser.role !== "admin")) {
     redirect("/");
   }
 
+  return currentUserId;
+}
+
+export async function requireSuperAdmin() {
+  const { userId } = await auth();
+  if (!userId) await auth.protect();
+
+  const currentUserId = userId!;
+  if (!getSuperAdminUserIds().includes(currentUserId)) {
+    redirect("/");
+  }
+
+  await getAppUserAccess(currentUserId);
   return currentUserId;
 }

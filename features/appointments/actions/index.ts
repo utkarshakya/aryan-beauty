@@ -1,10 +1,10 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { business } from "@/lib/business";
-import { requireAdmin } from "@/lib/auth";
+import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import {
   getAvailableSlots,
   createAppointmentTx,
@@ -25,8 +25,7 @@ export async function getAvailableSlotsAction(
   serviceId: number,
   date: string,
 ): Promise<TimeSlot[]> {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  await requireActiveUser();
 
   if (!Number.isInteger(serviceId) || serviceId <= 0 || !DATE_RE.test(date)) {
     return [];
@@ -39,10 +38,7 @@ export async function createAppointment(
   _prevState: BookingState,
   formData: FormData,
 ): Promise<BookingState> {
-  const { userId } = await auth();
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  const userId = await requireActiveUser();
 
   const user = await currentUser();
   const accountName =
@@ -178,9 +174,7 @@ export async function cancelMyAppointment(
   _previousState: CancellationState,
   formData: FormData,
 ): Promise<CancellationState> {
-  const { userId } = await auth();
-  if (!userId)
-    return { error: "Please sign in again to cancel this appointment." };
+  const userId = await requireActiveUser();
 
   const appointmentId = Number(formData.get("appointmentId"));
   if (!Number.isInteger(appointmentId) || appointmentId <= 0) {

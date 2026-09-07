@@ -1,14 +1,16 @@
-# Project Docs
+# Project documentation
 
 | File | Purpose |
 |---|---|
-| `product.md` | Product vision and roadmap |
-| `architecture.md` | Stable technical decisions, platform notes, engineering principles |
-| `ideas.md` | Future ideas and possibilities not part of the active plan |
-| `plan.md` | Single lightweight plan with decisions and checklist items |
+| `product.md` | Product vision and broad roadmap |
+| `architecture.md` | Current technical structure and engineering rules |
+| `plan.md` | Active implementation status and ordered checklist |
+| `ideas.md` | Future possibilities outside the active plan |
 
-Read `product.md` to understand the product and where it is going. Read `architecture.md` before making significant technical decisions. Active work is tracked in `plan.md` — a single lightweight file with raw decisions and a checklist, written and executed manually.
+Read `product.md` for the product direction, `architecture.md` before changing
+technical structure, and `plan.md` before starting implementation work.
 
 ## Core principle
 
-> Build for the real parlor first. Learn from real usage. Add complexity only when it creates value.
+> Build for the real parlour first. Learn from real usage. Add complexity only
+> when it creates value.

@@ -40,11 +40,6 @@ export async function POST(req: Request) {
         const email = (data.email_addresses as Array<{ email_address: string }>)?.[0]?.email_address;
         const name = data.full_name as string | undefined;
 
-        if (!email) {
-          console.error("user.created: no email found");
-          return new Response("No email", { status: 400 });
-        }
-
         await upsertUserFromClerk(clerkUserId, { email, name, role: "customer" });
         break;
       }
@@ -53,11 +48,6 @@ export async function POST(req: Request) {
         const clerkUserId = data.id as string;
         const email = (data.email_addresses as Array<{ email_address: string }>)?.[0]?.email_address;
         const name = data.full_name as string | undefined;
-
-        if (!email) {
-          console.error("user.updated: no email found");
-          return new Response("No email", { status: 400 });
-        }
 
         await upsertUserFromClerk(clerkUserId, { email, name });
         break;

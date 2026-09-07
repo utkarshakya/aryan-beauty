@@ -1,34 +1,43 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
+import { requireSuperAdmin } from "@/lib/auth";
 import type { UserRole, UserStatus } from "@prisma/client";
 
 export async function upsertUserFromClerk(
   clerkUserId: string,
-  data: { email: string; name?: string; role?: UserRole },
+  data: { email?: string | null; name?: string; role?: UserRole },
 ) {
-  const { email, name, role = "customer" } = data;
+  const { email = null, name, role } = data;
 
-  return prisma.$transaction(async (tx) => {
-    const user = await tx.user.upsert({
+  const user = await prisma.$transaction(async (tx) => {
+    const existingUser = await tx.user.findUnique({
       where: { clerkUserId },
-      create: {
-        clerkUserId,
-        email,
-        name,
-        role,
-        status: "active",
-      },
-      update: {
-        email,
-        name,
-        role,
-        status: "active",
-      },
     });
 
-    const customer = await tx.customer.findFirst({
-      where: { email, userId: { equals: null } },
-    });
+    // A routine Clerk profile update must never change a person's role or
+    // reactivate an account disabled by an administrator.
+    const user = existingUser
+      ? await tx.user.update({
+          where: { clerkUserId },
+          data: { email, name },
+        })
+      : await tx.user.create({
+          data: {
+            clerkUserId,
+            email,
+            name,
+            role: role ?? "customer",
+            status: "active",
+          },
+        });
+
+    const customer = email
+      ? await tx.customer.findFirst({
+          where: { email, userId: { equals: null } },
+        })
+      : null;
 
     if (customer) {
       await tx.customer.update({
@@ -37,13 +46,16 @@ export async function upsertUserFromClerk(
       });
     }
 
-    await syncPublicMetadata(clerkUserId, {
-      role: user.role,
-      status: user.status,
-    });
-
     return user;
   });
+
+  // Do network I/O after the database transaction has committed.
+  await syncPublicMetadata(clerkUserId, {
+    role: user.role,
+    status: user.status,
+  });
+
+  return user;
 }
 
 export async function syncPublicMetadata(
@@ -57,25 +69,32 @@ export async function syncPublicMetadata(
 }
 
 export async function softDeleteUser(clerkUserId: string) {
-  return prisma.$transaction(async (tx) => {
-    const user = await tx.user.findUnique({ where: { clerkUserId } });
-    if (!user) return null;
+  const user = await prisma.$transaction(async (tx) => {
+    const existingUser = await tx.user.findUnique({ where: { clerkUserId } });
+    if (!existingUser) return null;
 
-    await tx.user.update({
+    return tx.user.update({
       where: { clerkUserId },
       data: { status: "disabled" },
     });
-
-    await syncPublicMetadata(clerkUserId, {
-      role: user.role,
-      status: "disabled",
-    });
-
-    return user;
   });
+
+  if (!user) return null;
+
+  await syncPublicMetadata(clerkUserId, {
+    role: user.role,
+    status: "disabled",
+  });
+
+  return user;
 }
 
 export async function updateUserRole(clerkUserId: string, role: UserRole) {
+  await requireSuperAdmin();
+  if (role === "super_admin") {
+    throw new Error("Super admin access is configured outside the application.");
+  }
+
   const client = await clerkClient();
 
   const user = await prisma.user.update({

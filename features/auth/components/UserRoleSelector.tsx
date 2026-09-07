@@ -8,7 +8,6 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: "customer", label: "Customer" },
   { value: "staff", label: "Staff" },
   { value: "admin", label: "Admin" },
-  { value: "super_admin", label: "Super Admin" },
 ];
 
 export default function UserRoleSelector({ clerkUserId, currentRole }: { clerkUserId: string; currentRole: UserRole }) {

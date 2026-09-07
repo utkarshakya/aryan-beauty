@@ -2,95 +2,72 @@
 
 ## Vision
 
-Build a simple, useful digital product for a real beauty parlor.
+Build a simple, useful digital product for one real family-run beauty parlour.
+The owner should be able to manage daily work without technical knowledge, and
+customers should be able to book and manage their own appointments easily.
 
-The first real user is the owner's parlor and its customers. The product should be easy for the owner to use because the owner is not highly technical.
+This is also a learning project for building a complete Next.js product:
+frontend UI, server-side logic, databases, authentication, production systems,
+and eventually AI. AI is a long-term direction, not a requirement for the
+first release.
 
-We will learn from real usage and gradually add capabilities that solve actual salon problems instead of building a large system upfront.
+## Definition of success
 
-At the same time, this is a serious learning project for the developer. It is an opportunity to learn and apply Next.js, backend development, databases, authentication, production systems, and eventually AI in depth.
+The first success is a working product the parlour can use with real customers:
 
-AI is a long-term direction, not a requirement for the first release. Once the core product is useful, we can explore ambitious AI features, automation, and intelligence.
-
-### Success
-
-The first success is not a large feature set. It is a working product that the parlor can actually use with real customers.
-
-Longer term, the product should become a strong foundation for learning, experimentation, and potentially a reusable salon product if real-world usage justifies it.
+- customers can browse active services and book appointments;
+- customers can see their own upcoming and past appointments;
+- the owner can manage appointments and services;
+- permissions protect owner data and operations;
+- the system is understandable enough to operate and maintain.
 
 ## Roadmap
 
-This is the product roadmap, not an implementation checklist. It describes what we want to achieve and the broad order in which we will grow the product.
+This is the product roadmap, not the detailed implementation checklist. The
+current checklist and exact order live in [`plan.md`](plan.md).
 
-### Phase 1 — First Usable Product
+### Phase 1 — First usable product
 
-**Complete.** Aunty and her customers can actually use the product: public site, service catalog, customer booking, owner appointment management, basic auth — deployed and in real use.
+The public site, Clerk sign-in, service catalog, customer booking, customer
+appointment history/cancellation, owner appointment dashboard, and basic
+service management are implemented. Final validation and production readiness
+remain tracked in `plan.md`.
 
-### Product Polish V1.1 — current phase, in progress
+### Phase 2 — Product quality and operational workflows
 
-Turns the technically functional V1 into a product that feels credible to a real beauty parlour customer and is comfortably usable by the owner, ahead of a demonstration to the parlour owner and any public launch.
+Finish responsive/accessibility review, improve the owner appointment workflow,
+add business settings, and make the existing service and appointment data more
+reliable. These are the current priorities before adding larger capabilities.
 
-Status: product audit complete and agreed as the factual baseline. Currently working through design foundation, product visual language, customer experience redesign, admin experience redesign, UX reliability and edge cases, real-device review, and demo readiness. This phase takes the place of the original "Learn From Real Usage" step: usability fixes, booking-experience improvements, and owner-workflow improvements now happen inside V1.1.
+### Phase 3 — Grow the salon system
 
-### Phase 3 — Grow the Salon System
+Introduce additional management only when real usage justifies it:
 
-Gradually introduce more management capabilities as the parlor needs them.
+- staff management;
+- customer history improvements;
+- payments and expenses;
+- reports and analytics;
+- reminders and other operational workflows.
 
-Possible areas:
+The exact features remain intentionally flexible.
 
-- Staff management
-- Service management improvements
-- Customer history
-- Payments and expenses
-- Reports and analytics
-- Other operational workflows
+### Phase 4 — AI and automation
 
-The exact features are intentionally not locked now. Real usage should determine what comes next.
+After the core workflows have stable real data, explore useful AI and
+automation such as service recommendations, owner questions over salon data,
+appointment reminders, customer re-engagement, and demand insights.
 
-**Goal:** Reduce manual work for the owner without making the product complicated.
+### Long-term direction
 
-### Phase 4 — AI
+If real usage shows that the product works for more than the first parlour,
+consider multiple salons or branches. Do not add organizations, tenants,
+subscriptions, or complex permissions before that need is demonstrated.
 
-Once the core system has useful real data and stable workflows, begin serious AI experimentation.
+## Principles
 
-Possible directions:
-
-- AI beauty consultant
-- AI service recommendations
-- Owner-facing AI business copilot
-- Natural-language questions over salon data
-- Other AI features discovered during development
-
-**Goal:** Learn AI deeply while building features that provide real value.
-
-### Phase 5 — Automation & Intelligence
-
-Use the product's data and AI capabilities to automate useful work and discover patterns.
-
-Possible directions:
-
-- Appointment reminders
-- Automated summaries
-- Customer re-engagement
-- No-show prediction
-- Demand and busy-day insights
-- Other useful predictions or automations
-
-**Goal:** Move from a management tool toward an intelligent assistant for the parlor.
-
-### Long-Term Direction
-
-If real usage shows that the product solves problems beyond the first parlor, explore making the system reusable for other salons or multiple branches.
-
-This is not a Phase 1 requirement and should not drive early complexity.
-
-### Project Principles
-
-1. Build for the real parlor first.
+1. Build for the real parlour first.
 2. Keep the owner's experience simple.
 3. Ship one meaningful capability at a time.
-4. Let real usage influence later phases.
-5. Do not build future features prematurely.
-6. Prefer simple engineering when it is sufficient.
-7. Use the project to learn deeply, even when the user-facing product remains simple.
-8. Keep AI ambitious, but introduce it after the core product has a useful foundation.
+4. Let real usage determine later features.
+5. Prefer simple engineering when it is sufficient.
+6. Keep future complexity out of the first release.

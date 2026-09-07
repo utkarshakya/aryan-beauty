@@ -1,90 +1,106 @@
 # Architecture
 
-This document records the stable technical direction and important engineering principles. It should describe the system as it is intended to be built, not temporary implementation details.
+## Purpose
 
-## Target Stack
+Unknown Beauty is a single Next.js application for one beauty parlour. It is a
+full-stack application: pages, server-side actions, authentication, and
+PostgreSQL access live in the same repository and deploy together. There is no
+separate frontend or backend service to run.
 
-- **Application:** Next.js + TypeScript
-- **UI:** Tailwind CSS
-- **Backend:** Next.js server-side code and Route Handlers in the same application
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Database hosting:** Supabase
-- **Authentication:** Clerk
-- **File storage:** Supabase Storage
-- **Payments:** Razorpay when payments are introduced
-- **Email:** SMTP when notifications are introduced
-- **AI:** OpenAI API when AI features are introduced
-- **Deployment:** Netlify
+## Stack
 
-## Application Architecture
+- Next.js App Router and TypeScript
+- Tailwind CSS
+- Clerk authentication
+- PostgreSQL on Supabase
+- Prisma ORM
+- Netlify deployment
 
-Use a Next.js monolith. The active application lives at the repository root. The customer-facing UI, owner-facing UI, server-side application logic, and API routes live in one application.
+## Simple repository structure
 
-Keep boundaries clear inside the monolith rather than introducing separate frontend and backend applications unless a real requirement appears.
-
-The current application is intentionally starting from a clean Next.js foundation rather than migrating the old client/server architecture directly.
-
-## Repository Structure
+The target structure is intentionally small:
 
 ```text
-unknown/
-├── app/          # Thin Next.js routing layer (pages, layouts, route groups, API routes)
-├── features/     # Feature domain modules (auth, appointments, customers, services-catalog)
-├── components/   # Shared UI primitives and layout wrappers (ui/, layout/)
-├── lib/          # Infrastructure singletons (prisma.ts, utils.ts)
-├── public/       # Static assets
-├── docs/         # Product and engineering documentation
-└── prisma/       # Database schema and migrations
+app/          routes, pages, layouts, server actions, and HTTP route handlers
+components/   reusable visual components
+lib/          server-side infrastructure, auth, configuration, and database code
+prisma/       schema, migrations, and seed data
+docs/         product and engineering documentation
 ```
 
-### Feature Architecture & Component Placement
+During the gradual cleanup, existing code may still live under `features/` and
+`shared/`. Do not move everything at once. Move one complete domain, verify it,
+then remove the old location.
 
-- **`features/`:** Contains domain modules (`auth`, `appointments`, `customers`, `services-catalog`). Each feature folder encapsulates its DB queries (`services.ts`), server actions (`actions.ts`), UI components (`components/`), and types (`types.ts`).
-- **`app/`:** Kept thin and focused strictly on routing. Pages consume feature components and feature service functions.
-- **Shared UI:** Generic, feature-agnostic components (`Button`, `Container`, `Input`) live in `components/ui/`.
+### Placement rules
 
-## Data
+| Code | Home |
+|---|---|
+| URL pages and layouts | `app/` |
+| Server mutations invoked by forms/buttons | `app/actions/` |
+| External HTTP endpoints, such as Clerk webhooks | `app/api/` |
+| Reusable forms, cards, lists, navigation, and UI primitives | `components/` |
+| Prisma queries and transactions | `lib/db/` |
+| Prisma client, authorization, and business configuration | `lib/` |
 
-PostgreSQL is the primary application database. Prisma is used to model and access application data.
+A server page may read from `lib/db/` directly. A mutation must be a Server
+Action and must validate input and authorize the caller itself.
 
-The database should evolve with the product. Do not create a large schema for hypothetical future features before they are needed.
+## Request flow
 
-## Authentication and Access
+```text
+Browser UI → Server Action or Route Handler → lib/db query → Prisma → PostgreSQL
+```
 
-Clerk handles authentication. 
+For example, the booking form invokes `createAppointment`; the action verifies
+the Clerk session, validates the form, runs a Prisma transaction, and refreshes
+the appointment page. This is backend work even though it is in the same Next.js
+project.
 
-Application users are synced to the Prisma `User` model (`clerkUserId`) and linked to `Customer` profiles. Account creation and sync are handled automatically via Clerk Webhooks (`/api/webhooks/clerk`) and on-demand fallback sync (`getOrCreateUser`).
+## Authentication and authorization
 
-The product creator's super-admin Clerk ID is kept in protected environment configuration. Bootstrap admin IDs may be used to create initial admin records, after which ordinary admin and staff access is read from the database.
+Clerk authenticates the person. The Prisma `User` record is the authority for
+ordinary application roles and account status:
 
-Admin functionality must be protected. Public customer pages should remain simple and accessible without unnecessary authentication. Every protected page and server action must check the current user's role and active status on the server. Client-side navigation visibility is only a usability feature and is not an authorization boundary.
+- `super_admin`, `admin`, `staff`, and `customer` are application roles.
+- Disabled users are denied through database checks.
+- Clerk metadata is synchronized for display/integration purposes, but is not
+  used as the authorization source of truth.
+- The configured super-admin Clerk ID remains a recovery mechanism.
+- Bootstrap admin IDs create an initial admin record only when it is missing;
+  after that, the database record controls access.
 
-## Storage
+Every protected page and every Server Action must perform a server-side check.
+Showing or hiding a navigation link is a usability feature, not a permission
+check.
 
-Supabase Storage is used for application-managed images and other files when file storage is needed.
+## Data rules
 
-## Engineering Principles
+- `User` stores identity, role, and account status.
+- `Customer` stores salon-specific customer data and optionally links to `User`.
+- `Service.active` hides a service without deleting historical appointments.
+- Appointments are never deleted for normal cancellation; status changes to
+  `cancelled`.
+- Booking conflicts use interval overlap checks and ignore cancelled rows.
 
-- Keep the user experience simple, especially for the non-technical salon owner.
-- Prefer the simplest architecture that solves the current problem.
-- Avoid premature abstractions and infrastructure.
-- Keep product concerns and infrastructure concerns understandable.
-- Build around real salon workflows.
-- Keep AI capabilities modular so they can evolve independently.
-- Update this document when a significant architectural decision changes.
+## Testing locally
 
-## Platform Notes
+Use the product itself to test customer and admin flows, then use Prisma Studio
+to inspect saved records:
 
-- **Next.js 16 middleware:** the middleware file is `proxy.ts` at the repo root (not `middleware.ts`, not inside `app/`). It must not set a `runtime` config — Next 16 throws on it.
-- **Auth enforcement:** `createRouteMatcher` is deprecated in this Clerk/Next setup. Auth is enforced per-resource: every protected page/server action calls `await auth.protect()` or checks `await auth()` itself. `proxy.ts` holds no auth logic — it only exists so Clerk's handshake works.
-- **`searchParams`:** in Next 16 App Router pages, `searchParams` is a `Promise` and must be awaited before use.
-- **Prisma 7.9.1 + `prisma.config.ts`:** the datasource block only supports a `url` property. Do NOT add `directUrl` to it — this Prisma version does not support that property on the datasource config object.
-- **Connection strings:** `DATABASE_URL` (Supabase transaction pooler) is used by the running app at all times. `DIRECT_URL` (Supabase direct connection) is used only for CLI commands (`prisma migrate deploy`, etc.), never referenced in application code or `prisma.config.ts`.
-- **`Appointment.status`:** intentionally a plain `String`, not a Prisma enum, so new status values don't require a migration. Do not convert it to an enum without an explicit request.
-- **`Service.active`:** services are soft-hidden with an `active` boolean instead of being deleted. Public service and booking queries must include only active services; historical appointments continue to reference inactive services.
-- **Appointment overlap check:** a slot is unavailable if `existing.startTime < newEnd && existing.endTime > newStart`, ignoring rows where `status === "cancelled"`. This runs inside a Prisma interactive transaction alongside the customer upsert and appointment create.
-- **Customer lookup:** `User` owns `clerkUserId`. `Customer` connects to `User` via `userId`. Signed-in customers fetch their profile using `customer.findUnique({ where: { userId } })` or `clerkUserId` relation. Phone is optional contact data and is not an identity key.
-- **Auth model:** Clerk handles authentication. The Prisma `User` model stores `super_admin`, `admin`, `staff`, and `customer` roles plus account status. Users are synced via Clerk Webhooks (`/api/webhooks/clerk`) or lazy fallback sync (`getOrCreateUser`). Normal signed-in users can book but cannot access admin routes unless authorized.
-- **Netlify build command:** `prisma generate && next build`.
-- **Netlify env vars** — secret: `DATABASE_URL`, `CLERK_SECRET_KEY`. Public (`NEXT_PUBLIC_*`): the Clerk publishable key and sign-in/up/redirect URLs.
+```powershell
+npm.cmd run dev
+npm.cmd run prisma:studio
+```
+
+Postman is only useful for real HTTP route handlers under `app/api/`. Server
+Actions are tested through the forms and controls that invoke them.
+
+## Platform notes
+
+- Next.js 16 uses `proxy.ts`, not `middleware.ts`, for Clerk's handshake.
+- In this App Router version, page `searchParams` are asynchronous and must be
+  awaited.
+- `DATABASE_URL` is the application connection string. `DIRECT_URL` is for
+  Prisma CLI migrations only.
+- Netlify builds with `prisma generate && next build`.

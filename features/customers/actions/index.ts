@@ -1,9 +1,8 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import {
   getCustomerByUserId,
   getWalkInCustomers,
@@ -14,8 +13,7 @@ import {
 import { CustomerProfile, WalkInCustomer } from "../types";
 
 export async function getMyProfile(): Promise<CustomerProfile | null> {
-  const { userId } = await auth();
-  if (!userId) return null;
+  const userId = await requireActiveUser();
 
   const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId } });
   if (!appUser) return null;
@@ -27,8 +25,7 @@ export async function updateMyProfile(
   _prevState: { errors?: Record<string, string>; success?: string },
   formData: FormData
 ): Promise<{ errors?: Record<string, string>; success?: string }> {
-  const { userId } = await auth();
-  if (!userId) return { errors: { form: "Unauthorized" } };
+  const userId = await requireActiveUser();
 
   const appUser = await prisma.user.findUnique({ where: { clerkUserId: userId } });
   if (!appUser) return { errors: { form: "User not found" } };
