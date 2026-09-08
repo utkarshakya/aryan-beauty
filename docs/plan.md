@@ -24,20 +24,17 @@ Completed safety corrections:
 - The bootstrap-admin environment value creates an initial record only when
   missing; subsequent database status controls access.
 
-Current repository note: an earlier feature-folder import refactor is still
-uncommitted. Verify it before mixing it with further structural work.
+Current repository note: the webhook parsing fix and service active-state fix
+are verified but still uncommitted. Keep them separate from future structural
+work.
 
 ## Next session starting point
 
-Follow these steps in order:
+Stabilization checks and manual QA in sections 1 and 2 are complete. Next:
 
-1. Run `npm.cmd run lint`, `npx.cmd tsc --noEmit`,
-   `npm.cmd run prisma:validate`, and `npm.cmd run build`.
-2. Manually verify customer booking/cancellation, owner appointments, service
-   management, and disabled-account behavior.
-3. Implement section **6.1 Completed appointments view** and complete every
+1. Implement section **6.1 Completed appointments view** and complete every
    acceptance check in that section.
-4. Only after that slice is verified, begin the gradual folder simplification
+2. Only after that slice is verified, begin the gradual folder simplification
    in section 3. Move appointments first and keep each move independently
    verifiable.
 
@@ -48,19 +45,19 @@ move before these steps are complete.
 
 ### 1. Stabilize the current product
 
-- [ ] Run lint, typecheck, Prisma validation, and production build successfully.
-- [ ] Test the customer flow: sign in → book → refresh → upcoming/history →
+- [x] Run lint, typecheck, Prisma validation, and production build successfully.
+- [x] Test the customer flow: sign in → book → refresh → upcoming/history →
   cancel.
-- [ ] Test owner flow: view appointment → confirm/cancel → manage services.
-- [ ] Verify disabled account behavior and each role's access.
-- [ ] Commit the current refactor only after these checks pass.
+- [x] Test owner flow: view appointment → confirm/cancel → manage services.
+- [x] Verify disabled account behavior and each role's access.
+- [ ] Commit the current verified changes before future structural work.
 
 ### 2. Finish customer quality checks
 
 - [x] Add an appointment empty state for a signed-in customer with no bookings.
-- [ ] Review all customer screens on phone, tablet, and desktop.
-- [ ] Check keyboard navigation, focus visibility, labels, and contrast.
-- [ ] Confirm cancellation cutoff messaging is understandable.
+- [x] Review all customer screens on phone, tablet, and desktop.
+- [x] Check keyboard navigation, focus visibility, labels, and contrast.
+- [x] Confirm cancellation cutoff messaging is understandable.
 
 ### 3. Simplify the codebase gradually
 

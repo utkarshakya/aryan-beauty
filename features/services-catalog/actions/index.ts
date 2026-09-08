@@ -10,6 +10,9 @@ import {
   toggleService,
 } from "../db/queries";
 
+const isActiveValue = (value: FormDataEntryValue | null) =>
+  value === "on" || value === "true";
+
 export async function getServicesAction() {
   await requireOwnerAdmin();
   return getAllServices();
@@ -30,7 +33,7 @@ export async function createServiceAction(
   const category = String(formData.get("category") ?? "Other").trim() || "Other";
   const price = Number(formData.get("price"));
   const durationMin = Number(formData.get("durationMin"));
-  const active = formData.get("active") === "on";
+  const active = isActiveValue(formData.get("active"));
 
   const errors: Record<string, string> = {};
 
@@ -63,7 +66,7 @@ export async function updateServiceAction(
   const category = String(formData.get("category") ?? "Other").trim() || "Other";
   const price = Number(formData.get("price"));
   const durationMin = Number(formData.get("durationMin"));
-  const active = formData.get("active") === "on";
+  const active = isActiveValue(formData.get("active"));
 
   const errors: Record<string, string> = {};
 

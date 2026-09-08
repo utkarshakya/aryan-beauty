@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "../actions";
 import { Service } from "@prisma/client";
 import { Button } from "@/shared/ui";
@@ -34,6 +35,7 @@ export default function ServiceEditor({ service }: { service: Service }) {
 }
 
 function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: () => void }) {
+  const router = useRouter();
   const [name, setName] = useState(service.name);
   const [description, setDescription] = useState(service.description);
   const [category, setCategory] = useState(service.category);
@@ -68,6 +70,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
         setErrors(result.errors);
       } else {
         onCancel();
+        router.refresh();
       }
     } finally {
       setSaving(false);
@@ -77,8 +80,14 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
   const handleToggle = async () => {
     setSaving(true);
     try {
-      await toggleServiceAction(service.id, !active);
+      const result = await toggleServiceAction(service.id, !active);
+      if (result.errors) {
+        setErrors(result.errors);
+        return;
+      }
+
       setActive(!active);
+      router.refresh();
     } finally {
       setSaving(false);
     }

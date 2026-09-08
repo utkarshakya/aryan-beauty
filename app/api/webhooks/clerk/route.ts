@@ -17,18 +17,23 @@ export async function POST(req: Request) {
   const payload = await req.text();
   const wh = new Webhook(WEBHOOK_SECRET);
 
-  let evt: { type: string; data: Record<string, unknown> } | null = null;
+  let evt: { type: string; data: Record<string, unknown> };
 
   try {
-    const verified = wh.verify(payload, {
+    wh.verify(payload, {
       "svix-id": svixId,
       "svix-timestamp": svixTimestamp,
       "svix-signature": svixSignature,
     });
-    evt = verified as unknown as { type: string; data: Record<string, unknown> };
+
+    // svix verifies the raw payload but does not return the parsed event.
+    evt = JSON.parse(payload) as {
+      type: string;
+      data: Record<string, unknown>;
+    };
   } catch (err) {
-    console.error("Webhook verification failed:", err);
-    return new Response("Invalid signature", { status: 400 });
+    console.error("Webhook verification or parsing failed:", err);
+    return new Response("Invalid webhook", { status: 400 });
   }
 
   const { type, data } = evt;
