@@ -45,7 +45,7 @@ structure. Dead files removed. Next:
   cancel.
 - [x] Test owner flow: view appointment → confirm/cancel → manage services.
 - [x] Verify disabled account behavior and each role's access.
-- [ ] Commit the current verified changes before future structural work.
+- [x] Commit the current verified changes before future structural work.
 
 ### 2. Finish customer quality checks
 
