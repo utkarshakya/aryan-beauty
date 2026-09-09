@@ -30,14 +30,11 @@ work.
 
 ## Next session starting point
 
-Stabilization checks and manual QA in sections 1 and 2 are complete, and the
-first UI-primitives slice in section 3 is complete. Appointments migration is
-complete. Next:
+Sections 1–3 complete. All features migrated from `features/` to target
+structure. Dead files removed. Next:
 
-1. Commit the structural migration before starting business settings.
-
-Do not start business settings, staff management, or a repository-wide folder
-move before these steps are complete.
+1. Begin business settings (section 5): business name, phone, address,
+   time zone, opening hours, and slot interval.
 
 ## Working order
 
@@ -77,7 +74,7 @@ prisma/       schema and migrations
 - [x] Move customers from `features/customers/` to `components/customers/`,
   `app/actions/customers.ts`, and `lib/db/customers.ts`.
 - [x] Move auth from `features/auth/` to `components/auth/` and `lib/auth/`.
-- [ ] Remove unused barrel exports and dead files only after imports are moved.
+- [x] Remove unused barrel exports and dead files only after imports are moved.
 
 Do not perform a repository-wide move in one change.
 
