@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { upsertUserFromClerk, softDeleteUser } from "@/features/auth/server";
+import { upsertUserFromClerk, softDeleteUser } from "@/lib/auth";
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET!;
 

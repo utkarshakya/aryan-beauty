@@ -30,13 +30,11 @@ work.
 
 ## Next session starting point
 
-Stabilization checks and manual QA in sections 1 and 2 are complete. Next:
+Stabilization checks and manual QA in sections 1 and 2 are complete, and the
+first UI-primitives slice in section 3 is complete. Appointments migration is
+complete. Next:
 
-1. Implement section **6.1 Completed appointments view** and complete every
-   acceptance check in that section.
-2. Only after that slice is verified, begin the gradual folder simplification
-   in section 3. Move appointments first and keep each move independently
-   verifiable.
+1. Commit the structural migration before starting business settings.
 
 Do not start business settings, staff management, or a repository-wide folder
 move before these steps are complete.
@@ -70,11 +68,15 @@ lib/          auth, configuration, and database access
 prisma/       schema and migrations
 ```
 
-- [ ] Consolidate duplicate UI primitives into `components/ui`.
-- [ ] Move appointments from `features/` to `components/appointments`,
+- [x] Consolidate duplicate UI primitives into `components/ui`.
+- [x] Move appointments from `features/` to `components/appointments`,
   `app/actions/appointments.ts`, and `lib/db/appointments.ts`.
-- [ ] Verify and remove the old appointment location.
-- [ ] Repeat for services, customers, then auth.
+- [x] Verify and remove the old appointment location.
+- [x] Move services from `features/services-catalog/` to `components/services/`,
+  `app/actions/services.ts`, and `lib/db/services.ts`.
+- [x] Move customers from `features/customers/` to `components/customers/`,
+  `app/actions/customers.ts`, and `lib/db/customers.ts`.
+- [x] Move auth from `features/auth/` to `components/auth/` and `lib/auth/`.
 - [ ] Remove unused barrel exports and dead files only after imports are moved.
 
 Do not perform a repository-wide move in one change.
