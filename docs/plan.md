@@ -103,8 +103,7 @@ Do not perform a repository-wide move in one change.
 
 #### 6.1 Completed appointments view — next owner-dashboard slice
 
-Status: planned. This is the first owner-dashboard feature to implement after
-the stabilization checks above.
+Status: implemented and manually verified.
 
 Goal: show past work truthfully without adding a manual “Mark completed” action
 or a new stored status. A confirmed appointment whose `endTime` has passed is
@@ -112,16 +111,16 @@ displayed as `Completed`, while the database value remains `confirmed`.
 
 Implementation:
 
-- [ ] Add `completed` to the admin status filter and tabs.
-- [ ] Query completed appointments with `status: "confirmed"` and
+- [x] Add `completed` to the admin status filter and tabs.
+- [x] Query completed appointments with `status: "confirmed"` and
   `endTime < now`, without limiting the query to today.
-- [ ] Order completed appointments newest first.
-- [ ] Exclude appointments whose end time has passed from the “Upcoming today”
+- [x] Order completed appointments newest first.
+- [x] Exclude appointments whose end time has passed from the “Upcoming today”
   section.
-- [ ] Add a distinct completed badge style.
-- [ ] Render no Confirm or Cancel actions for completed rows on mobile or
+- [x] Add a distinct completed badge style.
+- [x] Render no Confirm or Cancel actions for completed rows on mobile or
   desktop.
-- [ ] Keep the default tab as Pending and keep All today-focused.
+- [x] Keep the default tab as Pending and keep All today-focused.
 
 Rules:
 
@@ -132,12 +131,12 @@ Rules:
 
 Acceptance checks:
 
-- [ ] A confirmed appointment ending in the past appears in Completed.
-- [ ] Completed includes appointments from previous dates.
-- [ ] A past pending appointment does not appear in Completed.
-- [ ] A cancelled appointment does not appear in Completed.
-- [ ] A finished appointment no longer appears in Upcoming today.
-- [ ] Completed rows have no destructive or confirmation controls.
+- [x] A confirmed appointment ending in the past appears in Completed.
+- [x] Completed includes appointments from previous dates.
+- [x] A past pending appointment does not appear in Completed.
+- [x] A cancelled appointment does not appear in Completed.
+- [x] A finished appointment no longer appears in Upcoming today.
+- [x] Completed rows have no destructive or confirmation controls.
 
 ### 7. Reliability and launch readiness
 

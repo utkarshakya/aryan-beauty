@@ -226,16 +226,30 @@ export async function adminCancelAppointment(id: number) {
 export async function getAdminAppointments(
   statusFilter: string[] | undefined,
   startTime: Date,
+  now = new Date(),
 ) {
   await requireAdmin();
-  return prisma.appointment.findMany({
+  const completedFilter = statusFilter?.length === 1 && statusFilter[0] === "completed";
+  const appointments = await prisma.appointment.findMany({
     where: {
-      startTime: { gte: startTime },
-      ...(statusFilter ? { status: { in: statusFilter } } : {}),
+      ...(completedFilter
+        ? { status: "confirmed", endTime: { lt: now } }
+        : {
+            startTime: { gte: startTime },
+            ...(statusFilter ? { status: { in: statusFilter } } : {}),
+          }),
     },
     include: { customer: true, service: true },
-    orderBy: { startTime: "asc" },
+    orderBy: { startTime: completedFilter ? "desc" : "asc" },
   });
+
+  return appointments.map((appointment) => ({
+    ...appointment,
+    displayStatus:
+      appointment.status === "confirmed" && appointment.endTime < now
+        ? "completed"
+        : appointment.status,
+  }));
 }
 
 export async function getAdminAppointmentCounts(startTime: Date) {
@@ -265,10 +279,14 @@ export async function getAdminAppointmentCounts(startTime: Date) {
   };
 }
 
-export async function getUpcomingAppointments(startTime: Date) {
+export async function getUpcomingAppointments(startTime: Date, now = new Date()) {
   await requireAdmin();
   return prisma.appointment.findMany({
-    where: { startTime: { gte: startTime }, status: { not: "cancelled" } },
+    where: {
+      startTime: { gte: startTime },
+      endTime: { gte: now },
+      status: { not: "cancelled" },
+    },
     include: { customer: true, service: true },
     orderBy: { startTime: "asc" },
     take: 5,

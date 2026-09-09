@@ -9,6 +9,7 @@ type Appointment = {
   startTime: Date;
   endTime: Date;
   status: string;
+  displayStatus?: string;
   notes: string;
   customer: { name: string; phone: string | null };
   service: { name: string; durationMin: number; price: number };
@@ -16,22 +17,30 @@ type Appointment = {
 
 type AppointmentsListProps = {
   appointments: Appointment[];
-  currentStatus: "default" | "all" | "pending" | "confirmed" | "cancelled";
+  currentStatus:
+    | "default"
+    | "all"
+    | "pending"
+    | "confirmed"
+    | "cancelled"
+    | "completed";
 };
 
 const STATUS_BADGE_CLASSES: Record<string, string> = {
   pending: "bg-warning-soft text-warning",
   confirmed: "bg-success-soft text-success",
+  completed: "bg-primary-soft text-primary-strong",
   cancelled: "bg-neutral-soft text-neutral",
 };
 
 const statusTabs: {
-  value: "all" | "pending" | "confirmed" | "cancelled";
+  value: "all" | "pending" | "confirmed" | "completed" | "cancelled";
   label: string;
 }[] = [
   { value: "all", label: "All" },
   { value: "pending", label: "Pending" },
   { value: "confirmed", label: "Confirmed" },
+  { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
 ];
 
@@ -68,7 +77,11 @@ export default function AdminAppointmentsList({
       ) : (
         <>
           <div className="space-y-3 md:hidden">
-            {appointments.map((appointment) => (
+            {appointments.map((appointment) => {
+              const displayStatus = appointment.displayStatus ?? appointment.status;
+              const isCompleted = displayStatus === "completed";
+
+              return (
               <article
                 key={appointment.id}
                 className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
@@ -85,10 +98,9 @@ export default function AdminAppointmentsList({
                     )}
                   </div>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${STATUS_BADGE_CLASSES[appointment.status]}`}
+                    className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${STATUS_BADGE_CLASSES[displayStatus]}`}
                   >
-                    {appointment.status.charAt(0).toUpperCase() +
-                      appointment.status.slice(1)}
+                    {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
                   </span>
                 </div>
 
@@ -136,9 +148,9 @@ export default function AdminAppointmentsList({
                   </div>
                 </dl>
 
-                {appointment.status !== "cancelled" && (
+                {!isCompleted && displayStatus !== "cancelled" && (
                   <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-border pt-3">
-                    {appointment.status === "pending" && (
+                    {displayStatus === "pending" && (
                       <form
                         action={confirmAppointment.bind(null, appointment.id)}
                       >
@@ -150,13 +162,14 @@ export default function AdminAppointmentsList({
                         </button>
                       </form>
                     )}
-                    {appointment.status !== "cancelled" && (
+                    {displayStatus !== "cancelled" && (
                       <CancelButton appointmentId={appointment.id} />
                     )}
                   </div>
                 )}
               </article>
-            ))}
+              );
+            })}
           </div>
 
           <div className="hidden overflow-x-auto md:block">
@@ -171,7 +184,11 @@ export default function AdminAppointmentsList({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {appointments.map((appointment) => (
+                {appointments.map((appointment) => {
+                  const displayStatus = appointment.displayStatus ?? appointment.status;
+                  const isCompleted = displayStatus === "completed";
+
+                  return (
                   <tr key={appointment.id} className="hover:bg-neutral-soft">
                     <td className="px-3 py-5">
                       <p className="font-medium text-foreground">
@@ -223,15 +240,14 @@ export default function AdminAppointmentsList({
                     </td>
                     <td className="px-3 py-5">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${STATUS_BADGE_CLASSES[appointment.status]}`}
-                      >
-                        {appointment.status.charAt(0).toUpperCase() +
-                          appointment.status.slice(1)}
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${STATUS_BADGE_CLASSES[displayStatus]}`}
+                        >
+                          {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
                       </span>
                     </td>
                     <td className="px-3 py-5 text-right">
                       <div className="flex items-center justify-end gap-3">
-                        {appointment.status === "pending" && (
+                        {!isCompleted && displayStatus === "pending" && (
                           <form
                             action={confirmAppointment.bind(
                               null,
@@ -246,13 +262,14 @@ export default function AdminAppointmentsList({
                             </button>
                           </form>
                         )}
-                        {appointment.status !== "cancelled" && (
+                        {!isCompleted && displayStatus !== "cancelled" && (
                           <CancelButton appointmentId={appointment.id} />
                         )}
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

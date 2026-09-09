@@ -2,7 +2,13 @@ import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { AdminAppointmentsList, getAdminAppointments, getAdminAppointmentCounts, getUpcomingAppointments } from "@/features/appointments";
 
-type StatusFilter = "default" | "all" | "pending" | "confirmed" | "cancelled";
+type StatusFilter =
+  | "default"
+  | "all"
+  | "pending"
+  | "confirmed"
+  | "cancelled"
+  | "completed";
 
 const STATUS_FILTER_MAP: Record<StatusFilter, string[] | undefined> = {
   default: ["pending"],
@@ -10,6 +16,7 @@ const STATUS_FILTER_MAP: Record<StatusFilter, string[] | undefined> = {
   pending: ["pending"],
   confirmed: ["confirmed"],
   cancelled: ["cancelled"],
+  completed: ["completed"],
 };
 
 const startOfToday = () => {
@@ -30,11 +37,13 @@ export default async function AdminPage({
     requestedStatus === "all" ||
     requestedStatus === "pending" ||
     requestedStatus === "confirmed" ||
-    requestedStatus === "cancelled"
+    requestedStatus === "cancelled" ||
+    requestedStatus === "completed"
       ? requestedStatus
       : "pending";
   const statusFilter = STATUS_FILTER_MAP[statusParam];
   const today = startOfToday();
+  const now = new Date();
 
   const [
     appointments,
@@ -46,9 +55,9 @@ export default async function AdminPage({
     },
     upcomingAppointments,
   ] = await Promise.all([
-    getAdminAppointments(statusFilter, today),
+    getAdminAppointments(statusFilter, today, now),
     getAdminAppointmentCounts(today),
-    getUpcomingAppointments(today),
+    getUpcomingAppointments(today, now),
   ]);
 
   return (
