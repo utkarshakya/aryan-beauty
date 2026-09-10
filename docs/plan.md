@@ -4,7 +4,7 @@ This plan covers the first deployment of Unknown Beauty for one family-run
 beauty parlour. Keep the product useful for this parlour before considering
 multiple businesses, organizations, billing, or complex permissions.
 
-## Current state — 7 September 2026
+## Current state — 10 September 2026
 
 Completed product work:
 
@@ -15,6 +15,7 @@ Completed product work:
 - Owner appointment dashboard at `/admin`.
 - Owner service management: create, edit, activate, and deactivate services.
 - Public and booking pages exclude inactive services.
+- Business settings fully wired: `BusinessSettings` schema, migration, `lib/db/business.ts`, `app/actions/business.ts`, `/admin/settings` form. Booking availability reads per-weekday `openingHours`, `closedWeekdays`, `closures`, `slotIntervalMin`, `minBookingNoticeMin`, `timeZone` from DB. Cancellation cutoff uses `cancellationCutoffMin`. Marketing pages (Hero, Footer, EmptyServices, not-found, BookingForm) read from DB. `lib/business.ts` and `shared/` deleted.
 
 Completed safety corrections:
 
@@ -30,11 +31,14 @@ work.
 
 ## Next session starting point
 
-Sections 1–3 complete. All features migrated from `features/` to target
-structure. Dead files removed. Next:
+Sections 1–5 complete. All features migrated from `features/` to target
+structure. Dead files removed. Business settings fully implemented, wired into
+booking/cancellation logic, and all marketing pages. `lib/business.ts` and
+`shared/` deleted.
 
-1. Begin business settings (section 5): business name, phone, address,
-   time zone, opening hours, and slot interval.
+Next:
+
+1. Section 4 (improve service data) — validation, snapshotting, inactive service handling.
 
 ## Working order
 
@@ -88,10 +92,26 @@ Do not perform a repository-wide move in one change.
 
 ### 5. Business settings
 
-- [ ] Business name, phone, address, and time zone.
-- [ ] Opening hours, closed weekdays, closures/holidays, and slot interval.
-- [ ] Minimum booking notice and cancellation cutoff.
-- [ ] Ensure updated settings affect new availability only, not existing visits.
+- [x] Business name, phone, address, and time zone (schema + admin form).
+- [x] Opening hours, closed weekdays, closures/holidays, and slot interval
+  (schema + admin form; now read by booking logic).
+- [x] Minimum booking notice and cancellation cutoff (schema + admin form;
+  now read by booking/cancellation logic).
+- [x] Replace `lib/business.ts` / `shared/config/business.ts` usage in
+  `lib/db/appointments.ts` and `app/actions/appointments.ts` with
+  `BusinessSettings` from the database.
+- [x] Update `getAvailableSlots` to use per-weekday `openingHours`, skip
+  `closedWeekdays` and dates in `closures`, and respect `minBookingNoticeMin`
+  (current implementation only supports one global opening/closing hour).
+- [x] Update the cancellation cutoff check to use `cancellationCutoffMin`
+  (minutes) instead of `business.cancellationCutoffHours`.
+- [x] Add marketing fields to `BusinessSettings` model (`tagline`, `description`,
+  `phoneDisplay`, `phoneHref`, `addressLine2`) and wire into Hero, Footer,
+  EmptyServices, not-found, BookingForm.
+- [x] Delete `lib/business.ts` and `shared/config/business.ts` — no remaining
+  imports.
+- [x] Ensure updated settings affect new availability only, not existing
+  visits.
 
 ### 6. Owner appointment workflow
 

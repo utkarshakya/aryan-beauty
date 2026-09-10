@@ -11,8 +11,12 @@ const ALL_CATEGORIES = "All";
 
 export default function ServicesFilter({
   services,
+  phoneDisplay,
+  phoneHref,
 }: {
   services: Service[];
+  phoneDisplay: string;
+  phoneHref: string;
 }) {
   const categories = useMemo(
     () => [ALL_CATEGORIES, ...new Set(services.map((s) => s.category))],
@@ -33,7 +37,7 @@ export default function ServicesFilter({
       />
 
       {services.length === 0 ? (
-        <EmptyServices />
+        <EmptyServices phoneDisplay={phoneDisplay} phoneHref={phoneHref} />
       ) : (
         <>
           <div

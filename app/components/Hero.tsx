@@ -1,8 +1,42 @@
 import Container from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
-import { business } from "@/lib/business";
+import { getBusinessSettingsForDisplay } from "@/lib/db/business";
 
-export default function Hero() {
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function formatHoursDays(closedWeekdays: number[]): string {
+  const openDays = [0, 1, 2, 3, 4, 5, 6].filter(d => !closedWeekdays.includes(d));
+  if (openDays.length === 7) return "Monday – Sunday";
+  if (openDays.length === 0) return "Currently closed";
+  if (openDays.length === 1) return WEEKDAY_LABELS[openDays[0]];
+  return `${WEEKDAY_LABELS[openDays[0]]} – ${WEEKDAY_LABELS[openDays[openDays.length - 1]]}`;
+}
+
+function formatHoursTime(openingHours: Record<string, { open: string; close: string }>): string {
+  const hours = Object.values(openingHours);
+  if (hours.length === 0) return "";
+  const first = hours[0];
+  return `${formatTime(first.open)} – ${formatTime(first.close)}`;
+}
+
+function formatTime(t: string): string {
+  const [h, m] = t.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return m === 0 ? `${hour}:00 ${period}` : `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+export default async function Hero() {
+  let business;
+  try {
+    business = await getBusinessSettingsForDisplay();
+  } catch {
+    business = {
+      description: "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
+      openingHours: {} as Record<string, { open: string; close: string }>,
+      address: "Shop 12, Main Market Road",
+    };
+  }
   return (
     <section className="relative isolate overflow-hidden bg-primary-soft dark:bg-[#17131a]">
       <div
@@ -35,8 +69,8 @@ export default function Hero() {
             </ButtonLink>
           </div>
           <p className="mt-6 text-xs text-muted sm:mt-8 sm:text-sm">
-            Open {business.hoursDays}, {business.hoursTime} ·{" "}
-            {business.addressLine1}
+            Open {formatHoursDays([])}, {formatHoursTime(business.openingHours)} ·{" "}
+            {business.address}
           </p>
         </div>
       </Container>

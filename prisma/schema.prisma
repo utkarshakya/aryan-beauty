@@ -41,6 +41,27 @@ model Service {
   appointments Appointment[]
 }
 
+model BusinessSettings {
+  id                    Int      @id @default(autoincrement())
+  name                  String
+  phone                 String?
+  phoneDisplay          String?
+  phoneHref             String?
+  address               String?
+  addressLine2          String?
+  tagline               String?
+  description           String?
+  timeZone              String   @default("Asia/Kolkata")
+  openingHours          Json     @default("{}")
+  closedWeekdays        Int[]    @default([])
+  closures              Json     @default("[]")
+  slotIntervalMin       Int      @default(30)
+  minBookingNoticeMin   Int      @default(60)
+  cancellationCutoffMin Int      @default(120)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
 model Appointment {
   id         Int      @id @default(autoincrement())
   customerId Int

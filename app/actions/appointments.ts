@@ -3,7 +3,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { business } from "@/lib/business";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import {
   getAvailableSlots,
@@ -77,8 +76,10 @@ export async function createAppointment(
     return { errors };
   }
 
+  const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+  const businessSettings = await getBusinessSettingsForAvailability();
   const businessDate = new Intl.DateTimeFormat("en-CA", {
-    timeZone: business.timezone,
+    timeZone: businessSettings.timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -188,15 +189,14 @@ export async function cancelMyAppointment(
   });
   if (!appUser) return { error: "User not found" };
 
-  const cancelled = await cancelAppointment(
-    appointmentId,
-    appUser.id,
-    business.cancellationCutoffHours
-  );
+  const cancelled = await cancelAppointment(appointmentId, appUser.id);
 
   if (!cancelled) {
+    const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+    const business = await getBusinessSettingsForAvailability();
+    const hours = Math.round(business.cancellationCutoffMin / 60);
     return {
-      error: `Appointments can only be cancelled more than ${business.cancellationCutoffHours} hours before the visit.`,
+      error: `Appointments can only be cancelled more than ${hours} hour${hours !== 1 ? "s" : ""} before the visit.`,
     };
   }
 

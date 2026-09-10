@@ -7,9 +7,17 @@ import BookingForm from "./BookingForm";
 export default function BookAppointmentSection({
   services,
   preselectedServiceId,
+  phoneDisplay,
+  phoneHref,
+  hoursDays,
+  hoursTime,
 }: {
   services: Service[];
   preselectedServiceId?: number;
+  phoneDisplay: string;
+  phoneHref: string;
+  hoursDays: string;
+  hoursTime: string;
 }) {
   const [open, setOpen] = useState(Boolean(preselectedServiceId));
   const formRef = useRef<HTMLDivElement>(null);
@@ -20,6 +28,10 @@ export default function BookAppointmentSection({
         <BookingForm
           services={services}
           preselectedServiceId={preselectedServiceId}
+          phoneDisplay={phoneDisplay}
+          phoneHref={phoneHref}
+          hoursDays={hoursDays}
+          hoursTime={hoursTime}
         />
       </div>
     );

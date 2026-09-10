@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import Container from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { business } from "@/lib/business";
 
 export default function Error({
   error,
@@ -22,8 +21,7 @@ export default function Error({
         Something went wrong
       </h1>
       <p className="mx-auto mt-3 max-w-md text-muted">
-        We couldn&apos;t load this page. Please try again, or call us on{" "}
-        {business.phoneDisplay} if the problem continues.
+        We couldn&apos;t load this page. Please try again later.
       </p>
       <div className="mt-8 flex justify-center">
         <Button onClick={() => retry()}>Try again</Button>

@@ -1,11 +1,36 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireActiveUser } from "@/lib/auth";
+import { getBusinessSettingsForDisplay } from "@/lib/db/business";
 import Container from "@/components/ui/Container";
 import PageHeader from "@/app/components/PageHeader";
 import BookAppointmentSection from "@/components/appointments/BookAppointmentSection";
 import AppointmentGroup from "@/components/appointments/AppointmentGroup";
 import EmptyServices from "@/app/components/EmptyServices";
+
+const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function formatHoursDays(closedWeekdays: number[]): string {
+  const openDays = [0, 1, 2, 3, 4, 5, 6].filter(d => !closedWeekdays.includes(d));
+  if (openDays.length === 7) return "Monday – Sunday";
+  if (openDays.length === 0) return "Currently closed";
+  if (openDays.length === 1) return WEEKDAY_LABELS[openDays[0]];
+  return `${WEEKDAY_LABELS[openDays[0]]} – ${WEEKDAY_LABELS[openDays[openDays.length - 1]]}`;
+}
+
+function formatHoursTime(openingHours: Record<string, { open: string; close: string }>): string {
+  const hours = Object.values(openingHours);
+  if (hours.length === 0) return "";
+  const first = hours[0];
+  return `${formatTime(first.open)} – ${formatTime(first.close)}`;
+}
+
+function formatTime(t: string): string {
+  const [h, m] = t.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return m === 0 ? `${hour}:00 ${period}` : `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +53,7 @@ export default async function AppointmentsPage({
   const appUser = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
-  const [customer, services] = await Promise.all([
+  const [customer, services, business] = await Promise.all([
     prisma.customer.findUnique({
       where: { userId: appUser?.id ?? -1 },
       include: {
@@ -42,6 +67,7 @@ export default async function AppointmentsPage({
       where: { active: true },
       orderBy: [{ category: "asc" }, { name: "asc" }],
     }),
+    getBusinessSettingsForDisplay(),
   ]);
 
   const now = new Date();
@@ -70,11 +96,18 @@ export default async function AppointmentsPage({
             Book new appointment
           </h2>
           {services.length === 0 ? (
-            <EmptyServices />
+            <EmptyServices
+              phoneDisplay={business.phoneDisplay}
+              phoneHref={business.phoneHref}
+            />
           ) : (
             <BookAppointmentSection
               services={services}
               preselectedServiceId={preselectedServiceId}
+              phoneDisplay={business.phoneDisplay}
+              phoneHref={business.phoneHref}
+              hoursDays={formatHoursDays(business.closedWeekdays)}
+              hoursTime={formatHoursTime(business.openingHours)}
             />
           )}
         </section>

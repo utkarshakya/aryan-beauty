@@ -61,18 +61,38 @@ export async function getAvailableSlots(
   serviceId: number,
   date: string
 ): Promise<{ value: string; label: string }[]> {
-  const { business } = await import("@/lib/business");
+  const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
 
-  const dateAtBusinessTime = (date: string, hour: number) =>
-    new Date(`${date}T${String(hour).padStart(2, "0")}:00:00+05:30`);
+  const business = await getBusinessSettingsForAvailability();
 
   const service = await prisma.service.findFirst({
     where: { id: serviceId, active: true },
   });
   if (!service) return [];
 
-  const opening = dateAtBusinessTime(date, business.openingHour);
-  const closing = dateAtBusinessTime(date, business.closingHour);
+  const dayOfWeek = new Date(date + "T00:00:00").getDay();
+  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const dayName = dayNames[dayOfWeek];
+
+  if (business.closedWeekdays.includes(dayOfWeek)) {
+    return [];
+  }
+
+  const dayHours = business.openingHours[dayName];
+  if (!dayHours) {
+    return [];
+  }
+
+  const isClosureDate = business.closures.some((c) => c.date === date);
+  if (isClosureDate) {
+    return [];
+  }
+
+  const [openHour, openMin] = dayHours.open.split(":").map(Number);
+  const [closeHour, closeMin] = dayHours.close.split(":").map(Number);
+
+  const opening = new Date(`${date}T${String(openHour).padStart(2, "0")}:${String(openMin).padStart(2, "0")}:00`);
+  const closing = new Date(`${date}T${String(closeHour).padStart(2, "0")}:${String(closeMin).padStart(2, "0")}:00`);
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -87,6 +107,8 @@ export async function getAvailableSlots(
   const durationMs = service.durationMin * 60_000;
   const intervalMs = business.slotIntervalMin * 60_000;
   const now = Date.now();
+  const minBookingNoticeMs = business.minBookingNoticeMin * 60_000;
+  const earliestAllowed = now + minBookingNoticeMs;
 
   for (
     let start = opening.getTime();
@@ -99,12 +121,12 @@ export async function getAvailableSlots(
         appointment.startTime.getTime() < end &&
         appointment.endTime.getTime() > start
     );
-    if (start > now && !unavailable) {
+    if (start >= earliestAllowed && !unavailable) {
       const startDate = new Date(start);
       slots.push({
         value: startDate.toISOString(),
         label: startDate.toLocaleTimeString("en-IN", {
-          timeZone: business.timezone,
+          timeZone: business.timeZone,
           hour: "numeric",
           minute: "2-digit",
         }),
@@ -129,15 +151,18 @@ export async function createAppointmentTx(
 
 export async function cancelAppointment(
   appointmentId: number,
-  customerId: number,
-  cutoffHours: number
+  customerId: number
 ) {
+  const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+  const business = await getBusinessSettingsForAvailability();
+  const cutoffMs = business.cancellationCutoffMin * 60 * 1000;
+
   const result = await prisma.appointment.updateMany({
     where: {
       id: appointmentId,
       status: { not: "cancelled" },
       startTime: {
-        gt: new Date(Date.now() + cutoffHours * 60 * 60 * 1000),
+        gt: new Date(Date.now() + cutoffMs),
       },
       customerId,
     },

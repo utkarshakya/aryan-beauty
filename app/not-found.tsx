@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
-import { business } from "@/lib/business";
 
-export default function NotFound() {
+export default async function NotFound() {
+  let businessName = "Unknown Beauty";
+  try {
+    const { getBusinessSettingsForDisplay } = await import("@/lib/db/business");
+    const business = await getBusinessSettingsForDisplay();
+    businessName = business.name;
+  } catch {
+    // DB unavailable during build — use default
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-3 py-16 text-center sm:px-4 sm:py-24">
       <p className="text-sm font-medium uppercase tracking-wide text-primary">
-        {business.name}
+        {businessName}
       </p>
       <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-4xl">
         Page not found

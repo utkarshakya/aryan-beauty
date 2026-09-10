@@ -1,7 +1,12 @@
 import { ButtonLink } from "@/components/ui/Button";
-import { business } from "@/lib/business";
 
-export default function EmptyServices() {
+export default function EmptyServices({
+  phoneDisplay,
+  phoneHref,
+}: {
+  phoneDisplay: string;
+  phoneHref: string;
+}) {
   return (
     <div className="rounded-xl border border-border bg-muted-soft p-5 text-center sm:p-12">
       <h2 className="text-lg font-semibold sm:text-xl">Our service menu is being updated</h2>
@@ -10,8 +15,8 @@ export default function EmptyServices() {
         be happy to help you book your visit.
       </p>
       <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <ButtonLink href={business.phoneHref} variant="secondary">
-          Call {business.phoneDisplay}
+        <ButtonLink href={phoneHref} variant="secondary">
+          Call {phoneDisplay}
         </ButtonLink>
         <ButtonLink href="/" variant="ghost">
           Back to home

@@ -9,7 +9,6 @@ import {
   type TimeSlot,
 } from "@/app/actions/appointments";
 import { Button, ButtonLink } from "@/components/ui";
-import { business } from "@/shared/config";
 
 const initialState: BookingState = { errors: {} };
 
@@ -40,9 +39,17 @@ function CheckIcon() {
 export default function BookingForm({
   services,
   preselectedServiceId,
+  phoneDisplay,
+  phoneHref,
+  hoursDays,
+  hoursTime,
 }: {
   services: Service[];
   preselectedServiceId?: number;
+  phoneDisplay: string;
+  phoneHref: string;
+  hoursDays: string;
+  hoursTime: string;
 }) {
   const [state, formAction, pending] = useActionState(
     createAppointment,
@@ -137,10 +144,10 @@ export default function BookingForm({
         <p className="mt-5 text-center text-xs text-muted sm:mt-6 sm:text-sm">
           Questions?{" "}
           <a
-            href={business.phoneHref}
+            href={phoneHref}
             className="font-medium text-primary transition-colors hover:text-primary-strong"
           >
-            Call us on {business.phoneDisplay}
+            Call us on {phoneDisplay}
           </a>
         </p>
 
@@ -311,7 +318,7 @@ export default function BookingForm({
           </select>
         </div>
         <p className="text-sm text-muted">
-          Open {business.hoursDays}, {business.hoursTime}.
+          Open {hoursDays}, {hoursTime}.
         </p>
         {errors.startTime && (
           <p
