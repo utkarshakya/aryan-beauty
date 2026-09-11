@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Appointment, Service, Customer } from "@prisma/client";
 
+// ─── Types ──────────────────────────────────────────────────────────────────
+
 export type AppointmentWithRelations = Appointment & {
   customer: Customer;
   service: Service;
@@ -24,6 +26,8 @@ export type CancellationState = {
   success?: string;
   error?: string;
 };
+
+// ─── Customer Queries ───────────────────────────────────────────────────────
 
 export async function getAppointmentsByCustomerId(
   customerId: number
@@ -56,6 +60,20 @@ export async function getRecentHistory(
     .filter((a) => !upcomingIds.has(a.id))
     .slice(0, limit);
 }
+
+export async function getCustomerWithAppointments(customerId: number) {
+  return prisma.customer.findUnique({
+    where: { id: customerId },
+    include: {
+      appointments: {
+        include: { service: true },
+        orderBy: { startTime: "desc" },
+      },
+    },
+  });
+}
+
+// ─── Booking Logic ──────────────────────────────────────────────────────────
 
 export async function getAvailableSlots(
   serviceId: number,
@@ -178,17 +196,5 @@ export async function confirmAppointment(appointmentId: number) {
   return prisma.appointment.update({
     where: { id: appointmentId },
     data: { status: "confirmed" },
-  });
-}
-
-export async function getCustomerWithAppointments(customerId: number) {
-  return prisma.customer.findUnique({
-    where: { id: customerId },
-    include: {
-      appointments: {
-        include: { service: true },
-        orderBy: { startTime: "desc" },
-      },
-    },
   });
 }

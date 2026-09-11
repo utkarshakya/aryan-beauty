@@ -13,6 +13,8 @@ import {
   type WalkInCustomer,
 } from "@/lib/db/customers";
 
+// ─── Customer Profile ───────────────────────────────────────────────────────
+
 export async function getMyProfile(): Promise<CustomerProfile | null> {
   const userId = await requireActiveUser();
 
@@ -61,6 +63,8 @@ export async function updateMyProfile(
 
   return { success: "Profile updated successfully" };
 }
+
+// ─── Admin Actions ──────────────────────────────────────────────────────────
 
 export async function getWalkInCustomersAction(): Promise<WalkInCustomer[]> {
   await requireAdmin();

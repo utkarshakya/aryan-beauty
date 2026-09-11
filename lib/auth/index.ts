@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
+// ─── Types ──────────────────────────────────────────────────────────────────
+
 export type UserRole = "super_admin" | "admin" | "staff" | "customer";
 export type UserStatus = "active" | "disabled";
 
@@ -15,6 +17,8 @@ export interface SessionClaims {
 }
 
 export * from "./sync";
+
+// ─── Internal Helpers ───────────────────────────────────────────────────────
 
 const getUserIds = (value: string | undefined) =>
   (value ?? "")
@@ -64,6 +68,8 @@ async function getAppUserAccess(userId: string): Promise<AppUserAccess | null> {
     select: { role: true, status: true },
   });
 }
+
+// ─── Auth Guards ────────────────────────────────────────────────────────────
 
 export async function hasAdminAccess(userId: string | null) {
   if (!userId) return false;

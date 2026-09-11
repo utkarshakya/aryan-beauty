@@ -61,7 +61,7 @@ export default async function AdminPage({
     upcomingAppointments,
   ] = await Promise.all([
     getAdminAppointments(statusFilter, today, now),
-    getAdminAppointmentCounts(today),
+    getAdminAppointmentCounts(today, now),
     getUpcomingAppointments(today, now),
   ]);
 

@@ -13,18 +13,26 @@ import {
   type TimeSlot,
 } from "@/lib/db/appointments";
 
-const INDIAN_PHONE_RE = new RegExp("^[6-9]\\d{9}$");
-
-const initialState: BookingState = { errors: {} };
-
-const DATE_RE = new RegExp("^\\d{4}-\\d{2}-\\d{2}$");
+// ─── Re-exports ─────────────────────────────────────────────────────────────
 
 export { getAvailableSlots };
-export type { BookingState, CancellationState, TimeSlot } from "@/lib/db/appointments";
+export type {
+  BookingState,
+  CancellationState,
+  TimeSlot,
+} from "@/lib/db/appointments";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const INDIAN_PHONE_RE = new RegExp("^[6-9]\\d{9}$");
+const DATE_RE = new RegExp("^\\d{4}-\\d{2}-\\d{2}$");
+const initialState: BookingState = { errors: {} };
+
+// ─── Customer Actions ───────────────────────────────────────────────────────
 
 export async function getAvailableSlotsAction(
   serviceId: number,
-  date: string
+  date: string,
 ): Promise<TimeSlot[]> {
   await requireActiveUser();
 
@@ -37,7 +45,7 @@ export async function getAvailableSlotsAction(
 
 export async function createAppointment(
   _prevState: BookingState,
-  formData: FormData
+  formData: FormData,
 ): Promise<BookingState> {
   const userId = await requireActiveUser();
 
@@ -76,7 +84,8 @@ export async function createAppointment(
     return { errors };
   }
 
-  const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+  const { getBusinessSettingsForAvailability } =
+    await import("@/lib/db/business");
   const businessSettings = await getBusinessSettingsForAvailability();
   const businessDate = new Intl.DateTimeFormat("en-CA", {
     timeZone: businessSettings.timeZone,
@@ -104,7 +113,7 @@ export async function createAppointment(
       }
 
       const endTime = new Date(
-        startTime.getTime() + service.durationMin * 60_000
+        startTime.getTime() + service.durationMin * 60_000,
       );
 
       const conflict = await tx.appointment.findFirst({
@@ -178,7 +187,7 @@ export async function createAppointment(
 
 export async function cancelMyAppointment(
   _previousState: CancellationState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CancellationState> {
   const userId = await requireActiveUser();
 
@@ -195,7 +204,8 @@ export async function cancelMyAppointment(
   const cancelled = await cancelAppointment(appointmentId, appUser.id);
 
   if (!cancelled) {
-    const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+    const { getBusinessSettingsForAvailability } =
+      await import("@/lib/db/business");
     const business = await getBusinessSettingsForAvailability();
     const hours = Math.round(business.cancellationCutoffMin / 60);
     return {
@@ -208,7 +218,7 @@ export async function cancelMyAppointment(
   return { success: "Appointment cancelled successfully." };
 }
 
-// --- Admin Actions ---
+// ─── Admin Actions ──────────────────────────────────────────────────────────
 
 export async function confirmAppointment(id: number) {
   await requireAdmin();
@@ -231,7 +241,7 @@ export async function adminCancelAppointment(id: number) {
 export async function getAdminAppointments(
   statusFilter: string[] | undefined,
   startTime: Date,
-  now = new Date()
+  now = new Date(),
 ) {
   await requireAdmin();
   const completedFilter =
@@ -243,6 +253,7 @@ export async function getAdminAppointments(
         : {
             startTime: { gte: startTime },
             ...(statusFilter ? { status: { in: statusFilter } } : {}),
+            NOT: { status: "confirmed", endTime: { lt: now } },
           }),
     },
     include: { customer: true },
@@ -258,7 +269,10 @@ export async function getAdminAppointments(
   }));
 }
 
-export async function getAdminAppointmentCounts(startTime: Date) {
+export async function getAdminAppointmentCounts(
+  startTime: Date,
+  now = new Date(),
+) {
   await requireAdmin();
   const [
     todayAppointments,
@@ -273,7 +287,11 @@ export async function getAdminAppointmentCounts(startTime: Date) {
       where: { status: "pending", startTime: { gte: startTime } },
     }),
     prisma.appointment.count({
-      where: { status: "confirmed", startTime: { gte: startTime } },
+      where: {
+        status: "confirmed",
+        startTime: { gte: startTime },
+        NOT: { endTime: { lt: now } },
+      },
     }),
     prisma.service.count({ where: { active: true } }),
   ]);
@@ -285,7 +303,10 @@ export async function getAdminAppointmentCounts(startTime: Date) {
   };
 }
 
-export async function getUpcomingAppointments(startTime: Date, now = new Date()) {
+export async function getUpcomingAppointments(
+  startTime: Date,
+  now = new Date(),
+) {
   await requireAdmin();
   return prisma.appointment.findMany({
     where: {
