@@ -58,7 +58,6 @@ export default async function AppointmentsPage({
       where: { userId: appUser?.id ?? -1 },
       include: {
         appointments: {
-          include: { service: true },
           orderBy: { startTime: "desc" },
         },
       },

@@ -63,16 +63,19 @@ model BusinessSettings {
 }
 
 model Appointment {
-  id         Int      @id @default(autoincrement())
-  customerId Int
-  serviceId  Int
-  startTime  DateTime
-  status     String   @default("pending")
-  notes      String   @default("")
-  createdAt  DateTime @default(now())
-  endTime    DateTime
-  customer   Customer @relation(fields: [customerId], references: [id])
-  service    Service  @relation(fields: [serviceId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  customerId         Int
+  serviceId          Int
+  serviceName        String   @default("")
+  servicePrice       Int      @default(0)
+  serviceDurationMin Int      @default(0)
+  startTime          DateTime
+  status             String   @default("pending")
+  notes              String   @default("")
+  createdAt          DateTime @default(now())
+  endTime            DateTime
+  customer           Customer @relation(fields: [customerId], references: [id])
+  service            Service  @relation(fields: [serviceId], references: [id])
 
   @@index([startTime])
 }

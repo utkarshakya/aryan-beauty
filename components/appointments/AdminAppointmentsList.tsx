@@ -12,7 +12,9 @@ type Appointment = {
   displayStatus?: string;
   notes: string;
   customer: { name: string; phone: string | null };
-  service: { name: string; durationMin: number; price: number };
+  serviceName: string;
+  servicePrice: number;
+  serviceDurationMin: number;
 };
 
 type AppointmentsListProps = {
@@ -108,13 +110,13 @@ export default function AdminAppointmentsList({
                   <div>
                     <dt className="text-muted">Service</dt>
                     <dd className="mt-1 font-medium text-foreground">
-                      {appointment.service.name}
+                      {appointment.serviceName}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-muted">Price</dt>
                     <dd className="mt-1 font-medium text-foreground">
-                      ₹{Math.round(appointment.service.price)}
+                      ₹{Math.round(appointment.servicePrice)}
                     </dd>
                   </div>
                   <div className="col-span-2">
@@ -202,11 +204,11 @@ export default function AdminAppointmentsList({
                     </td>
                     <td className="px-3 py-5">
                       <p className="font-medium text-foreground">
-                        {appointment.service.name}
+                        {appointment.serviceName}
                       </p>
                       <p className="text-muted">
-                        {appointment.service.durationMin} min · ₹
-                        {Math.round(appointment.service.price)}
+                        {appointment.serviceDurationMin} min · ₹
+                        {Math.round(appointment.servicePrice)}
                       </p>
                     </td>
                     <td className="px-3 py-5 text-foreground">

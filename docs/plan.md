@@ -4,7 +4,7 @@ This plan covers the first deployment of Unknown Beauty for one family-run
 beauty parlour. Keep the product useful for this parlour before considering
 multiple businesses, organizations, billing, or complex permissions.
 
-## Current state — 10 September 2026
+## Current state — 11 September 2026
 
 Completed product work:
 
@@ -16,6 +16,7 @@ Completed product work:
 - Owner service management: create, edit, activate, and deactivate services.
 - Public and booking pages exclude inactive services.
 - Business settings fully wired: `BusinessSettings` schema, migration, `lib/db/business.ts`, `app/actions/business.ts`, `/admin/settings` form. Booking availability reads per-weekday `openingHours`, `closedWeekdays`, `closures`, `slotIntervalMin`, `minBookingNoticeMin`, `timeZone` from DB. Cancellation cutoff uses `cancellationCutoffMin`. Marketing pages (Hero, Footer, EmptyServices, not-found, BookingForm) read from DB. `lib/business.ts` and `shared/` deleted.
+- Service data improved: required field validation (name, price, duration), snapshot fields (`serviceName`, `servicePrice`, `serviceDurationMin`) on `Appointment` captured at booking time, all display components read snapshots, inactive services excluded from booking flows.
 
 Completed safety corrections:
 
@@ -31,14 +32,17 @@ work.
 
 ## Next session starting point
 
-Sections 1–5 complete. All features migrated from `features/` to target
+Sections 1–5 complete (Section 4 now includes validation, snapshotting, and
+inactive service handling). All features migrated from `features/` to target
 structure. Dead files removed. Business settings fully implemented, wired into
 booking/cancellation logic, and all marketing pages. `lib/business.ts` and
-`shared/` deleted.
+`shared/` deleted. Service snapshot fields on `Appointment` schema, migration,
+booking flow, and all display components updated.
 
 Next:
 
-1. Section 4 (improve service data) — validation, snapshotting, inactive service handling.
+1. Section 6 (owner appointment workflow) — search, filters, detail view,
+   status transitions.
 
 ## Working order
 
@@ -84,10 +88,10 @@ Do not perform a repository-wide move in one change.
 
 ### 4. Improve service data
 
-- [ ] Validate required name, category, price, and duration boundaries.
-- [ ] Snapshot service name, price, and duration on an appointment so later
+- [x] Validate required name, category, price, and duration boundaries.
+- [x] Snapshot service name, price, and duration on an appointment so later
   service edits do not rewrite historical records.
-- [ ] Confirm inactive services never appear in booking, while old
+- [x] Confirm inactive services never appear in booking, while old
   appointments remain readable.
 
 ### 5. Business settings

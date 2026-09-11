@@ -142,6 +142,9 @@ export async function createAppointmentTx(
   data: {
     customerId: number;
     serviceId: number;
+    serviceName: string;
+    servicePrice: number;
+    serviceDurationMin: number;
     startTime: Date;
     endTime: Date;
   }

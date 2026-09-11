@@ -137,6 +137,9 @@ export async function createAppointment(
       await createAppointmentTx(tx, {
         customerId: customer.id,
         serviceId: service.id,
+        serviceName: service.name,
+        servicePrice: service.price,
+        serviceDurationMin: service.durationMin,
         startTime,
         endTime,
       });
@@ -242,7 +245,7 @@ export async function getAdminAppointments(
             ...(statusFilter ? { status: { in: statusFilter } } : {}),
           }),
     },
-    include: { customer: true, service: true },
+    include: { customer: true },
     orderBy: { startTime: completedFilter ? "desc" : "asc" },
   });
 
@@ -290,7 +293,7 @@ export async function getUpcomingAppointments(startTime: Date, now = new Date())
       endTime: { gte: now },
       status: { not: "cancelled" },
     },
-    include: { customer: true, service: true },
+    include: { customer: true },
     orderBy: { startTime: "asc" },
     take: 5,
   });

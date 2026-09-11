@@ -24,7 +24,9 @@ type Appointment = {
   startTime: Date;
   endTime: Date;
   status: string;
-  service: { name: string; durationMin: number; price: number };
+  serviceName: string;
+  servicePrice: number;
+  serviceDurationMin: number;
 };
 
 export default function AppointmentGroup({
@@ -60,11 +62,11 @@ export default function AppointmentGroup({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    {appointment.service.name}
+                    {appointment.serviceName}
                   </h3>
                   <p className="mt-1 text-sm text-muted">
-                    {appointment.service.durationMin} minutes · ₹
-                    {Math.round(appointment.service.price)}
+                    {appointment.serviceDurationMin} minutes · ₹
+                    {Math.round(appointment.servicePrice)}
                   </p>
                 </div>
                 <span

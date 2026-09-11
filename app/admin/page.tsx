@@ -145,7 +145,7 @@ export default async function AdminPage({
                     {appointment.customer.name}
                   </p>
                   <p className="truncate text-xs text-muted">
-                    {appointment.service.name}
+                    {appointment.serviceName}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
