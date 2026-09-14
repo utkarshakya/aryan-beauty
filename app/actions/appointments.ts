@@ -206,7 +206,12 @@ export async function cancelMyAppointment(
   });
   if (!appUser) return { error: "User not found" };
 
-  const cancelled = await cancelAppointment(appointmentId, appUser.id);
+  const customer = await prisma.customer.findUnique({
+    where: { userId: appUser.id },
+  });
+  if (!customer) return { error: "User not found" };
+
+  const cancelled = await cancelAppointment(appointmentId, customer.id);
 
   if (!cancelled) {
     const { getBusinessSettingsForAvailability } =
