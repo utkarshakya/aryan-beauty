@@ -3,11 +3,16 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import {
   getAvailableSlots,
   createAppointmentTx,
   cancelAppointment,
+  getAppointmentById,
+  confirmAppointment as confirmAppointmentTransition,
+  adminCancelAppointment as adminCancelAppointmentTransition,
+  restoreAppointment,
   type BookingState,
   type CancellationState,
   type TimeSlot,
@@ -222,42 +227,129 @@ export async function cancelMyAppointment(
 
 export async function confirmAppointment(id: number) {
   await requireAdmin();
-  await prisma.appointment.update({
-    where: { id },
-    data: { status: "confirmed" },
-  });
+  if (!Number.isInteger(id) || id <= 0) return;
+
+  const applied = await confirmAppointmentTransition(id);
+  if (!applied) return;
+
   revalidatePath("/admin");
+  revalidatePath(`/admin/appointments/${id}`);
 }
 
 export async function adminCancelAppointment(id: number) {
   await requireAdmin();
-  await prisma.appointment.update({
-    where: { id },
-    data: { status: "cancelled" },
-  });
-  revalidatePath("/admin");
+  if (!Number.isInteger(id) || id <= 0)
+    return { ok: false, error: "That appointment could not be found." };
+
+  const applied = await adminCancelAppointmentTransition(id);
+  if (applied) {
+    revalidatePath("/admin");
+    revalidatePath(`/admin/appointments/${id}`);
+  }
+  return {
+    ok: applied,
+    error: applied
+      ? undefined
+      : "This appointment is already completed or cancelled and cannot be changed.",
+  };
+}
+
+export async function restoreAppointmentAction(id: number) {
+  await requireAdmin();
+  if (!Number.isInteger(id) || id <= 0)
+    return { ok: false, error: "That appointment could not be found." };
+
+  const applied = await restoreAppointment(id);
+  if (applied) {
+    revalidatePath("/admin");
+    revalidatePath(`/admin/appointments/${id}`);
+  }
+  return {
+    ok: applied,
+    error: applied
+      ? undefined
+      : "Only an upcoming cancelled appointment can be restored.",
+  };
+}
+
+export async function getAdminAppointmentAction(id: number) {
+  await requireAdmin();
+
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  const appointment = await getAppointmentById(id);
+  if (!appointment) return null;
+
+  const now = new Date();
+  return {
+    ...appointment,
+    displayStatus:
+      appointment.status === "confirmed" && appointment.endTime < now
+        ? "completed"
+        : appointment.status,
+  };
 }
 
 export async function getAdminAppointments(
   statusFilter: string[] | undefined,
-  startTime: Date,
   now = new Date(),
+  opts: {
+    search?: string;
+    from?: Date;
+    to?: Date;
+    windowCompleted?: boolean;
+  } = {},
 ) {
   await requireAdmin();
+  const { search, from, to, windowCompleted } = opts;
   const completedFilter =
     statusFilter?.length === 1 && statusFilter[0] === "completed";
+  const term = search?.trim();
+  const customerFilter: Prisma.AppointmentWhereInput = term
+    ? {
+        customer: {
+          is: {
+            OR: [
+              { name: { contains: term, mode: "insensitive" } },
+              { phone: { contains: term } },
+            ],
+          },
+        },
+      }
+    : {};
+  const dateWindow =
+    from || to
+      ? {
+          ...(from ? { gte: from } : {}),
+          ...(to ? { lt: to } : {}),
+        }
+      : undefined;
+
   const appointments = await prisma.appointment.findMany({
     where: {
+      ...customerFilter,
       ...(completedFilter
-        ? { status: "confirmed", endTime: { lt: now } }
-        : {
-            startTime: { gte: startTime },
-            ...(statusFilter ? { status: { in: statusFilter } } : {}),
-            NOT: { status: "confirmed", endTime: { lt: now } },
-          }),
+        ? {
+            status: "confirmed",
+            endTime: { lt: now },
+            ...(windowCompleted && dateWindow
+              ? { startTime: dateWindow }
+              : {}),
+          }
+        : term
+          ? {
+              ...(statusFilter ? { status: { in: statusFilter } } : {}),
+            }
+          : {
+              ...(dateWindow ? { startTime: dateWindow } : {}),
+              ...(statusFilter ? { status: { in: statusFilter } } : {}),
+              NOT: { status: "confirmed", endTime: { lt: now } },
+            }),
     },
     include: { customer: true },
-    orderBy: { startTime: completedFilter ? "desc" : "asc" },
+    orderBy: {
+      startTime: term || completedFilter || !dateWindow ? "desc" : "asc",
+    },
   });
 
   return appointments.map((appointment) => ({

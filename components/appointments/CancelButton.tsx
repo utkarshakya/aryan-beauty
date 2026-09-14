@@ -5,7 +5,10 @@ import { adminCancelAppointment as cancelAppointment } from "@/app/actions/appoi
 export default function CancelButton({ appointmentId }: { appointmentId: number }) {
   const handleSubmit = async () => {
     if (window.confirm("Cancel this appointment?")) {
-      await cancelAppointment(appointmentId);
+      const result = await cancelAppointment(appointmentId);
+      if (result.error) {
+        window.alert(result.error);
+      }
     }
   };
 

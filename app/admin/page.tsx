@@ -33,11 +33,12 @@ const startOfToday = () => {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; search?: string; date?: string }>;
 }) {
   await requireAdmin();
   const params = await searchParams;
   const requestedStatus = params.status;
+  const searchParam = params.search?.trim() ?? "";
   const statusParam: StatusFilter =
     requestedStatus === "all" ||
     requestedStatus === "pending" ||
@@ -50,6 +51,59 @@ export default async function AdminPage({
   const today = startOfToday();
   const now = new Date();
 
+  const dateRaw = params.date;
+  const validDate =
+    typeof dateRaw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateRaw)
+      ? dateRaw
+      : undefined;
+  const dateMode: "today" | "date" | "all" =
+    dateRaw === "all" ? "all" : validDate ? "date" : "today";
+  const dateFilter =
+    dateMode === "all" ? "all" : dateMode === "date" ? validDate! : undefined;
+  const from =
+    dateMode === "today"
+      ? today
+      : dateMode === "date"
+        ? new Date(`${validDate}T00:00:00`)
+        : undefined;
+  const to =
+    dateMode === "date"
+      ? (() => {
+          const end = new Date(from!.getTime());
+          end.setDate(end.getDate() + 1);
+          return end;
+        })()
+      : undefined;
+  const todayInputValue = new Date().toLocaleDateString("en-CA");
+  const scopeLabel =
+    dateMode === "date"
+      ? `for ${new Date(`${validDate}T00:00:00`).toLocaleDateString("en-IN", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        })}`
+      : dateMode === "all"
+        ? "for all dates"
+        : "for today";
+  const statusWord = statusParam === "all" ? null : statusParam;
+  const statusText = statusWord
+    ? statusWord.charAt(0).toUpperCase() + statusWord.slice(1)
+    : "appointments";
+  const hasExplicitStatus =
+    requestedStatus === "all" ||
+    requestedStatus === "pending" ||
+    requestedStatus === "confirmed" ||
+    requestedStatus === "cancelled" ||
+    requestedStatus === "completed";
+  const makeAdminHref = (date?: string) => {
+    const p = new URLSearchParams();
+    if (hasExplicitStatus) p.set("status", statusParam);
+    if (searchParam) p.set("search", searchParam);
+    if (date) p.set("date", date);
+    const qs = p.toString();
+    return qs ? `/admin?${qs}` : "/admin";
+  };
+
   const [
     appointments,
     {
@@ -60,7 +114,12 @@ export default async function AdminPage({
     },
     upcomingAppointments,
   ] = await Promise.all([
-    getAdminAppointments(statusFilter, today, now),
+    getAdminAppointments(statusFilter, now, {
+      search: searchParam || undefined,
+      from,
+      to,
+      windowCompleted: dateMode === "date",
+    }),
     getAdminAppointmentCounts(today, now),
     getUpcomingAppointments(today, now),
   ]);
@@ -167,9 +226,105 @@ export default async function AdminPage({
       <h2 className="mb-5 mt-8 text-xl font-bold text-foreground sm:mt-10 sm:text-2xl">
         Appointments
       </h2>
+      <form
+        action="/admin"
+        method="GET"
+        className="mb-4 flex flex-wrap items-end gap-3"
+      >
+        <div className="min-w-56 flex-1 sm:max-w-md">
+          <label
+            htmlFor="appointment-search"
+            className="mb-1 block text-sm font-medium text-foreground"
+          >
+            Search
+          </label>
+          <input
+            id="appointment-search"
+            name="search"
+            defaultValue={searchParam}
+            placeholder="Customer name or phone"
+            autoComplete="off"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          />
+        </div>
+        {hasExplicitStatus ? (
+          <input type="hidden" name="status" value={statusParam} />
+        ) : null}
+        {dateFilter && <input type="hidden" name="date" value={dateFilter} />}
+        <button
+          type="submit"
+          className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
+        >
+          Search
+        </button>
+      </form>
+      <div className="mb-4 flex flex-wrap items-end gap-2">
+        <Link
+          href={makeAdminHref()}
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
+            dateMode === "today"
+              ? "border-primary/30 bg-primary-soft text-primary-strong"
+              : "border-transparent text-muted hover:bg-neutral-soft"
+          }`}
+        >
+          Today
+        </Link>
+        <Link
+          href={makeAdminHref("all")}
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
+            dateMode === "all"
+              ? "border-primary/30 bg-primary-soft text-primary-strong"
+              : "border-transparent text-muted hover:bg-neutral-soft"
+          }`}
+        >
+          All dates
+        </Link>
+        <form
+          action="/admin"
+          method="GET"
+          className="flex items-end gap-2"
+        >
+          <div>
+            <label
+              htmlFor="appointment-date"
+              className="mb-1 block text-sm font-medium text-foreground"
+            >
+              Date
+            </label>
+            <input
+              id="appointment-date"
+              name="date"
+              type="date"
+              defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
+              className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            />
+          </div>
+          {hasExplicitStatus && (
+            <input type="hidden" name="status" value={statusParam} />
+          )}
+          {searchParam && (
+            <input type="hidden" name="search" value={searchParam} />
+          )}
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm"
+          >
+            View date
+          </button>
+        </form>
+      </div>
       <AdminAppointmentsList
         appointments={appointments}
         currentStatus={statusParam}
+        searchTerm={searchParam}
+        dateFilter={dateFilter}
+        scopeLabel={scopeLabel}
+        showScope={dateMode !== "today"}
+        emptyMessage={
+          statusParam === "all"
+            ? `No appointments ${scopeLabel}.`
+            : `No ${statusText.toLowerCase()} appointments ${scopeLabel}.`
+        }
       />
     </div>
   );

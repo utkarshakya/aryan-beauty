@@ -41,8 +41,8 @@ booking flow, and all display components updated.
 
 Next:
 
-1. Section 6 (owner appointment workflow) — search, filters, detail view,
-   status transitions.
+1. Section 7 (reliability and launch readiness) — tests, checklist, production
+   review.
 
 ## Working order
 
@@ -119,10 +119,10 @@ Do not perform a repository-wide move in one change.
 
 ### 6. Owner appointment workflow
 
-- [ ] Search by customer name/phone.
-- [ ] Date selector and filters with clear empty states.
-- [ ] Appointment detail view with useful customer contact/notes.
-- [ ] Explicit, validated status transitions and reversible cancellation.
+- [x] Search by customer name/phone.
+- [x] Date selector and filters with clear empty states.
+- [x] Appointment detail view with useful customer contact/notes.
+- [x] Explicit, validated status transitions and reversible cancellation.
 
 #### 6.1 Completed appointments view — next owner-dashboard slice
 
@@ -160,6 +160,157 @@ Acceptance checks:
 - [x] A cancelled appointment does not appear in Completed.
 - [x] A finished appointment no longer appears in Upcoming today.
 - [x] Completed rows have no destructive or confirmation controls.
+
+#### 6.2 Appointment detail view
+
+Status: implemented; lint, typecheck, Prisma validation, and production build
+pass.
+
+Goal: give the worker the full record — customer contact, service snapshot,
+schedule, and booking notes — without changing the data model.
+
+Implementation:
+
+- [x] Add `getAppointmentById(id)` query in `lib/db/appointments.ts`.
+- [x] Add guarded `getAdminAppointmentAction(id)` in `app/actions/appointments.ts`
+  with `requireAdmin()` and completed-status display logic.
+- [x] Add `app/admin/appointments/[id]/page.tsx` route with `notFound()` for
+  invalid or missing ids.
+- [x] Render `AppointmentDetail` with customer name/phone/email, service
+  snapshot (name, duration, price), date/time, notes, and status badge.
+- [x] Revalidate `/admin/appointments/[id]` on confirm/cancel so the detail
+  screen stays current.
+- [x] Link customer names on the admin list (mobile and desktop) to the
+  detail view.
+
+Rules:
+
+- Access uses `requireAdmin`, matching the `/admin` dashboard.
+- Completed (past confirmed) appointments show no Confirm or Cancel controls.
+- No schema change, no new status, no cancellation-cutoff changes here.
+
+Acceptance checks:
+
+- [x] Opening any appointment row from `/admin` shows a full detail screen.
+- [x] Detail shows customer contact, service snapshot, schedule, and notes.
+- [x] Confirm/cancel from the detail screen updates both list and detail.
+- [x] Unknown or non-numeric ids return 404.
+
+#### 6.3 Search by customer name/phone
+
+Status: implemented; lint, typecheck, and production build pass.
+
+Goal: let the worker find any booking when they remember the person, not the
+date. Search drops the today-anchor and matches across all dates/statuses,
+loaded into the detail view from section 6.2.
+
+Implementation:
+
+- [x] `getAdminAppointments` accepts `search` and filters by customer
+  `name` (case-insensitive) or `phone` (Postgres `contains`).
+- [x] A search term switches the query off the today-anchor, orders newest
+  first, and returns completed appointments too.
+- [x] `/admin` reads `?search=`; search form preserves the active status tab
+  via a hidden field only when a tab was explicitly chosen.
+- [x] Status tabs preserve an active search term in their hrefs.
+- [x] Dedicated empty state and result-count caption with a Clear search link.
+
+Rules:
+
+- No search term keeps existing today-anchored behaviour unchanged.
+- Search combines with status tabs when one is active; defaults to all
+  statuses on the default view.
+- No schema change.
+
+Acceptance checks:
+
+- [x] Searching a customer name or partial phone finds matching appointments
+  from any date.
+- [x] Empty searches return a clear “no match” message with Clear search.
+- [x] Tabs keep the active search; clearing keeps the active tab.
+- [x] Plain `/admin` (no `?search=`) behaves exactly as before.
+
+#### 6.4 Date selector and filter-aware empty states
+
+Status: implemented; lint, typecheck, and production build pass.
+
+Goal: browse any date or the full ledger, not just today, with empty states
+that name the active view instead of a bare “No appointments”.
+
+Implementation:
+
+- [x] `getAdminAppointments` accepts an optional date window (`from`/`to`) and a
+  `windowCompleted` flag; active search still overrides the date range.
+- [x] `/admin` reads `?date=YYYY-MM-DD` (browse that day) and `?date=all`
+  (full ledger, newest first); absent stays today-anchored.
+- [x] Date view controls: Today / All dates pill links and a native date picker
+  with a “View date” submit; links preserve active status and search.
+- [x] Status tabs and search links preserve the active date.
+- [x] List shows a scope caption (“Showing confirmed appointments for
+  Friday, 12 Sep”) outside the default today view.
+- [x] Empty state names the active view (“No pending appointments for all
+  dates.”).
+
+Rules:
+
+- Completed tab keeps listing historical records on today/all views; only an
+  explicitly picked date narrows it to that day.
+- Today-anchored default behaviour with no params is unchanged.
+- No schema change.
+
+Acceptance checks:
+
+- [x] Picking a past date shows that day’s appointments with actions intact.
+- [x] All dates drops the today-anchor and orders newest first.
+- [x] Filters and search survive switching between Today / All dates / tabs.
+- [x] Empty views explain what and which date range returned nothing.
+
+#### 6.5 Validated status transitions and reversible cancellation
+
+Status: implemented; lint, typecheck, and production build pass.
+
+Goal: make status changes explicit, safe, and undoable. Every transition is a
+guarded `updateMany` (no race between check and write), and a cancelled
+upcoming appointment can be restored to confirmed.
+
+Transitions (enforced server-side):
+
+- pending → confirmed (Confirm).
+- pending → confirmed-now-past is allowed; a past confirmed appointment is
+  displayed as Completed and can no longer be changed.
+- Cancel allowed from pending or a confirmed appointment whose end time has
+  not yet passed. Completed or cancelled rows are rejected.
+- cancelled → confirmed (Restore), only while the appointment is still
+  upcoming; past cancelled rows stay cancelled.
+
+Implementation:
+
+- [x] `lib/db/appointments.ts`: `confirmAppointment` guarded to `pending`;
+  `adminCancelAppointment` guarded to `pending` or unexpired `confirmed`;
+  `restoreAppointment` guarded to upcoming `cancelled`. All return whether
+  the transition applied.
+- [x] `app/actions/appointments.ts`: admin actions validate the id, call the
+  helpers, revalidate list + detail, and return `{ ok, error }` on failure
+  (Cancel and Restore). Confirm stays a void form action.
+- [x] New `RestoreButton` client control with confirm dialog; shown for
+  cancelled upcoming rows on list (mobile + desktop) and detail.
+- [x] `CancelButton` surfaces the server error when a transition is rejected.
+
+Rules:
+
+- No manual “mark completed” action and no stored completed status; the
+  DisplayStatus rule from 6.1 is unchanged.
+- Double clicks / concurrent requests are no-ops, not corruptions.
+- No schema change.
+
+Acceptance checks:
+
+- [x] Confirm a pending appointment works; re-submit is a silent no-op.
+- [x] Cancel works for pending or upcoming confirmed; rejected for Completed
+  and Cancelled.
+- [x] Restore an upcoming cancelled appointment brings it back to Confirmed.
+- [x] A cancelled appointment whose start time has passed cannot be restored.
+- [x] Rejected transitions surface a message instead of silently failing.
 
 ### 7. Reliability and launch readiness
 

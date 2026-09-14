@@ -61,6 +61,15 @@ export async function getRecentHistory(
     .slice(0, limit);
 }
 
+export async function getAppointmentById(
+  id: number
+): Promise<AppointmentWithRelations | null> {
+  return prisma.appointment.findUnique({
+    where: { id },
+    include: { customer: true, service: true },
+  });
+}
+
 export async function getCustomerWithAppointments(customerId: number) {
   return prisma.customer.findUnique({
     where: { id: customerId },
@@ -193,8 +202,38 @@ export async function cancelAppointment(
 }
 
 export async function confirmAppointment(appointmentId: number) {
-  return prisma.appointment.update({
-    where: { id: appointmentId },
+  const result = await prisma.appointment.updateMany({
+    where: { id: appointmentId, status: "pending" },
     data: { status: "confirmed" },
   });
+  return result.count > 0;
+}
+
+export async function adminCancelAppointment(
+  appointmentId: number,
+  now: Date = new Date()
+) {
+  const result = await prisma.appointment.updateMany({
+    where: {
+      id: appointmentId,
+      OR: [{ status: "pending" }, { status: "confirmed", endTime: { gte: now } }],
+    },
+    data: { status: "cancelled" },
+  });
+  return result.count > 0;
+}
+
+export async function restoreAppointment(
+  appointmentId: number,
+  now: Date = new Date()
+) {
+  const result = await prisma.appointment.updateMany({
+    where: {
+      id: appointmentId,
+      status: "cancelled",
+      startTime: { gte: now },
+    },
+    data: { status: "confirmed" },
+  });
+  return result.count > 0;
 }

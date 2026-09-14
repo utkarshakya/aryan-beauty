@@ -2,6 +2,7 @@
 
 import { confirmAppointment } from "@/app/actions/appointments";
 import CancelButton from "./CancelButton";
+import RestoreButton from "./RestoreButton";
 import Link from "next/link";
 
 type Appointment = {
@@ -26,6 +27,11 @@ type AppointmentsListProps = {
     | "confirmed"
     | "cancelled"
     | "completed";
+  searchTerm?: string;
+  dateFilter?: string;
+  scopeLabel?: string;
+  showScope?: boolean;
+  emptyMessage?: string;
 };
 
 const STATUS_BADGE_CLASSES: Record<string, string> = {
@@ -49,7 +55,34 @@ const statusTabs: {
 export default function AdminAppointmentsList({
   appointments,
   currentStatus,
+  searchTerm,
+  dateFilter,
+  scopeLabel,
+  showScope,
+  emptyMessage,
 }: AppointmentsListProps) {
+  const term = searchTerm?.trim();
+  const statusWord =
+    currentStatus === "all"
+      ? null
+      : currentStatus === "default"
+        ? "pending"
+        : currentStatus;
+  const clearHref = () => {
+    const params = new URLSearchParams();
+    params.set("status", currentStatus === "default" ? "pending" : currentStatus);
+    if (dateFilter) params.set("date", dateFilter);
+    const qs = params.toString();
+    return qs ? `/admin?${qs}` : "/admin";
+  };
+  const hrefForTab = (value: string) => {
+    const params = new URLSearchParams();
+    params.set("status", value);
+    if (term) params.set("search", term);
+    if (dateFilter) params.set("date", dateFilter);
+    return `/admin?${params.toString()}`;
+  };
+
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-muted-soft/40 p-3 sm:space-y-6 sm:p-5">
       <nav
@@ -59,7 +92,7 @@ export default function AdminAppointmentsList({
         {statusTabs.map((tab) => (
           <Link
             key={tab.value}
-            href={`/admin?status=${tab.value}`}
+            href={hrefForTab(tab.value)}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
               currentStatus === tab.value ||
               (currentStatus === "default" && tab.value === "pending")
@@ -73,11 +106,48 @@ export default function AdminAppointmentsList({
       </nav>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted shadow-sm sm:p-10">
-          No appointments
-        </div>
+        term ? (
+          <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted shadow-sm sm:p-10">
+            <p>No appointments match “{term}”.</p>
+            <p className="mt-1">
+              Try a different name or phone number, or{" "}
+              <Link
+                href={clearHref()}
+                className="font-medium text-primary underline hover:text-primary-strong"
+              >
+                clear the search
+              </Link>
+              .
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted shadow-sm sm:p-10">
+            {emptyMessage ?? "No appointments"}
+          </div>
+        )
       ) : (
         <>
+          {term ? (
+            <p className="text-sm text-muted">
+              {appointments.length}{" "}
+              {appointments.length === 1 ? "appointment" : "appointments"} for
+              “{term}” ·{" "}
+              <Link
+                href={clearHref()}
+                className="font-medium text-primary underline hover:text-primary-strong"
+              >
+                Clear search
+              </Link>
+            </p>
+          ) : showScope && scopeLabel ? (
+            <p className="text-sm text-muted">
+              Showing{" "}
+              {statusWord
+                ? `${statusWord} appointments ${scopeLabel}`
+                : `appointments ${scopeLabel}`}
+              .
+            </p>
+          ) : null}
           <div className="space-y-3 md:hidden">
             {appointments.map((appointment) => {
               const displayStatus = appointment.displayStatus ?? appointment.status;
@@ -90,9 +160,12 @@ export default function AdminAppointmentsList({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-foreground">
+                    <Link
+                      href={`/admin/appointments/${appointment.id}`}
+                      className="truncate font-medium text-foreground hover:text-primary hover:underline"
+                    >
                       {appointment.customer.name}
-                    </p>
+                    </Link>
                     {appointment.customer.phone && (
                       <p className="mt-1 text-sm text-muted">
                         {appointment.customer.phone}
@@ -169,6 +242,12 @@ export default function AdminAppointmentsList({
                     )}
                   </div>
                 )}
+                {displayStatus === "cancelled" &&
+                  new Date(appointment.startTime) > new Date() && (
+                    <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-border pt-3">
+                      <RestoreButton appointmentId={appointment.id} />
+                    </div>
+                  )}
               </article>
               );
             })}
@@ -193,9 +272,12 @@ export default function AdminAppointmentsList({
                   return (
                   <tr key={appointment.id} className="hover:bg-neutral-soft">
                     <td className="px-3 py-5">
-                      <p className="font-medium text-foreground">
+                      <Link
+                        href={`/admin/appointments/${appointment.id}`}
+                        className="font-medium text-foreground hover:text-primary hover:underline"
+                      >
                         {appointment.customer.name}
-                      </p>
+                      </Link>
                       {appointment.customer.phone && (
                         <p className="text-muted">
                           {appointment.customer.phone}
@@ -267,6 +349,10 @@ export default function AdminAppointmentsList({
                         {!isCompleted && displayStatus !== "cancelled" && (
                           <CancelButton appointmentId={appointment.id} />
                         )}
+                        {displayStatus === "cancelled" &&
+                          new Date(appointment.startTime) > new Date() && (
+                            <RestoreButton appointmentId={appointment.id} />
+                          )}
                       </div>
                     </td>
                   </tr>
