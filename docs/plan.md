@@ -27,8 +27,9 @@ Completed safety corrections:
   missing; subsequent database status controls access.
 
 Current repository note: the webhook parsing fix and service active-state fix
-are verified but still uncommitted. Keep them separate from future structural
-work.
+are committed (`04169b8`). Section 7 test suite (`npm run test`) and Vitest
+infrastructure added, including a fix for customer self-cancellation (cancelMyAppointment
+now resolves the `Customer` by `userId` instead of passing `User.id`).
 
 ## Next session starting point
 
@@ -314,11 +315,15 @@ Acceptance checks:
 
 ### 7. Reliability and launch readiness
 
-- [ ] Add tests for authorization, disabled users, ownership, booking
+- [x] Add tests for authorization, disabled users, ownership, booking
   conflicts, cancellation cutoff, and inactive services.
-- [ ] Add a manual testing checklist to the README.
-- [ ] Review production environment values, Clerk redirects, backups, and
-  account recovery.
+- [x] Add a manual testing checklist to the README.
+- [x] Review production environment values, Clerk redirects, backups, and
+  account recovery. Findings: `NEXT_PUBLIC_CLERK_*_FALLBACK_REDIRECT_URL`
+  pointed at a non-existent `/studio` route and `/admin`; corrected to
+  `/auth/redirect` in `.env` and `.env.production`. `DIRECT_URL` intentionally
+  absent from `.env.production` (migrations run locally). Supabase free tier
+  auto-pause accepted by the owner.
 - [ ] Test the complete flow on a real phone.
 
 ### 8. Staff management — last
