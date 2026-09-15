@@ -209,10 +209,10 @@ export default async function AdminPage({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-sm font-medium text-foreground">
-                    {appointment.startTime.toLocaleTimeString("en-IN", {
+                    {appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString("en-IN", {
                       hour: "numeric",
                       minute: "2-digit",
-                    })}
+                    }) : ""}
                   </p>
                   <p className="text-xs capitalize text-muted">
                     {appointment.status}

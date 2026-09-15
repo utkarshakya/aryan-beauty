@@ -145,8 +145,10 @@ export async function getAvailableSlots(
     const end = start + durationMs;
     const unavailable = appointments.some(
       (appointment) =>
-        appointment.startTime.getTime() < end &&
-        appointment.endTime.getTime() > start
+        appointment.startTime &&
+        appointment.endTime &&
+        new Date(appointment.startTime).getTime() < end &&
+        new Date(appointment.endTime).getTime() > start
     );
     if (start >= earliestAllowed && !unavailable) {
       const startDate = new Date(start);

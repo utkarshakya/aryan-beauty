@@ -1,14 +1,14 @@
 import CancelAppointmentButton from "./CancelAppointmentButton";
 
-const formatDate = (date: Date) =>
-  date.toLocaleDateString("en-IN", {
+const formatDate = (date: Date | string) =>
+  new Date(date).toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
 
-const formatTime = (date: Date) =>
-  date.toLocaleTimeString("en-IN", {
+const formatTime = (date: Date | string) =>
+  new Date(date).toLocaleTimeString("en-IN", {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -21,8 +21,8 @@ const statusClasses: Record<string, string> = {
 
 type Appointment = {
   id: number;
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   status: string;
   serviceName: string;
   servicePrice: number;
@@ -72,21 +72,21 @@ export default function AppointmentGroup({
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses[appointment.status] ?? "bg-neutral-soft text-neutral"}`}
                 >
-                  {appointment.status.charAt(0).toUpperCase() +
-                    appointment.status.slice(1)}
+                  {appointment.status ? appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) : ""}
                 </span>
               </div>
 
               <div className="mt-4 border-t border-border pt-3 text-sm text-foreground">
-                <p>{formatDate(appointment.startTime)}</p>
+                <p>{appointment.startTime ? formatDate(appointment.startTime) : ""}</p>
                 <p className="mt-1 text-muted">
-                  {formatTime(appointment.startTime)} –{" "}
-                  {formatTime(appointment.endTime)}
+                  {appointment.startTime ? formatTime(appointment.startTime) : ""} –{" "}
+                  {appointment.endTime ? formatTime(appointment.endTime) : ""}
                 </p>
               </div>
 
               {appointment.status !== "cancelled" &&
-                appointment.startTime > new Date() && (
+                appointment.startTime &&
+                new Date(appointment.startTime) > new Date() && (
                   <div className="mt-4 border-t border-border pt-3">
                     <CancelAppointmentButton appointmentId={appointment.id} />
                   </div>

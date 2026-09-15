@@ -28,7 +28,7 @@ export default function Error({
         We couldn&apos;t load this page. Please try again later.
       </p>
       {error?.message && (
-        <p className="mt-4 text-xs font-mono text-red-500 bg-red-50 p-2 rounded max-w-md mx-auto break-words">
+        <p className="mt-4 text-xs font-mono text-red-500 bg-red-50 p-2 rounded max-w-md mx-auto wrap-break-word">
           {error.message}
         </p>
       )}

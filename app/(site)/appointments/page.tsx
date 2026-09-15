@@ -72,11 +72,11 @@ export default async function AppointmentsPage({
   const now = new Date();
   const upcoming =
     customer?.appointments.filter(
-      (a) => a.startTime >= now && a.status !== "cancelled",
+      (a) => a && a.startTime && new Date(a.startTime) >= now && a.status !== "cancelled",
     ) ?? [];
   const history =
     customer?.appointments
-      .filter((a) => !upcoming.some((u) => u.id === a.id))
+      .filter((a) => a && !upcoming.some((u) => u.id === a.id))
       .slice(0, MAX_HISTORY) ?? [];
 
   return (

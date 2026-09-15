@@ -10,16 +10,16 @@ const STATUS_BADGE_CLASSES: Record<string, string> = {
   cancelled: "bg-neutral-soft text-neutral",
 };
 
-const formatDate = (date: Date) =>
-  date.toLocaleDateString("en-IN", {
+const formatDate = (date: Date | string) =>
+  new Date(date).toLocaleDateString("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
-const formatTime = (date: Date) =>
-  date.toLocaleTimeString("en-IN", {
+const formatTime = (date: Date | string) =>
+  new Date(date).toLocaleTimeString("en-IN", {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -31,9 +31,9 @@ type AppointmentDetailProps = {
     serviceName: string;
     servicePrice: number;
     serviceDurationMin: number;
-    startTime: Date;
-    endTime: Date;
-    createdAt: Date;
+    startTime: Date | string;
+    endTime: Date | string;
+    createdAt: Date | string;
     notes: string;
     displayStatus: string;
   };

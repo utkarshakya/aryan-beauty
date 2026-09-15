@@ -7,8 +7,8 @@ import Link from "next/link";
 
 type Appointment = {
   id: number;
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   status: string;
   displayStatus?: string;
   notes: string;
@@ -243,6 +243,7 @@ export default function AdminAppointmentsList({
                   </div>
                 )}
                 {displayStatus === "cancelled" &&
+                  appointment.startTime &&
                   new Date(appointment.startTime) > new Date() && (
                     <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-border pt-3">
                       <RestoreButton appointmentId={appointment.id} />
@@ -350,6 +351,7 @@ export default function AdminAppointmentsList({
                           <CancelButton appointmentId={appointment.id} />
                         )}
                         {displayStatus === "cancelled" &&
+                          appointment.startTime &&
                           new Date(appointment.startTime) > new Date() && (
                             <RestoreButton appointmentId={appointment.id} />
                           )}

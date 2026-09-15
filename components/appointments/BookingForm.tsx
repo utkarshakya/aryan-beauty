@@ -94,10 +94,12 @@ export default function BookingForm({
 
   if (state && "success" in state) {
     const { serviceName, startTime, name, phone } = state.success;
-    const formatted = new Date(startTime).toLocaleString("en-IN", {
-      dateStyle: "full",
-      timeStyle: "short",
-    });
+    const formatted = startTime
+      ? new Date(startTime).toLocaleString("en-IN", {
+          dateStyle: "full",
+          timeStyle: "short",
+        })
+      : "";
 
     return (
       <div
@@ -272,7 +274,7 @@ export default function BookingForm({
             id="date"
             name="date"
             type="date"
-            min={new Date().toLocaleDateString("en-CA")}
+            min={new Date().toISOString().split("T")[0]}
             value={selectedDate}
             onChange={(event) => {
               setSelectedDate(event.target.value);
