@@ -5,6 +5,8 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+import { Pool } from "pg";
+
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -13,9 +15,12 @@ if (!connectionString) {
   );
 }
 
-const adapter = new PrismaPg({
+const pool = new Pool({
   connectionString: connectionString || "postgresql://postgres:postgres@localhost:5432/db",
+  ssl: connectionString?.includes("localhost") ? false : { rejectUnauthorized: false },
 });
+
+const adapter = new PrismaPg(pool);
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
