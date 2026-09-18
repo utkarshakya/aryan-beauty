@@ -71,3 +71,24 @@ subscriptions, or complex permissions before that need is demonstrated.
 4. Let real usage determine later features.
 5. Prefer simple engineering when it is sufficient.
 6. Keep future complexity out of the first release.
+
+## Next product direction: People and permissions
+
+The next major capability is a People area for managing customers, staff,
+admins, and walk-in customers in one place.
+
+Planned ideas:
+
+- Search people and view their profiles and appointment history.
+- Invite staff and manage customer-to-staff promotion or demotion.
+- Disable and restore accounts without deleting their history.
+- Use capability-based permissions alongside role templates.
+- Let the super admin grant or revoke individual capabilities.
+- Keep super-admin accounts protected from changes inside the application.
+- Create walk-in customers and link them to existing customer accounts.
+- Apply the new permissions to appointments, services, business settings, and
+  customer actions.
+- Add tests and manual checks for each role and permission combination.
+
+After this feature is complete, run the full product flow on a real phone
+before launch.

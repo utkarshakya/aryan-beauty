@@ -328,10 +328,10 @@ Acceptance checks:
 
 ### 8. Staff management — last
 
-- [ ] Decide whether the owner may manage staff or only the super admin may.
-- [ ] Invite/activate staff through Clerk and assign the `staff` role.
-- [ ] Disable/restore staff without deleting history.
-- [ ] Prevent creation or modification of super-admin access from the app.
+- [x] Decide whether the owner may manage staff or only the super admin may. Implemented through the owner-admin staff workspace; granting Admin remains super-admin-only.
+- [x] Invite/activate staff through Clerk and assign the `staff` role.
+- [x] Disable/restore staff without deleting history.
+- [x] Prevent creation or modification of super-admin access from the app.
 
 ## Explicitly postponed
 
