@@ -17,6 +17,7 @@ export interface SessionClaims {
 }
 
 export * from "./sync";
+export * from "./metadata";
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
 

@@ -151,6 +151,12 @@ export default async function AdminPage({
           >
             Business settings
           </Link>
+          <Link
+            href="/admin/staff"
+            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Manage staff
+          </Link>
         </div>
       </div>
       <section

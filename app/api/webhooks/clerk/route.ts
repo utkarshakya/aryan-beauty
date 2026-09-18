@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { upsertUserFromClerk, softDeleteUser } from "@/lib/auth";
+import { upsertUserFromClerk, softDeleteUser, roleFromPublicMetadata } from "@/lib/auth";
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET!;
 
@@ -45,7 +45,10 @@ export async function POST(req: Request) {
         const email = (data.email_addresses as Array<{ email_address: string }>)?.[0]?.email_address;
         const name = data.full_name as string | undefined;
 
-        await upsertUserFromClerk(clerkUserId, { email, name, role: "customer" });
+        const metadataRole = (data.public_metadata as { role?: unknown } | undefined)?.role;
+        const role = roleFromPublicMetadata(metadataRole);
+
+        await upsertUserFromClerk(clerkUserId, { email, name, role });
         break;
       }
 

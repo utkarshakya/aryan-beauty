@@ -77,6 +77,23 @@ is only needed for HTTP Route Handlers under `app/api/`.
 - [ ] Marketing fields (tagline, description, phone, address) appear on the
       public pages.
 
+### Staff management
+
+- [ ] Owner invites an email from `/admin/staff` → the invitee receives the
+      Clerk invitation email.
+- [ ] The invitee accepts, signs up, and lands on the workspace as active
+      `staff` (webhook applies the invited role, not customer).
+- [ ] Owner can promote an existing customer to Staff and demote staff back to
+      Customer.
+- [ ] Disabling a staff member revokes their access immediately, and their
+      booking/customer history stays intact.
+- [ ] Restore brings a disabled staff member back with their role preserved.
+- [ ] Owner cannot disable themselves, cannot change a super-admin account, and
+      the UI offers no super-admin option.
+- [ ] An owner cannot grant the Admin role through the app.
+- [ ] Staff and customers cannot reach `/admin/staff` (redirected).
+- [ ] Viewing the list again after a role change shows the updated badge.
+
 ### Access and safety
 
 - [ ] A customer cannot reach `/admin` (redirected).

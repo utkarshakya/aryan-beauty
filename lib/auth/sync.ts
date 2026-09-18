@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
-import { requireSuperAdmin } from "@/lib/auth";
+import { requireOwnerAdmin, requireSuperAdmin } from "@/lib/auth";
 import type { UserRole, UserStatus } from "@prisma/client";
 
 export async function upsertUserFromClerk(
@@ -97,18 +97,98 @@ export async function updateUserRole(clerkUserId: string, role: UserRole) {
     );
   }
 
-  const client = await clerkClient();
-
   const user = await prisma.user.update({
     where: { clerkUserId },
     data: { role },
   });
 
-  await client.users.updateUserMetadata(clerkUserId, {
-    publicMetadata: { role: user.role, status: user.status },
+  await syncPublicMetadata(clerkUserId, {
+    role: user.role,
+    status: user.status,
   });
 
   return user;
+}
+
+function assertChangeableTarget(
+  user: { clerkUserId: string; role: UserRole; status: UserStatus } | null,
+  actorClerkUserId: string
+) {
+  if (!user) throw new Error("User not found.");
+  if (user.role === "super_admin") {
+    throw new Error("Super admin access is configured outside the application.");
+  }
+  if (user.clerkUserId === actorClerkUserId) {
+    throw new Error("You cannot change your own access.");
+  }
+}
+
+export async function setUserRole(clerkUserId: string, role: UserRole) {
+  const actorClerkUserId = await requireOwnerAdmin();
+
+  if (role === "super_admin") {
+    throw new Error("Super admin access is configured outside the application.");
+  }
+  if (role === "admin") {
+    await requireSuperAdmin();
+  }
+
+  const user = await prisma.user.findUnique({ where: { clerkUserId } });
+  assertChangeableTarget(user, actorClerkUserId);
+
+  const updated = await prisma.user.update({
+    where: { clerkUserId },
+    data: { role },
+  });
+
+  await syncPublicMetadata(clerkUserId, {
+    role: updated.role,
+    status: updated.status,
+  });
+
+  return updated;
+}
+
+export async function disableUser(clerkUserId: string) {
+  const actorClerkUserId = await requireOwnerAdmin();
+
+  const user = await prisma.user.findUnique({ where: { clerkUserId } });
+  assertChangeableTarget(user, actorClerkUserId);
+
+  if (user!.status === "disabled") return null;
+
+  const updated = await prisma.user.update({
+    where: { clerkUserId },
+    data: { status: "disabled" },
+  });
+
+  await syncPublicMetadata(clerkUserId, {
+    role: updated.role,
+    status: "disabled",
+  });
+
+  return updated;
+}
+
+export async function restoreUser(clerkUserId: string) {
+  const actorClerkUserId = await requireOwnerAdmin();
+
+  const user = await prisma.user.findUnique({ where: { clerkUserId } });
+  assertChangeableTarget(user, actorClerkUserId);
+
+  if (user!.status === "active") return null;
+
+  const updated = await prisma.user.update({
+    where: { clerkUserId },
+    data: { status: "active" },
+  });
+
+  await syncPublicMetadata(clerkUserId, {
+    role: updated.role,
+    status: "active",
+  });
+
+  return updated;
 }
 
 export async function getOrCreateUser(clerkUserId: string) {
