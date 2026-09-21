@@ -1,5 +1,8 @@
 # Active Implementation Plan
 
+> Moved from `docs/plan.md` into `docs/plans/` so that active, in-progress plans live
+> together in one place.
+
 This plan covers the first deployment of Unknown Beauty for one family-run
 beauty parlour. Keep the product useful for this parlour before considering
 multiple businesses, organizations, billing, or complex permissions.

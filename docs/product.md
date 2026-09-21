@@ -24,14 +24,14 @@ The first success is a working product the parlour can use with real customers:
 ## Roadmap
 
 This is the product roadmap, not the detailed implementation checklist. The
-current checklist and exact order live in [`plan.md`](plan.md).
+current checklist and exact order live in [`plans/plan.md`](plans/plan.md).
 
 ### Phase 1 — First usable product
 
 The public site, Clerk sign-in, service catalog, customer booking, customer
 appointment history/cancellation, owner appointment dashboard, and basic
 service management are implemented. Final validation and production readiness
-remain tracked in `plan.md`.
+remain tracked in `plans/plan.md`.
 
 ### Phase 2 — Product quality and operational workflows
 
