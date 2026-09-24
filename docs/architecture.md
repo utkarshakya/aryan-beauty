@@ -2,105 +2,116 @@
 
 ## Purpose
 
-Unknown Beauty is a single Next.js application for one beauty parlour. It is a
-full-stack application: pages, server-side actions, authentication, and
-PostgreSQL access live in the same repository and deploy together. There is no
-separate frontend or backend service to run.
+Unknown Beauty is a single Next.js application for one beauty parlour. It is a full-stack application: pages, server-side actions, authentication, and PostgreSQL access live in the same repository and deploy together. There is no separate frontend or backend service to run.
 
 ## Stack
 
-- Next.js App Router and TypeScript
-- Tailwind CSS
+- Next.js 16 App Router and TypeScript
+- Tailwind CSS v4
 - Clerk authentication
 - PostgreSQL on Supabase
-- Prisma ORM
+- Prisma ORM with `@prisma/adapter-pg`
 - Netlify deployment
+- Vitest for unit/integration tests
 
-## Simple repository structure
+## Repository Structure
 
-The target structure is intentionally small:
-
-```text
-app/          routes, pages, layouts, server actions, and HTTP route handlers
-components/   reusable visual components
-lib/          server-side infrastructure, auth, configuration, and database code
-prisma/       schema, migrations, and seed data
-docs/         product and engineering documentation
+```
+app/              routes, pages, layouts, server actions, and HTTP route handlers
+  (site)/         public marketing and customer pages
+  admin/          owner/staff admin pages
+  api/            HTTP route handlers (Clerk webhooks)
+  actions/        Server Actions grouped by domain
+  components/     page-specific components
+components/       reusable visual components
+  ui/             shared primitives (Button, Container)
+  appointments/   appointment-specific components
+  services/       service management components
+  customers/      customer-related components
+  staff/          staff management components
+  business/       business settings components
+  auth/           auth-related components
+lib/              server-side infrastructure, auth, configuration, and database code
+  auth/           authorization guards, metadata sync
+  db/             Prisma queries and transactions by domain
+  prisma.ts       Prisma client with pg adapter
+prisma/           schema, migrations, and seed data
+docs/             product and engineering documentation
+tests/            Vitest tests with helpers
 ```
 
-During the gradual cleanup, existing code may still live under `features/` and
-`shared/`. Do not move everything at once. Move one complete domain, verify it,
-then remove the old location.
-
-### Placement rules
+### Placement Rules
 
 | Code | Home |
 |---|---|
 | URL pages and layouts | `app/` |
 | Server mutations invoked by forms/buttons | `app/actions/` |
-| External HTTP endpoints, such as Clerk webhooks | `app/api/` |
-| Reusable forms, cards, lists, navigation, and UI primitives | `components/` |
+| External HTTP endpoints (Clerk webhooks) | `app/api/` |
+| Reusable forms, cards, lists, navigation, UI primitives | `components/` |
 | Prisma queries and transactions | `lib/db/` |
-| Prisma client, authorization, and business configuration | `lib/` |
+| Prisma client, authorization, business configuration | `lib/` |
 
-A server page may read from `lib/db/` directly. A mutation must be a Server
-Action and must validate input and authorize the caller itself.
+A server page may read from `lib/db/` directly. A mutation must be a Server Action and must validate input and authorize the caller itself.
 
-## Request flow
+## Request Flow
 
-```text
+```
 Browser UI → Server Action or Route Handler → lib/db query → Prisma → PostgreSQL
 ```
 
-For example, the booking form invokes `createAppointment`; the action verifies
-the Clerk session, validates the form, runs a Prisma transaction, and refreshes
-the appointment page. This is backend work even though it is in the same Next.js
-project.
+For example, the booking form invokes `createAppointment`; the action verifies the Clerk session, validates the form, runs a Prisma transaction, and refreshes the appointment page. This is backend work even though it is in the same Next.js project.
 
-## Authentication and authorization
+## Authentication and Authorization
 
-Clerk authenticates the person. The Prisma `User` record is the authority for
-ordinary application roles and account status:
+Clerk authenticates the person. The Prisma `User` record is the authority for ordinary application roles and account status:
 
 - `super_admin`, `admin`, `staff`, and `customer` are application roles.
 - Disabled users are denied through database checks.
-- Clerk metadata is synchronized for display/integration purposes, but is not
-  used as the authorization source of truth.
+- Clerk metadata is synchronized for display/integration purposes, but is not used as the authorization source of truth.
 - The configured super-admin Clerk ID remains a recovery mechanism.
-- Bootstrap admin IDs create an initial admin record only when it is missing;
-  after that, the database record controls access.
+- Bootstrap admin IDs create an initial admin record only when it is missing; after that, the database record controls access.
 
-Every protected page and every Server Action must perform a server-side check.
-Showing or hiding a navigation link is a usability feature, not a permission
-check.
+Every protected page and every Server Action must perform a server-side check. Showing or hiding a navigation link is a usability feature, not a permission check.
 
-## Data rules
+### Auth Guards (in `lib/auth/index.ts`)
+
+- `requireActiveUser()` — any signed-in active user
+- `requireAdmin()` — active super_admin, admin, or staff
+- `requireOwnerAdmin()` — active super_admin or admin only
+- `requireSuperAdmin()` — configured super-admin Clerk ID only
+
+## Data Rules
 
 - `User` stores identity, role, and account status.
 - `Customer` stores salon-specific customer data and optionally links to `User`.
 - `Service.active` hides a service without deleting historical appointments.
-- Appointments are never deleted for normal cancellation; status changes to
-  `cancelled`.
+- Appointments are never deleted for normal cancellation; status changes to `cancelled`.
 - Booking conflicts use interval overlap checks and ignore cancelled rows.
+- Appointment snapshots (`serviceName`, `servicePrice`, `serviceDurationMin`) captured at booking time preserve historical accuracy.
+- `BusinessSettings` is a singleton (one row) controlling scheduling rules and marketing content.
 
-## Testing locally
+## Testing Locally
 
-Use the product itself to test customer and admin flows, then use Prisma Studio
-to inspect saved records:
+Use the product itself to test customer and admin flows, then use Prisma Studio to inspect saved records:
 
 ```powershell
 npm.cmd run dev
 npm.cmd run prisma:studio
 ```
 
-Postman is only useful for real HTTP route handlers under `app/api/`. Server
-Actions are tested through the forms and controls that invoke them.
+Run the test suite:
 
-## Platform notes
+```powershell
+npm.cmd run test
+```
+
+Postman is only useful for real HTTP route handlers under `app/api/`. Server Actions are tested through the forms and controls that invoke them.
+
+## Platform Notes
 
 - Next.js 16 uses `proxy.ts`, not `middleware.ts`, for Clerk's handshake.
-- In this App Router version, page `searchParams` are asynchronous and must be
-  awaited.
-- `DATABASE_URL` is the application connection string. `DIRECT_URL` is for
-  Prisma CLI migrations only.
+- In this App Router version, page `searchParams` are asynchronous and must be awaited.
+- `DATABASE_URL` is the application connection string. `DIRECT_URL` is for Prisma CLI migrations only.
 - Netlify builds with `prisma generate && next build`.
+- Tailwind CSS v4 uses `@theme` in `app/globals.css` for design tokens.
+- Server Actions are the primary mutation mechanism; Route Handlers only for webhooks.
