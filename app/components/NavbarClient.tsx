@@ -15,7 +15,7 @@ export default function NavbarClient({ canAccessAdmin }: { canAccessAdmin: boole
     <header className="sticky top-0 z-40 border-b border-border bg-background">
       <Container>
         <div className="flex h-14 items-center justify-between sm:h-16">
-          <Link href="/" className="text-lg font-bold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:text-xl">Unknown <span className="text-primary">Beauty</span></Link>
+          <Link href="/" className="text-lg font-bold tracking-tight text-foreground focus-ring sm:text-xl">Unknown <span className="text-primary">Beauty</span></Link>
           <div className="flex items-center gap-1">
             <nav className="hidden items-center gap-1 sm:flex" aria-label="Main navigation">
               <Link href="/services" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground">Services</Link>
@@ -24,7 +24,7 @@ export default function NavbarClient({ canAccessAdmin }: { canAccessAdmin: boole
             </nav>
             <ThemeToggle />
             <div className="hidden sm:block">{isLoaded ? (isSignedIn ? <UserButton /> : <Link href="/sign-in" className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground sm:px-4">Login</Link>) : null}</div>
-            <button type="button" aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} className="rounded-full p-1.5 text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:hidden">
+            <button type="button" aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)} className="rounded-full p-1.5 text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:hidden">
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
               </svg>

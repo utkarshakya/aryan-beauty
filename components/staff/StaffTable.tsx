@@ -112,7 +112,7 @@ export default function StaffTable({
                         value={user.role === "admin" ? "admin" : user.role}
                         disabled={busy === user.clerkUserId || user.role === "admin"}
                         onChange={(e) => handleRoleChange(user, e.target.value as UserRole)}
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring disabled:opacity-60"
                       >
                         {user.role === "admin" ? (
                           <option value="admin">Admin</option>

@@ -53,7 +53,7 @@ export default function ServicesFilter({
                   type="button"
                   onClick={() => setActiveCategory(category)}
                   aria-pressed={active}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm ${
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-ring sm:px-4 sm:py-2 sm:text-sm ${
                     active
                       ? "bg-primary text-white"
                       : "bg-primary-soft text-foreground hover:bg-primary-soft-strong"

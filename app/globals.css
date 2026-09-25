@@ -22,11 +22,24 @@
   --color-danger-soft: #fce4e6;
   --color-neutral: #66545d;
   --color-neutral-soft: #eee3e2;
+
+  --color-surface: #ffffff;
+  --color-surface-strong: #f3e7e4;
+
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+
+  --shadow-card: 0 1px 2px rgb(42 27 36 / 0.05), 0 4px 12px rgb(42 27 36 / 0.06);
+
+  --text-display: clamp(1.875rem, 5vw, 3rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
 }
 
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-display: var(--font-fraunces);
 }
 
 body {
@@ -34,6 +47,21 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans);
   transition: background-color 180ms ease, color 180ms ease;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 @media (max-width: 639px) {
@@ -64,4 +92,7 @@ html.dark {
   --color-danger-soft: #482027;
   --color-neutral: #c7b5bd;
   --color-neutral-soft: #382d38;
+
+  --color-surface: #2b2530;
+  --color-surface-strong: #3b3342;
 }

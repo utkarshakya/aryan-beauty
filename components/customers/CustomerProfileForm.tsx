@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 const initialState = { errors: {} as Record<string, string> };
 
 const inputClasses =
-  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary";
+  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring";
 const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
 const errorTextClasses = "mt-1.5 text-sm text-danger";
 

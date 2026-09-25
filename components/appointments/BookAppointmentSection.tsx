@@ -46,7 +46,7 @@ export default function BookAppointmentSection({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open booking form"
-        className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-strong focus-ring"
       >
         Book appointment
       </button>

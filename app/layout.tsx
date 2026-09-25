@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { fraunces } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <ClerkProvider>
       <html
         lang="en"
-        className="h-full antialiased"
+        className={`${fraunces.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">{children}</body>
       </html>

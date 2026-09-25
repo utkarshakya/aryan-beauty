@@ -141,19 +141,19 @@ export default async function AdminPage({
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/services"
-            className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring"
           >
             Manage services
           </Link>
           <Link
             href="/admin/settings"
-            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
           >
             Business settings
           </Link>
           <Link
             href="/admin/staff"
-            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
           >
             Manage staff
           </Link>
@@ -250,7 +250,7 @@ export default async function AdminPage({
             defaultValue={searchParam}
             placeholder="Customer name or phone"
             autoComplete="off"
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus-ring"
           />
         </div>
         {hasExplicitStatus ? (
@@ -259,7 +259,7 @@ export default async function AdminPage({
         {dateFilter && <input type="hidden" name="date" value={dateFilter} />}
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-5"
+          className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring sm:px-5"
         >
           Search
         </button>
@@ -302,7 +302,7 @@ export default async function AdminPage({
               name="date"
               type="date"
               defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
-              className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus-ring"
             />
           </div>
           {hasExplicitStatus && (
@@ -313,7 +313,7 @@ export default async function AdminPage({
           )}
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm"
+            className="inline-flex items-center justify-center rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring sm:px-4 sm:py-2 sm:text-sm"
           >
             View date
           </button>

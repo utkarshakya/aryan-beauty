@@ -52,7 +52,7 @@ export default function ServiceForm() {
     }
   };
 
-  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -127,7 +127,7 @@ export default function ServiceForm() {
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
-            className="rounded border-border text-primary focus:ring-primary"
+            className="rounded border-border text-primary focus-ring"
           />
           Active
         </label>

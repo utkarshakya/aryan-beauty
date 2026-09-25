@@ -38,7 +38,7 @@ export default async function Hero() {
     };
   }
   return (
-    <section className="relative isolate overflow-hidden bg-primary-soft dark:bg-[#17131a]">
+    <section className="relative isolate overflow-hidden bg-primary-soft dark:bg-background">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 -top-40 hidden h-80 w-80 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl dark:block"
@@ -63,7 +63,7 @@ export default async function Hero() {
               href="/services"
               variant="secondary"
               size="lg"
-              className="w-full max-w-[320px] sm:w-auto sm:max-w-none dark:bg-[#2b2530] dark:text-primary dark:hover:bg-[#3b3342]"
+              className="w-full max-w-[320px] sm:w-auto sm:max-w-none dark:bg-surface dark:text-primary dark:hover:bg-surface-strong"
             >
               View Services
             </ButtonLink>

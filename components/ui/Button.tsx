@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 const baseClasses =
-  "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
 
 const sizeClasses = {
   md: "px-4 py-2.5 text-xs sm:px-5 sm:text-sm",

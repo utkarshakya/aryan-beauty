@@ -122,7 +122,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
     setClosures(prev => prev.filter((_, i) => i !== index));
   };
 
-  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -241,7 +241,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                     type="checkbox"
                     checked={!closed}
                     onChange={() => toggleClosedWeekday(WEEKDAYS.findIndex(d => d.key === day.key))}
-                    className="rounded border-border text-primary focus:ring-primary"
+                    className="rounded border-border text-primary focus-ring"
                   />
                   <span className="text-sm font-medium text-foreground">{day.label}</span>
                 </label>

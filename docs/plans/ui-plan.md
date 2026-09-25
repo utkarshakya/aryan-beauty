@@ -2,7 +2,7 @@
 
 Companion to `plans/plan.md` (this folder; the original implementation plan). Scope: visual quality, consistency, and polish of the website for the real parlour — customer-facing pages first, owner admin second. No product behaviour changes unless explicitly listed.
 
-## Current State — 24 September 2026
+## Current State — 25 September 2026
 
 What the UI looks like today:
 
@@ -11,13 +11,14 @@ What the UI looks like today:
 - Marketing components live in `app/components/` (Hero, Navbar, Footer, ServiceCard, ServicesPreview, ServicesFilter, EmptyServices, PageHeader, ThemeToggle, not-found).
 - Admin screens inline long class strings repeatedly: `app/admin/page.tsx` restyles the same pill `Link` as a button four times and defines `SummaryCard` locally; status badges are styled ad hoc in the appointments list and detail views.
 - Forms (BookingForm, BusinessSettingsForm, ServiceForm, CustomerProfileForm, StaffInviteForm) each define their own input classes.
-- Typography is the system font stack only; no brand or display font.
-- Some hardcoded dark-mode hexes bypass the theme (`Hero.tsx` `dark:bg-[#17131a]`, `dark:bg-[#2b2530]`, `dark:bg-[#3b3342]`).
+- Typography: system font stack for body; Fraunces (warm serif, loaded via `next/font` in `app/fonts.ts`) for `h1`–`h3` through a base rule, plus a `font-display` utility and `text-display` size token.
+- Focus is defined once as the `focus-ring` utility in `app/globals.css` and used at every interactive element (2px primary outline, 2px offset; works in both themes).
+- Hardcoded dark-mode hexes are gone: `Hero.tsx` uses `dark:bg-background` and the new `surface` / `surface-strong` tokens.
 - Hero calls `formatHoursDays([])` with an empty array instead of the real `closedWeekdays`, so the opening-days line can be wrong; the fallback address is hardcoded.
 
 Goal of this plan: one coherent design language applied everywhere, expressed through shared primitives and tokens, with the public site reading as warm, calm, and trustworthy for a small parlour.
 
-**Progress:** No sections started yet. All checkboxes below are unchecked.
+**Progress:** Section 1 (Design Foundation) complete — 25 September 2026. Sections 2–6 untouched; their checkboxes are unchecked.
 
 ## Working Order
 
@@ -25,11 +26,11 @@ Work in order; each section builds on the last. Keep every change shippable on i
 
 ### 1. Design Foundation
 
-- [ ] Load a brand font via `next/font` (e.g. a warm serif for display/headings plus the existing system stack for body). No external font CDN.
-- [ ] Audit `@theme` tokens: add any missing sizes the UI needs (e.g. `--text-display`, card radii, shadow tokens) rather than inventing one-off values in components.
-- [ ] Replace hardcoded dark-mode hexes in `Hero.tsx` (and anywhere else they appear) with theme tokens; extend the token set if a needed shade is missing.
-- [ ] Define the standard focus-visible treatment once (ring width, offset, colour) and reuse it from the primitives.
-- [ ] Document the token/primitive conventions briefly in `docs/architecture.md` (which classes/components to reach for first).
+- [x] Load a brand font via `next/font` (e.g. a warm serif for display/headings plus the existing system stack for body). No external font CDN.
+- [x] Audit `@theme` tokens: add any missing sizes the UI needs (e.g. `--text-display`, card radii, shadow tokens) rather than inventing one-off values in components.
+- [x] Replace hardcoded dark-mode hexes in `Hero.tsx` (and anywhere else they appear) with theme tokens; extend the token set if a needed shade is missing.
+- [x] Define the standard focus-visible treatment once (ring width, offset, colour) and reuse it from the primitives.
+- [x] Document the token/primitive conventions briefly in `docs/architecture.md` (which classes/components to reach for first).
 
 ### 2. Shared UI Primitives (`components/ui/`)
 
@@ -72,7 +73,7 @@ Extract duplicates only where three or more call sites already repeat the same s
 
 ### 6. Verification
 
-- [ ] `npm run lint`, `npx tsc --noEmit`, `npm run prisma:validate`, `npm run build` all pass.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm run db:validate`, `npm run build` all pass.
 - [ ] `npm run test` — 39 tests still green (UI work must not touch them).
 - [ ] Manual pass of the README manual testing checklist (customer, owner, business settings, access) — UI changes must not alter flows.
 - [ ] Update this plan's checkboxes and the "Current state" note as sections complete.

@@ -13,7 +13,7 @@ import { Button, ButtonLink } from "@/components/ui";
 const initialState: BookingState = { errors: {} };
 
 const inputClasses =
-  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:px-4 sm:py-2.5";
+  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring sm:px-4 sm:py-2.5";
 const validInputClasses = `${inputClasses} border-border`;
 const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
 const errorTextClasses = "mt-1.5 text-sm text-danger";
@@ -191,7 +191,7 @@ export default function BookingForm({
           <button
             type="button"
             onClick={() => setDismissedError(errors.form ?? null)}
-            className="rounded-full p-1 font-bold leading-none transition-colors hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            className="rounded-full p-1 font-bold leading-none transition-colors hover:bg-danger/10 focus-ring"
             aria-label="Dismiss error"
           >
             <svg

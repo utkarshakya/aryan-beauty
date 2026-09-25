@@ -53,6 +53,18 @@ tests/            Vitest tests with helpers
 
 A server page may read from `lib/db/` directly. A mutation must be a Server Action and must validate input and authorize the caller itself.
 
+## Design Language
+
+Design tokens live in `app/globals.css` under `@theme`; dark-mode overrides are re-declared under `html.dark`, so `dark:*` utilities pick them up automatically. Components must never hardcode hex/RGB values — if a shade is missing, add a token.
+
+- **Colour**: `background`, `foreground`, `muted`, `border`, `primary`/`success`/`warning`/`danger`/`neutral` each with a `-soft` companion, and `surface`/`surface-strong` for raised surfaces (cards, panels, dark-mode buttons).
+- **Typography**: body text uses the system stack (`font-sans`). Headings `h1`–`h3` use Fraunces automatically via a base rule in `globals.css`; the font is loaded in `app/fonts.ts` with `next/font` (build-time, self-hosted — no runtime CDN). For display text outside headings, use the `font-display` utility. Hero-scale copy uses `text-display`.
+- **Shape**: `rounded-card` (`--radius-card`) for cards/panels, `rounded-control` (`--radius-control`) for inputs and selects, `rounded-full` for buttons and pills. Elevation uses `shadow-card`.
+- **Focus**: use the `focus-ring` utility for every interactive element. Never hand-roll `ring-*`/`outline-*` focus classes; the utility is defined once in `globals.css` and renders a 2px primary outline with a 2px offset so the gap shows the real background in both themes.
+- **Primitives**: reach for `components/ui/` (`Button`, `Container`) before writing class strings by hand; further shared primitives are added there as patterns repeat.
+
+Unused tokens are pruned from the built CSS until a component uses them — that is expected.
+
 ## Request Flow
 
 ```
