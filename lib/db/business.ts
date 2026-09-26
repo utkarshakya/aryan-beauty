@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { BusinessSettings } from "@prisma/client";
+import { BusinessSettings, Prisma } from "@prisma/client";
 
 export type BusinessSettingsFormData = {
   name: string;
@@ -44,39 +44,51 @@ export type BusinessSettingsForDisplay = {
 };
 
 export async function getBusinessSettings(): Promise<BusinessSettings | null> {
-  return prisma.businessSettings.findFirst();
+  return prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
 }
 
 export async function getBusinessSettingsOrCreate(): Promise<BusinessSettings> {
-  let settings = await prisma.businessSettings.findFirst();
+  let settings = await prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
   if (!settings) {
-    settings = await prisma.businessSettings.create({
-      data: {
-        name: "Unknown Beauty",
-        phone: "",
-        phoneDisplay: "+91 98765 43210",
-        phoneHref: "tel:+919876543210",
-        address: "Shop 12, Main Market Road",
-        addressLine2: "",
-        tagline: "Your neighbourhood beauty parlour",
-        description: "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
-        timeZone: "Asia/Kolkata",
-        openingHours: {
-          monday: { open: "09:00", close: "18:00" },
-          tuesday: { open: "09:00", close: "18:00" },
-          wednesday: { open: "09:00", close: "18:00" },
-          thursday: { open: "09:00", close: "18:00" },
-          friday: { open: "09:00", close: "18:00" },
-          saturday: { open: "09:00", close: "18:00" },
-          sunday: { open: "09:00", close: "18:00" },
+    try {
+      settings = await prisma.businessSettings.create({
+        data: {
+          id: 1,
+          name: "Unknown Beauty",
+          phone: "",
+          phoneDisplay: "+91 98765 43210",
+          phoneHref: "tel:+919876543210",
+          address: "Shop 12, Main Market Road",
+          addressLine2: "",
+          tagline: "Your neighbourhood beauty parlour",
+          description: "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
+          timeZone: "Asia/Kolkata",
+          openingHours: {
+            monday: { open: "09:00", close: "18:00" },
+            tuesday: { open: "09:00", close: "18:00" },
+            wednesday: { open: "09:00", close: "18:00" },
+            thursday: { open: "09:00", close: "18:00" },
+            friday: { open: "09:00", close: "18:00" },
+            saturday: { open: "09:00", close: "18:00" },
+            sunday: { open: "09:00", close: "18:00" },
+          },
+          closedWeekdays: [],
+          closures: [],
+          slotIntervalMin: 30,
+          minBookingNoticeMin: 60,
+          cancellationCutoffMin: 120,
         },
-        closedWeekdays: [],
-        closures: [],
-        slotIntervalMin: 30,
-        minBookingNoticeMin: 60,
-        cancellationCutoffMin: 120,
-      },
-    });
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        settings = await prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
+      } else {
+        throw error;
+      }
+    }
+    if (!settings) {
+      throw new Error("BusinessSettings singleton row missing after create retry");
+    }
   }
   return settings;
 }

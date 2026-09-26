@@ -38,10 +38,21 @@ Use `npm.cmd` in PowerShell if the Windows execution policy blocks `npm.ps1`.
 ```powershell
 npm.cmd run lint
 npx.cmd tsc --noEmit
-npm.cmd run prisma:validate
+npm.cmd run db:validate
 npm.cmd run build
 npm.cmd run test
 ```
+
+### Running the tests
+
+`npm.cmd run test` **truncates all rows** (restart identity) in `Appointment`, `BusinessSettings`, `Customer`, `Service`, and `User` on the database named by `TEST_DIRECT_URL` in `.env`. Point `TEST_DIRECT_URL` at the dev database only.
+
+Safety rails:
+- `tests/setup.ts` throws if `TEST_DIRECT_URL` is missing, then points the test process at that URL.
+- `tests/helpers/db.ts` re-checks `DATABASE_URL === TEST_DIRECT_URL` immediately before the `TRUNCATE`.
+- Tests overwrite `DATABASE_URL` with `TEST_DIRECT_URL` in their own process, so the `.env` values of `DATABASE_URL`/`DIRECT_URL` cannot retarget a test run.
+
+To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones (never touch `TEST_DIRECT_URL`), run your command, then restore. After a test run, re-seed demo data with `npm.cmd run db:seed` if needed.
 
 ## Manual Testing
 
@@ -49,5 +60,5 @@ See the [manual testing checklist](docs/plans/plan.md#manual-testing-checklist) 
 
 Inspect database records with:
 ```powershell
-npm.cmd run prisma:studio
+npm.cmd run db:studio
 ```
