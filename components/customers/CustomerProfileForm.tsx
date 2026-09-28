@@ -2,14 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { updateMyProfile } from "@/app/actions/customers";
-import { Button } from "@/components/ui";
+import { Button, Field, Input } from "@/components/ui";
 
 const initialState = { errors: {} as Record<string, string> };
-
-const inputClasses =
-  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring";
-const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
-const errorTextClasses = "mt-1.5 text-sm text-danger";
 
 export default function CustomerProfileForm({ initialData }: { initialData: { name: string; phone: string | null; email: string | null } }) {
   const [state, formAction, pending] = useActionState(updateMyProfile, initialState);
@@ -45,11 +40,8 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
         </div>
       )}
 
-      <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
-          Name
-        </label>
-        <input
+      <Field label="Name" error={errors.name}>
+        <Input
           id="name"
           name="name"
           type="text"
@@ -57,17 +49,18 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          aria-invalid={Boolean(errors.name) || undefined}
-          className={errors.name ? errorInputClasses : inputClasses}
         />
-        {errors.name && <p className={errorTextClasses}>{errors.name}</p>}
-      </div>
+      </Field>
 
-      <div>
-        <label htmlFor="phone" className="mb-1.5 block text-sm font-medium">
-          Mobile <span className="font-normal text-muted">(optional)</span>
-        </label>
-        <input
+      <Field
+        label={
+          <>
+            Mobile <span className="font-normal text-muted">(optional)</span>
+          </>
+        }
+        error={errors.phone}
+      >
+        <Input
           id="phone"
           name="phone"
           type="tel"
@@ -76,17 +69,17 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
           placeholder="10-digit mobile number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          aria-invalid={Boolean(errors.phone) || undefined}
-          className={errors.phone ? errorInputClasses : inputClasses}
         />
-        {errors.phone && <p className={errorTextClasses}>{errors.phone}</p>}
-      </div>
+      </Field>
 
-      <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-          Email <span className="font-normal text-muted">(optional)</span>
-        </label>
-        <input
+      <Field
+        label={
+          <>
+            Email <span className="font-normal text-muted">(optional)</span>
+          </>
+        }
+      >
+        <Input
           id="email"
           name="email"
           type="email"
@@ -94,9 +87,8 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
           placeholder="email@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={inputClasses}
         />
-      </div>
+      </Field>
 
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Saving…" : "Save Changes"}

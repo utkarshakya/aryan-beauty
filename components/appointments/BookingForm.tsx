@@ -8,15 +8,9 @@ import {
   type BookingState,
   type TimeSlot,
 } from "@/app/actions/appointments";
-import { Button, ButtonLink } from "@/components/ui";
+import { Button, ButtonLink, Field, Input, Select } from "@/components/ui";
 
 const initialState: BookingState = { errors: {} };
-
-const inputClasses =
-  "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring sm:px-4 sm:py-2.5";
-const validInputClasses = `${inputClasses} border-border`;
-const errorInputClasses = `${inputClasses} border-danger bg-danger-soft`;
-const errorTextClasses = "mt-1.5 text-sm text-danger";
 
 function CheckIcon() {
   return (
@@ -210,11 +204,16 @@ export default function BookingForm({
         </div>
       )}
 
-      <div>
-        <label htmlFor="serviceId" className="mb-1.5 block text-sm font-medium">
-          Service
-        </label>
-        <select
+      <Field
+        label="Service"
+        error={errors.serviceId}
+        hint={
+          selectedService
+            ? `Takes about ${selectedService.durationMin} minutes.`
+            : undefined
+        }
+      >
+        <Select
           id="serviceId"
           name="serviceId"
           defaultValue={preselectedServiceId ?? ""}
@@ -223,8 +222,6 @@ export default function BookingForm({
             setSelectedSlot("");
           }}
           required
-          aria-invalid={Boolean(errors.serviceId) || undefined}
-          className={errors.serviceId ? errorInputClasses : validInputClasses}
         >
           <option value="" disabled>
             Select a service
@@ -235,42 +232,30 @@ export default function BookingForm({
               {service.durationMin} min)
             </option>
           ))}
-        </select>
-        {selectedService && (
-          <p className="mt-1.5 text-sm text-muted">
-            Takes about {selectedService.durationMin} minutes.
-          </p>
-        )}
-        {errors.serviceId && (
-          <p className={errorTextClasses}>{errors.serviceId}</p>
-        )}
-      </div>
+        </Select>
+      </Field>
 
-      <div>
-        <div>
-          <label htmlFor="phone" className="mb-1.5 block text-sm font-medium">
+      <Field
+        label={
+          <>
             Mobile <span className="font-normal text-muted">(optional)</span>
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            inputMode="numeric"
-            placeholder="10-digit mobile number"
-            aria-invalid={Boolean(errors.phone) || undefined}
-            className={errors.phone ? errorInputClasses : validInputClasses}
-          />
-          {errors.phone && <p className={errorTextClasses}>{errors.phone}</p>}
-        </div>
-      </div>
+          </>
+        }
+        error={errors.phone}
+      >
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          inputMode="numeric"
+          placeholder="10-digit mobile number"
+        />
+      </Field>
 
       <div className="space-y-3">
-        <div>
-          <label htmlFor="date" className="mb-1.5 block text-sm font-medium">
-            Date
-          </label>
-          <input
+        <Field label="Date">
+          <Input
             id="date"
             name="date"
             type="date"
@@ -281,27 +266,26 @@ export default function BookingForm({
               setSelectedSlot("");
             }}
             required
-            aria-invalid={Boolean(errors.startTime) || undefined}
-            className={errors.startTime ? errorInputClasses : validInputClasses}
+            invalid={Boolean(errors.startTime)}
           />
-        </div>
+        </Field>
 
-        <div>
-          <label
-            htmlFor="startTime"
-            className="mb-1.5 block text-sm font-medium"
-          >
-            Available time
-          </label>
-          <select
+        <Field
+          label="Available time"
+          error={errors.startTime}
+          hint={
+            <>
+              Open {hoursDays}, {hoursTime}.
+            </>
+          }
+        >
+          <Select
             id="startTime"
             name="startTime"
             value={selectedSlot}
             onChange={(event) => setSelectedSlot(event.target.value)}
             disabled={!selectedDate || !selectedServiceId || loadingSlots}
             required
-            aria-invalid={Boolean(errors.startTime) || undefined}
-            className={errors.startTime ? errorInputClasses : validInputClasses}
           >
             <option value="">
               {loadingSlots
@@ -317,19 +301,8 @@ export default function BookingForm({
                 {slot.label}
               </option>
             ))}
-          </select>
-        </div>
-        <p className="text-sm text-muted">
-          Open {hoursDays}, {hoursTime}.
-        </p>
-        {errors.startTime && (
-          <p
-            role="alert"
-            className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger"
-          >
-            {errors.startTime}
-          </p>
-        )}
+          </Select>
+        </Field>
       </div>
 
       <Button type="submit" disabled={pending} className="w-full" size="lg">

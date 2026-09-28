@@ -10,7 +10,7 @@ What the UI looks like today:
 - Shared primitives are minimal: `components/ui/Button.tsx` (primary / secondary / ghost / danger, md / lg) and `components/ui/Container.tsx` (default / narrow). Everything else is hand-rolled Tailwind per file.
 - Marketing components live in `app/components/` (Hero, Navbar, Footer, ServiceCard, ServicesPreview, ServicesFilter, EmptyServices, PageHeader, ThemeToggle, not-found).
 - Admin screens inline long class strings repeatedly: `app/admin/page.tsx` restyles the same pill `Link` as a button four times and defines `SummaryCard` locally; status badges are styled ad hoc in the appointments list and detail views.
-- Forms (BookingForm, BusinessSettingsForm, ServiceForm, CustomerProfileForm, StaffInviteForm) each define their own input classes.
+- Forms (BookingForm, BusinessSettingsForm, ServiceForm, CustomerProfileForm, StaffInviteForm, ServiceEditor) now share `Field` + `Input`/`Textarea`/`Select` from `components/ui/` instead of defining their own input classes; `Field` standardises label, hint, and error rendering.
 - Typography: system font stack for body; Fraunces (warm serif, loaded via `next/font` in `app/fonts.ts`) for `h1`–`h3` through a base rule, plus a `font-display` utility and `text-display` size token.
 - Focus is defined once as the `focus-ring` utility in `app/globals.css` and used at every interactive element (2px primary outline, 2px offset; works in both themes).
 - Hardcoded dark-mode hexes are gone: `Hero.tsx` uses `dark:bg-background` and the new `surface` / `surface-strong` tokens.
@@ -18,7 +18,7 @@ What the UI looks like today:
 
 Goal of this plan: one coherent design language applied everywhere, expressed through shared primitives and tokens, with the public site reading as warm, calm, and trustworthy for a small parlour.
 
-**Progress:** Section 1 (Design Foundation) complete — 25 September 2026. Sections 2–6 untouched; their checkboxes are unchecked.
+**Progress:** Section 1 (Design Foundation) complete — 25 September 2026. Section 2 started: form primitives (`Input`, `Textarea`, `Select`, `Field`) shipped and adopted in all five forms plus `ServiceEditor.tsx`, which repeated the same class string. Sections 3–6 untouched; their checkboxes are unchecked.
 
 ## Working Order
 
@@ -36,7 +36,7 @@ Work in order; each section builds on the last. Keep every change shippable on i
 
 Extract duplicates only where three or more call sites already repeat the same styling. Do not redesign while extracting — extract first, restyle later.
 
-- [ ] `Input`, `Textarea`, `Select`, and a `Field` wrapper (label + hint + error) with consistent sizing; adopt in all five forms above.
+- [x] `Input`, `Textarea`, `Select`, and a `Field` wrapper (label + hint + error) with consistent sizing; adopt in all five forms above (done, plus `ServiceEditor.tsx` which repeated the same class string).
 - [ ] `Card` (border + background + radius + shadow) and use it for `SummaryCard`, `ServiceCard`, appointment groups, and detail panels.
 - [ ] `Badge` with the status variants the app actually uses (pending, confirmed, completed, cancelled) and a neutral variant; single source for admin list, detail, and customer history.
 - [ ] `PageHeader` (eyebrow + title + description + actions slot) — already exists as a marketing component; make it the standard for admin subpages too.

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "@/app/actions/services";
 import { Service } from "@prisma/client";
-import { Button } from "@/components/ui";
+import { Button, Field, Input, Textarea } from "@/components/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
   const [editing, setEditing] = useState(false);
@@ -93,8 +93,6 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
     }
   };
 
-  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring";
-
   return (
     <>
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -104,59 +102,46 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
         </Button>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-foreground">Name</label>
-          <input
+        <Field label="Name" error={errors.name}>
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className={inputClasses}
           />
-          {errors.name && <p className="mt-1.5 text-sm text-danger">{errors.name}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground">Category</label>
-          <input
+        </Field>
+        <Field label="Category">
+          <Input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className={inputClasses}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground">Price</label>
-          <input
+        </Field>
+        <Field label="Price" error={errors.price}>
+          <Input
             type="number"
             min="0"
             step="1"
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
             required
-            className={inputClasses}
           />
-          {errors.price && <p className="mt-1.5 text-sm text-danger">{errors.price}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground">Duration (minutes)</label>
-          <input
+        </Field>
+        <Field label="Duration (minutes)" error={errors.durationMin}>
+          <Input
             type="number"
             min="1"
             step="1"
             value={durationMin}
             onChange={(e) => setDurationMin(Number(e.target.value))}
             required
-            className={inputClasses}
           />
-          {errors.durationMin && <p className="mt-1.5 text-sm text-danger">{errors.durationMin}</p>}
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-foreground">Description</label>
-          <textarea
+        </Field>
+        <Field label="Description" className="sm:col-span-2">
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className={inputClasses}
           />
-        </div>
+        </Field>
         <div className="sm:col-span-2 flex items-center gap-2">
           <label className="flex items-center gap-2 text-sm font-medium text-foreground">
             <input

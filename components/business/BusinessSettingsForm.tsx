@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { updateBusinessSettingsAction } from "@/app/actions/business";
 import { BusinessSettings } from "@prisma/client";
-import { Button } from "@/components/ui";
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 
 const WEEKDAYS = [
   { key: "monday", label: "Monday" },
@@ -122,8 +122,6 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
     setClosures(prev => prev.filter((_, i) => i !== index));
   };
 
-  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring";
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {success && (
@@ -135,95 +133,68 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
       <section className="space-y-4" aria-labelledby="basic-heading">
         <h3 id="basic-heading" className="text-lg font-semibold text-foreground">Basic information</h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-foreground">Business name</label>
-            <input
+          <Field label="Business name" error={errors.name}>
+            <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={100}
-              className={inputClasses}
             />
-            {errors.name && <p className="mt-1.5 text-sm text-danger">{errors.name}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Phone</label>
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={inputClasses}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-foreground">Address</label>
-            <textarea
+          </Field>
+          <Field label="Phone">
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </Field>
+          <Field label="Address" className="sm:col-span-2">
+            <Textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               rows={2}
-              className={inputClasses}
             />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-foreground">Address line 2</label>
-            <input
+          </Field>
+          <Field label="Address line 2" className="sm:col-span-2">
+            <Input
               value={addressLine2}
               onChange={(e) => setAddressLine2(e.target.value)}
-              className={inputClasses}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Phone (storage)</label>
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={inputClasses}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Phone (display)</label>
-            <input
+          </Field>
+          <Field label="Phone (storage)">
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </Field>
+          <Field label="Phone (display)">
+            <Input
               value={phoneDisplay}
               onChange={(e) => setPhoneDisplay(e.target.value)}
-              className={inputClasses}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Phone (href)</label>
-            <input
+          </Field>
+          <Field label="Phone (href)">
+            <Input
               value={phoneHref}
               onChange={(e) => setPhoneHref(e.target.value)}
-              className={inputClasses}
             />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-foreground">Tagline</label>
-            <input
+          </Field>
+          <Field label="Tagline" className="sm:col-span-2">
+            <Input
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              className={inputClasses}
             />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-foreground">Description</label>
-            <textarea
+          </Field>
+          <Field label="Description" className="sm:col-span-2">
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className={inputClasses}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Time zone</label>
-            <select
+          </Field>
+          <Field label="Time zone">
+            <Select
               value={timeZone}
               onChange={(e) => setTimeZone(e.target.value)}
-              className={inputClasses}
             >
               {TIMEZONES.map(tz => (
                 <option key={tz} value={tz}>{tz}</option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </Field>
         </div>
       </section>
 
@@ -248,22 +219,22 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                 {!closed && (
                   <>
                     <div className="flex items-center gap-2">
-                      <label className="text-sm text-muted">Open</label>
-                      <input
+                      <label htmlFor={`open-${day.key}`} className="text-sm text-muted">Open</label>
+                      <Input
+                        id={`open-${day.key}`}
                         type="time"
                         value={hours.open}
                         onChange={(e) => updateOpeningHour(day.key, "open", e.target.value)}
-                        className={inputClasses}
                         style={{ width: "100px" }}
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="text-sm text-muted">Close</label>
-                      <input
+                      <label htmlFor={`close-${day.key}`} className="text-sm text-muted">Close</label>
+                      <Input
+                        id={`close-${day.key}`}
                         type="time"
                         value={hours.close}
                         onChange={(e) => updateOpeningHour(day.key, "close", e.target.value)}
-                        className={inputClasses}
                         style={{ width: "100px" }}
                       />
                     </div>
@@ -279,20 +250,18 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         <h3 id="closures-heading" className="text-lg font-semibold text-foreground">Closures & holidays</h3>
         <p className="text-sm text-muted">Add specific dates when the parlour is closed (holidays, vacation, etc.).</p>
         <div className="flex flex-wrap gap-2">
-          <input
+          <Input
             type="date"
             value={closureDate}
             onChange={(e) => setClosureDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
-            className={inputClasses}
             style={{ width: "180px" }}
           />
-          <input
+          <Input
             type="text"
             value={closureReason}
             onChange={(e) => setClosureReason(e.target.value)}
             placeholder="Reason (e.g., Diwali, Annual leave)"
-            className={inputClasses}
             style={{ flex: "1", minWidth: "200px" }}
           />
           <Button type="button" variant="secondary" onClick={addClosure} disabled={!closureDate || !closureReason.trim()}>
@@ -317,45 +286,42 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
       <section className="space-y-4" aria-labelledby="booking-heading">
         <h3 id="booking-heading" className="text-lg font-semibold text-foreground">Booking rules</h3>
         <div className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground">Slot interval (minutes)</label>
-            <select
+          <Field label="Slot interval (minutes)" error={errors.slotIntervalMin}>
+            <Select
               value={slotIntervalMin}
               onChange={(e) => setSlotIntervalMin(Number(e.target.value))}
-              className={inputClasses}
             >
               {SLOT_INTERVALS.map(interval => (
                 <option key={interval} value={interval}>{interval} minutes</option>
               ))}
-            </select>
-            {errors.slotIntervalMin && <p className="mt-1.5 text-sm text-danger">{errors.slotIntervalMin}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Minimum booking notice (minutes)</label>
-            <input
+            </Select>
+          </Field>
+          <Field
+            label="Minimum booking notice (minutes)"
+            error={errors.minBookingNoticeMin}
+            hint="How far in advance customers must book"
+          >
+            <Input
               type="number"
               min="0"
               step="1"
               value={minBookingNoticeMin}
               onChange={(e) => setMinBookingNoticeMin(Number(e.target.value))}
-              className={inputClasses}
             />
-            {errors.minBookingNoticeMin && <p className="mt-1.5 text-sm text-danger">{errors.minBookingNoticeMin}</p>}
-            <p className="mt-1 text-xs text-muted">How far in advance customers must book</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground">Cancellation cutoff (minutes)</label>
-            <input
+          </Field>
+          <Field
+            label="Cancellation cutoff (minutes)"
+            error={errors.cancellationCutoffMin}
+            hint="How far in advance customers can cancel"
+          >
+            <Input
               type="number"
               min="0"
               step="1"
               value={cancellationCutoffMin}
               onChange={(e) => setCancellationCutoffMin(Number(e.target.value))}
-              className={inputClasses}
             />
-            {errors.cancellationCutoffMin && <p className="mt-1.5 text-sm text-danger">{errors.cancellationCutoffMin}</p>}
-            <p className="mt-1 text-xs text-muted">How far in advance customers can cancel</p>
-          </div>
+          </Field>
         </div>
       </section>
 

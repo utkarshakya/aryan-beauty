@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createServiceAction } from "@/app/actions/services";
-import { Button } from "@/components/ui";
+import { Button, Field, Input, Textarea } from "@/components/ui";
 
 export default function ServiceForm() {
   const [name, setName] = useState("");
@@ -52,8 +52,6 @@ export default function ServiceForm() {
     }
   };
 
-  const inputClasses = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring";
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {success && (
@@ -62,64 +60,48 @@ export default function ServiceForm() {
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-foreground">Name</label>
-        <input
+      <Field label="Name" error={errors.name}>
+        <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className={inputClasses}
         />
-        {errors.name && <p className="mt-1.5 text-sm text-danger">{errors.name}</p>}
-      </div>
+      </Field>
 
-      <div>
-        <label className="block text-sm font-medium text-foreground">Category</label>
-        <input
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className={inputClasses}
-        />
-      </div>
+      <Field label="Category">
+        <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+      </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-foreground">Price</label>
-          <input
+        <Field label="Price" error={errors.price}>
+          <Input
             type="number"
             min="0"
             step="1"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required
-            className={inputClasses}
           />
-          {errors.price && <p className="mt-1.5 text-sm text-danger">{errors.price}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground">Minutes</label>
-          <input
+        </Field>
+        <Field label="Minutes" error={errors.durationMin}>
+          <Input
             type="number"
             min="1"
             step="1"
             value={durationMin}
             onChange={(e) => setDurationMin(e.target.value)}
             required
-            className={inputClasses}
           />
-          {errors.durationMin && <p className="mt-1.5 text-sm text-danger">{errors.durationMin}</p>}
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-foreground">Description</label>
-        <textarea
+      <Field label="Description">
+        <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className={inputClasses}
         />
-      </div>
+      </Field>
 
       <div className="flex items-center gap-2">
         <label className="flex items-center gap-2 text-sm font-medium text-foreground">

@@ -24,7 +24,7 @@ app/              routes, pages, layouts, server actions, and HTTP route handler
   actions/        Server Actions grouped by domain
   components/     page-specific components
 components/       reusable visual components
-  ui/             shared primitives (Button, Container)
+  ui/             shared primitives (Button, Container, form controls)
   appointments/   appointment-specific components
   services/       service management components
   customers/      customer-related components
@@ -61,7 +61,7 @@ Design tokens live in `app/globals.css` under `@theme`; dark-mode overrides are 
 - **Typography**: body text uses the system stack (`font-sans`). Headings `h1`–`h3` use Fraunces automatically via a base rule in `globals.css`; the font is loaded in `app/fonts.ts` with `next/font` (build-time, self-hosted — no runtime CDN). For display text outside headings, use the `font-display` utility. Hero-scale copy uses `text-display`.
 - **Shape**: `rounded-card` (`--radius-card`) for cards/panels, `rounded-control` (`--radius-control`) for inputs and selects, `rounded-full` for buttons and pills. Elevation uses `shadow-card`.
 - **Focus**: use the `focus-ring` utility for every interactive element. Never hand-roll `ring-*`/`outline-*` focus classes; the utility is defined once in `globals.css` and renders a 2px primary outline with a 2px offset so the gap shows the real background in both themes.
-- **Primitives**: reach for `components/ui/` (`Button`, `Container`) before writing class strings by hand; further shared primitives are added there as patterns repeat.
+- **Primitives**: reach for `components/ui/` (`Button`, `Container`, and the form controls `Field` with `Input`/`Textarea`/`Select`) before writing class strings by hand; further shared primitives are added there as patterns repeat. Wrap a labelled control in `Field` — it owns the label, hint, and error text and wires the control's `id`, `aria-invalid`, and error styling.
 
 Unused tokens are pruned from the built CSS until a component uses them — that is expected.
 
