@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getServicesAction } from "@/app/actions/services";
+import { cardClassName } from "@/components/ui";
 import ServiceEditor from "@/components/services/ServiceEditor";
 import ServiceForm from "@/components/services/ServiceForm";
 
@@ -38,7 +39,7 @@ export default async function ManageServicesPage() {
           )}
         </section>
 
-        <section className="h-fit rounded-xl border border-border bg-background p-4 shadow-sm sm:p-6" aria-labelledby="add-service-heading">
+        <section className={cardClassName("h-fit p-4 sm:p-6")} aria-labelledby="add-service-heading">
           <h2 id="add-service-heading" className="text-lg font-semibold text-foreground">Add a service</h2>
           <p className="mt-1 text-sm text-muted">New services are visible to customers immediately.</p>
           <ServiceForm />

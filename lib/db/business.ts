@@ -48,20 +48,23 @@ export async function getBusinessSettings(): Promise<BusinessSettings | null> {
 }
 
 export async function getBusinessSettingsOrCreate(): Promise<BusinessSettings> {
-  let settings = await prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
+  let settings = await prisma.businessSettings.findFirst({
+    orderBy: { id: "asc" },
+  });
   if (!settings) {
     try {
       settings = await prisma.businessSettings.create({
         data: {
           id: 1,
-          name: "Unknown Beauty",
+          name: "Aryan Beauty",
           phone: "",
           phoneDisplay: "+91 98765 43210",
           phoneHref: "tel:+919876543210",
           address: "Shop 12, Main Market Road",
           addressLine2: "",
           tagline: "Your neighbourhood beauty parlour",
-          description: "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
+          description:
+            "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
           timeZone: "Asia/Kolkata",
           openingHours: {
             monday: { open: "09:00", close: "18:00" },
@@ -80,14 +83,21 @@ export async function getBusinessSettingsOrCreate(): Promise<BusinessSettings> {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        settings = await prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        settings = await prisma.businessSettings.findFirst({
+          orderBy: { id: "asc" },
+        });
       } else {
         throw error;
       }
     }
     if (!settings) {
-      throw new Error("BusinessSettings singleton row missing after create retry");
+      throw new Error(
+        "BusinessSettings singleton row missing after create retry",
+      );
     }
   }
   return settings;
@@ -97,7 +107,10 @@ export async function getBusinessSettingsForAvailability(): Promise<BusinessSett
   const settings = await getBusinessSettingsOrCreate();
   return {
     timeZone: settings.timeZone,
-    openingHours: settings.openingHours as Record<string, { open: string; close: string }>,
+    openingHours: settings.openingHours as Record<
+      string,
+      { open: string; close: string }
+    >,
     closedWeekdays: settings.closedWeekdays,
     closures: settings.closures as Array<{ date: string; reason: string }>,
     slotIntervalMin: settings.slotIntervalMin,
@@ -111,20 +124,25 @@ export async function getBusinessSettingsForDisplay(): Promise<BusinessSettingsF
   return {
     name: settings.name,
     tagline: settings.tagline ?? "Your neighbourhood beauty parlour",
-    description: settings.description ?? "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
+    description:
+      settings.description ??
+      "Professional hair, skin, nail and beauty services — book your visit online in under a minute.",
     phone: settings.phone ?? "",
     phoneDisplay: settings.phoneDisplay ?? "+91 98765 43210",
     phoneHref: settings.phoneHref ?? "tel:+919876543210",
     address: settings.address ?? "Shop 12, Main Market Road",
     addressLine2: settings.addressLine2 ?? "",
     timeZone: settings.timeZone,
-    openingHours: settings.openingHours as Record<string, { open: string; close: string }>,
+    openingHours: settings.openingHours as Record<
+      string,
+      { open: string; close: string }
+    >,
     closedWeekdays: settings.closedWeekdays,
   };
 }
 
 export async function updateBusinessSettings(
-  data: Partial<BusinessSettingsFormData>
+  data: Partial<BusinessSettingsFormData>,
 ): Promise<BusinessSettings> {
   const settings = await getBusinessSettingsOrCreate();
   return prisma.businessSettings.update({

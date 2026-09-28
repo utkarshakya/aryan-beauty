@@ -1,6 +1,7 @@
 "use client";
 
 import { confirmAppointment } from "@/app/actions/appointments";
+import { Badge, badgeTone, cardClassName } from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 import Link from "next/link";
@@ -32,13 +33,6 @@ type AppointmentsListProps = {
   scopeLabel?: string;
   showScope?: boolean;
   emptyMessage?: string;
-};
-
-const STATUS_BADGE_CLASSES: Record<string, string> = {
-  pending: "bg-warning-soft text-warning",
-  confirmed: "bg-success-soft text-success",
-  completed: "bg-primary-soft text-primary-strong",
-  cancelled: "bg-neutral-soft text-neutral",
 };
 
 const statusTabs: {
@@ -107,7 +101,7 @@ export default function AdminAppointmentsList({
 
       {appointments.length === 0 ? (
         term ? (
-          <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted shadow-sm sm:p-10">
+          <div className={cardClassName("p-6 text-center text-sm text-muted sm:p-10")}>
             <p>No appointments match “{term}”.</p>
             <p className="mt-1">
               Try a different name or phone number, or{" "}
@@ -121,7 +115,7 @@ export default function AdminAppointmentsList({
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted shadow-sm sm:p-10">
+          <div className={cardClassName("p-6 text-center text-sm text-muted sm:p-10")}>
             {emptyMessage ?? "No appointments"}
           </div>
         )
@@ -156,7 +150,7 @@ export default function AdminAppointmentsList({
               return (
               <article
                 key={appointment.id}
-                className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+                className={cardClassName("p-4 sm:p-5")}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -172,11 +166,9 @@ export default function AdminAppointmentsList({
                       </p>
                     )}
                   </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${STATUS_BADGE_CLASSES[displayStatus]}`}
-                  >
+                  <Badge tone={badgeTone(displayStatus)}>
                     {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
-                  </span>
+                  </Badge>
                 </div>
 
                 <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-xs sm:gap-4 sm:text-sm">
@@ -324,11 +316,9 @@ export default function AdminAppointmentsList({
                       </p>
                     </td>
                     <td className="px-3 py-5">
-                      <span
-                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${STATUS_BADGE_CLASSES[displayStatus]}`}
-                        >
-                          {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
-                      </span>
+                      <Badge tone={badgeTone(displayStatus)}>
+                        {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+                      </Badge>
                     </td>
                     <td className="px-3 py-5 text-right">
                       <div className="flex items-center justify-end gap-3">

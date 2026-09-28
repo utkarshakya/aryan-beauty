@@ -1,9 +1,14 @@
 import { ButtonLink } from "@/components/ui/Button";
+import { cardClassName } from "@/components/ui";
 import type { Service } from "@prisma/client";
 
 export default function ServiceCard({ service }: { service: Service }) {
   return (
-    <article className="flex flex-col rounded-xl border border-border bg-background p-4 shadow-sm transition-shadow hover:shadow-md sm:p-6">
+    <article
+      className={cardClassName(
+        "flex flex-col p-4 transition-shadow hover:shadow-md sm:p-6",
+      )}
+    >
       <p className="text-xs font-medium uppercase tracking-wide text-muted">
         {service.category}
       </p>

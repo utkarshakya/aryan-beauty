@@ -18,7 +18,7 @@ What the UI looks like today:
 
 Goal of this plan: one coherent design language applied everywhere, expressed through shared primitives and tokens, with the public site reading as warm, calm, and trustworthy for a small parlour.
 
-**Progress:** Section 1 (Design Foundation) complete — 25 September 2026. Section 2 started: form primitives (`Input`, `Textarea`, `Select`, `Field`) shipped and adopted in all five forms plus `ServiceEditor.tsx`, which repeated the same class string. Sections 3–6 untouched; their checkboxes are unchecked.
+**Progress:** Section 1 (Design Foundation) complete — 25 September 2026. Section 2: form primitives (`Input`, `Textarea`, `Select`, `Field`) shipped and adopted in all five forms plus `ServiceEditor.tsx`; `Card` (shell + `cardClassName` helper) and `Badge` (single status tone map + `badgeTone` fallback) shipped 28 September 2026 and adopted across admin dashboard, appointments list/detail, customer history, ServiceCard, ServiceEditor, and the admin services/settings/staff panels — this also reconciles the `rounded-card`/`shadow-card` tokens `architecture.md` already prescribed but nothing used. Bonus fix: `AuthStatusBadge` role pills referenced nonexistent `purple`/`blue`/`green` tokens (dead classes) and now map to real palette tokens. Not migrated by design: border-only rows in `StaffTable`/`WalkInCustomerLinker` (2 sites, no shadow — not a 3+ duplicate) and dashed empty boxes (await `EmptyState`). Sections 3–6 untouched; their checkboxes are unchecked.
 
 ## Working Order
 
@@ -37,8 +37,8 @@ Work in order; each section builds on the last. Keep every change shippable on i
 Extract duplicates only where three or more call sites already repeat the same styling. Do not redesign while extracting — extract first, restyle later.
 
 - [x] `Input`, `Textarea`, `Select`, and a `Field` wrapper (label + hint + error) with consistent sizing; adopt in all five forms above (done, plus `ServiceEditor.tsx` which repeated the same class string).
-- [ ] `Card` (border + background + radius + shadow) and use it for `SummaryCard`, `ServiceCard`, appointment groups, and detail panels.
-- [ ] `Badge` with the status variants the app actually uses (pending, confirmed, completed, cancelled) and a neutral variant; single source for admin list, detail, and customer history.
+- [x] `Card` (border + background + radius + shadow) and use it for `SummaryCard`, `ServiceCard`, appointment groups, and detail panels.
+- [x] `Badge` with the status variants the app actually uses (pending, confirmed, completed, cancelled) and a neutral variant; single source for admin list, detail, and customer history.
 - [ ] `PageHeader` (eyebrow + title + description + actions slot) — already exists as a marketing component; make it the standard for admin subpages too.
 - [ ] `EmptyState` (icon/illustration slot, title, body, optional action) and adopt it in admin list, customer history, services, and search results.
 - [ ] `SectionHeading` for consistent secondary headings on public pages.

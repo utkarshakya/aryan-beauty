@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getBusinessSettingsAction } from "@/app/actions/business";
+import { cardClassName } from "@/components/ui";
 import BusinessSettingsForm from "@/components/business/BusinessSettingsForm";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function BusinessSettingsPage() {
         </div>
       </div>
 
-      <section className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-6" aria-labelledby="settings-heading">
+      <section className={cardClassName("p-4 sm:p-6")} aria-labelledby="settings-heading">
         <h2 id="settings-heading" className="sr-only">Business settings form</h2>
         <BusinessSettingsForm settings={settings} />
       </section>

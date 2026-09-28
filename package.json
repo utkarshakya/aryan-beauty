@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "posttest": "npm run db:seed",
     "db:version": "prisma --version",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate",

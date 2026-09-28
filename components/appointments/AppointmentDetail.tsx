@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
+import { Badge, badgeTone, cardClassName } from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
-
-const STATUS_BADGE_CLASSES: Record<string, string> = {
-  pending: "bg-warning-soft text-warning",
-  confirmed: "bg-success-soft text-success",
-  completed: "bg-primary-soft text-primary-strong",
-  cancelled: "bg-neutral-soft text-neutral",
-};
 
 const formatDate = (date: Date | string) =>
   new Date(date).toLocaleDateString("en-IN", {
@@ -64,17 +58,15 @@ export default function AppointmentDetail({
               {formatTime(appointment.createdAt)}
             </p>
           </div>
-          <span
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${STATUS_BADGE_CLASSES[displayStatus]}`}
-          >
+          <Badge tone={badgeTone(displayStatus)}>
             {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
-          </span>
+          </Badge>
         </div>
       </div>
 
       <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
         <section
-          className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+          className={cardClassName("p-4 sm:p-5")}
           aria-labelledby="customer-heading"
         >
           <h2
@@ -120,7 +112,7 @@ export default function AppointmentDetail({
         </section>
 
         <section
-          className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+          className={cardClassName("p-4 sm:p-5")}
           aria-labelledby="service-heading"
         >
           <h2
@@ -152,7 +144,7 @@ export default function AppointmentDetail({
         </section>
 
         <section
-          className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+          className={cardClassName("p-4 sm:p-5")}
           aria-labelledby="schedule-heading"
         >
           <h2
@@ -179,7 +171,7 @@ export default function AppointmentDetail({
         </section>
 
         <section
-          className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5"
+          className={cardClassName("p-4 sm:p-5")}
           aria-labelledby="notes-heading"
         >
           <h2

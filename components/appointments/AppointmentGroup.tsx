@@ -1,4 +1,5 @@
 import CancelAppointmentButton from "./CancelAppointmentButton";
+import { Badge, badgeTone, cardClassName } from "@/components/ui";
 
 const formatDate = (date: Date | string) =>
   new Date(date).toLocaleDateString("en-IN", {
@@ -12,12 +13,6 @@ const formatTime = (date: Date | string) =>
     hour: "numeric",
     minute: "2-digit",
   });
-
-const statusClasses: Record<string, string> = {
-  pending: "bg-warning-soft text-warning",
-  confirmed: "bg-success-soft text-success",
-  cancelled: "bg-neutral-soft text-neutral",
-};
 
 type Appointment = {
   id: number;
@@ -55,10 +50,7 @@ export default function AppointmentGroup({
       ) : (
         <div className="space-y-3">
           {appointments.map((appointment) => (
-            <article
-              key={appointment.id}
-              className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5"
-            >
+            <article key={appointment.id} className={cardClassName("p-3 sm:p-5")}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-semibold text-foreground">
@@ -69,11 +61,12 @@ export default function AppointmentGroup({
                     {Math.round(appointment.servicePrice)}
                   </p>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses[appointment.status] ?? "bg-neutral-soft text-neutral"}`}
-                >
-                  {appointment.status ? appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) : ""}
-                </span>
+                <Badge tone={badgeTone(appointment.status)}>
+                  {appointment.status
+                    ? appointment.status.charAt(0).toUpperCase() +
+                      appointment.status.slice(1)
+                    : ""}
+                </Badge>
               </div>
 
               <div className="mt-4 border-t border-border pt-3 text-sm text-foreground">

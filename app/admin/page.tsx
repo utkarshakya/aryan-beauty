@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
+import { Card, cardClassName } from "@/components/ui";
 import AdminAppointmentsList from "@/components/appointments/AdminAppointmentsList";
 import {
   getAdminAppointments,
@@ -185,7 +186,7 @@ export default async function AdminPage({
         />
       </section>
       <section
-        className="mt-6 rounded-xl border border-border bg-background p-4 shadow-sm sm:mt-8 sm:p-6"
+        className={cardClassName("mt-6 p-4 sm:mt-8 sm:p-6")}
         aria-labelledby="upcoming-heading"
       >
         <h2
@@ -346,12 +347,12 @@ function SummaryCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5">
+    <Card className="p-3 sm:p-5">
       <p className="text-xs font-medium text-muted">{label}</p>
       <p className="mt-1 text-2xl font-bold text-foreground sm:text-3xl">
         {value}
       </p>
       <p className="mt-1 text-[11px] text-muted sm:text-xs">{detail}</p>
-    </div>
+    </Card>
   );
 }

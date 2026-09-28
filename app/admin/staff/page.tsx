@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getStaffUsersAction } from "@/app/actions/users";
+import { cardClassName } from "@/components/ui";
 import StaffInviteForm from "@/components/staff/StaffInviteForm";
 import StaffTable from "@/components/staff/StaffTable";
 
@@ -35,7 +36,7 @@ export default async function ManageStaffPage() {
         </section>
 
         <section
-          className="h-fit rounded-xl border border-border bg-background p-4 shadow-sm sm:p-6"
+          className={cardClassName("h-fit p-4 sm:p-6")}
           aria-labelledby="invite-heading"
         >
           <h2 id="invite-heading" className="text-lg font-semibold text-foreground">Invite staff</h2>

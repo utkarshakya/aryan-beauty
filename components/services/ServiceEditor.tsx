@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "@/app/actions/services";
 import { Service } from "@prisma/client";
-import { Button, Field, Input, Textarea } from "@/components/ui";
+import { Button, cardClassName, Field, Input, Textarea } from "@/components/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
   const [editing, setEditing] = useState(false);
 
   return (
-    <article className="rounded-xl border border-border bg-background p-4 shadow-sm sm:p-5">
+    <article className={cardClassName("p-4 sm:p-5")}>
       {!editing ? (
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>

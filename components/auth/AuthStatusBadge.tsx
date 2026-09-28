@@ -10,9 +10,9 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const ROLE_CLASSES: Record<UserRole, string> = {
-  super_admin: "bg-purple-soft text-purple",
-  admin: "bg-blue-soft text-blue",
-  staff: "bg-green-soft text-green",
+  super_admin: "bg-primary-soft text-primary-strong",
+  admin: "bg-warning-soft text-warning",
+  staff: "bg-success-soft text-success",
   customer: "bg-neutral-soft text-neutral",
 };
 

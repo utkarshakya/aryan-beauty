@@ -52,7 +52,9 @@ Safety rails:
 - `tests/helpers/db.ts` re-checks `DATABASE_URL === TEST_DIRECT_URL` immediately before the `TRUNCATE`.
 - Tests overwrite `DATABASE_URL` with `TEST_DIRECT_URL` in their own process, so the `.env` values of `DATABASE_URL`/`DIRECT_URL` cannot retarget a test run.
 
-To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones (never touch `TEST_DIRECT_URL`), run your command, then restore. After a test run, re-seed demo data with `npm.cmd run db:seed` if needed.
+To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones (never touch `TEST_DIRECT_URL`), run your command, then restore.
+
+A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` script. If a run fails, `posttest` is skipped and the database is left truncated — re-run the tests or seed manually with `npm.cmd run db:seed`.
 
 ## Manual Testing
 
