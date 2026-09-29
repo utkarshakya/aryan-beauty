@@ -14,6 +14,7 @@ npm.cmd run dev
 Open `http://localhost:3000`.
 
 Required `.env` variables (see `.env.example`):
+
 - `DATABASE_URL` — application connection to Supabase PostgreSQL
 - `DIRECT_URL` — Prisma CLI connection for migrations only
 - `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SECRET`
@@ -24,20 +25,21 @@ Use `npm.cmd` in PowerShell if the Windows execution policy blocks `npm.ps1`.
 
 ## Documentation
 
-| File | Purpose |
-|------|---------|
-| [docs/README.md](docs/README.md) | Documentation index and current state summary |
-| [docs/product.md](docs/product.md) | Product vision, roadmap, and current capabilities |
-| [docs/architecture.md](docs/architecture.md) | Technical structure, stack, auth, and engineering rules |
-| [docs/plans/plan.md](docs/plans/plan.md) | Active implementation checklist with progress |
-| [docs/plans/ui-plan.md](docs/plans/ui-plan.md) | UI/UX improvement plan |
-| [docs/ideas.md](docs/ideas.md) | Future possibilities (not commitments) |
+| File                                           | Purpose                                                 |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| [docs/README.md](docs/README.md)               | Documentation index and current state summary           |
+| [docs/product.md](docs/product.md)             | Product vision, roadmap, and current capabilities       |
+| [docs/architecture.md](docs/architecture.md)   | Technical structure, stack, auth, and engineering rules |
+| [docs/plans/plan.md](docs/plans/plan.md)       | Active implementation checklist with progress           |
+| [docs/plans/ui-plan.md](docs/plans/ui-plan.md) | UI/UX improvement plan                                  |
+| [docs/scripts.md](docs/scripts.md)             | npm scripts: local vs DB connections and URLs used      |
+| [docs/ideas.md](docs/ideas.md)                 | Future possibilities (not commitments)                  |
 
 ## Verification Commands
 
 ```powershell
 npm.cmd run lint
-npx.cmd tsc --noEmit
+npm.cmd run typecheck
 npm.cmd run db:validate
 npm.cmd run build
 npm.cmd run test
@@ -45,14 +47,15 @@ npm.cmd run test
 
 ### Running the tests
 
-`npm.cmd run test` **truncates all rows** (restart identity) in `Appointment`, `BusinessSettings`, `Customer`, `Service`, and `User` on the database named by `TEST_DIRECT_URL` in `.env`. Point `TEST_DIRECT_URL` at the dev database only.
+`npm.cmd run test` **truncates all rows** (restart identity) in `Appointment`, `BusinessSettings`, `Customer`, `Service`, and `User` on the database named by `DATABASE_URL` in `.env`. Point it at the dev database only.
 
 Safety rails:
-- `tests/setup.ts` throws if `TEST_DIRECT_URL` is missing, then points the test process at that URL.
-- `tests/helpers/db.ts` re-checks `DATABASE_URL === TEST_DIRECT_URL` immediately before the `TRUNCATE`.
-- Tests overwrite `DATABASE_URL` with `TEST_DIRECT_URL` in their own process, so the `.env` values of `DATABASE_URL`/`DIRECT_URL` cannot retarget a test run.
 
-To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones (never touch `TEST_DIRECT_URL`), run your command, then restore.
+- `tests/setup.ts` throws if `DATABASE_URL` is missing from `.env`, then loads that value into the test process.
+- `tests/helpers/db.ts` re-checks `DATABASE_URL` is set immediately before the `TRUNCATE`.
+- Tests always take `DATABASE_URL` from `.env` in their own process, so shell-level `DATABASE_URL`/`DIRECT_URL` overrides cannot retarget a test run.
+
+To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones, run your command, then restore.
 
 A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` script. If a run fails, `posttest` is skipped and the database is left truncated — re-run the tests or seed manually with `npm.cmd run db:seed`.
 
@@ -61,6 +64,7 @@ A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` s
 See the [manual testing checklist](docs/plans/plan.md#manual-testing-checklist) in the implementation plan for customer, owner, business settings, staff management, and access/safety verification steps.
 
 Inspect database records with:
+
 ```powershell
 npm.cmd run db:studio
 ```

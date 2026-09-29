@@ -6,16 +6,14 @@ for (const line of readFileSync(".env", "utf8").split(/\r?\n/)) {
   if (match) env.set(match[1], match[2]);
 }
 
-const testUrl = env.get("TEST_DIRECT_URL");
-if (!testUrl) {
+const databaseUrl = env.get("DATABASE_URL");
+if (!databaseUrl) {
   throw new Error(
-    "TEST_DIRECT_URL missing from .env — tests refuse to run without an explicit test database. " +
-      "Set it to the connection string tests are allowed to TRUNCATE (the dev database)."
+    "DATABASE_URL missing from .env — tests refuse to run without a database. " +
+      "Point it at the dev database only: tests TRUNCATE all rows.",
   );
 }
-
-process.env.DATABASE_URL = testUrl;
-process.env.TEST_DIRECT_URL = testUrl;
+process.env.DATABASE_URL = databaseUrl;
 
 process.env.SUPER_ADMIN_CLERK_USER_IDS = "sa-test-1,sa-test-2";
 process.env.BOOTSTRAP_ADMIN_CLERK_USER_IDS = "ba-test-1";
