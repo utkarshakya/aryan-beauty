@@ -59,6 +59,18 @@ To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `
 
 A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` script. If a run fails, `posttest` is skipped and the database is left truncated — re-run the tests or seed manually with `npm.cmd run db:seed`.
 
+### Demo data
+
+`npm.cmd run db:seed` creates:
+
+- **9 services** — 8 active plus one inactive (Keratin Treatment) for testing the active/inactive toggle
+- **6 demo customers** (`…@example.com`) with searchable names and phone numbers
+- **~32 appointments** spread over the last 3 weeks and next 2 weeks — past confirmed (shown as Completed), past and future cancelled, today, and future pending/confirmed — all placed inside business hours without overlaps
+
+The seed only owns its own rows: it replaces the `@example.com` customers and their appointments, and never touches `User`, `BusinessSettings`, or bookings you made yourself. Safe to run repeatedly.
+
+To populate your own history on the customer "My appointments" page: sign in once (so your `User` row has your email — tests wipe it), then run `npm.cmd run db:seed`. It links 3 appointments to your account, skipped if you already have bookings.
+
 ## Manual Testing
 
 See the [manual testing checklist](docs/plans/plan.md#manual-testing-checklist) in the implementation plan for customer, owner, business settings, staff management, and access/safety verification steps.

@@ -43,7 +43,7 @@ Every script in `package.json`, what it runs, and when to use it.
 | `db:migrate:reset`  | `prisma migrate reset`                  | **Destructive:** drops every table, replays all migrations, then seeds. Use to get a clean database.                                    |
 | `db:push`           | `prisma db push`                        | Writes schema changes straight to the database, no migration file. Prototyping only — prefer `db:migrate`.                              |
 | `db:pull`           | `prisma db pull`                        | Reverse-engineers the schema from the live database into `prisma/schema.prisma`. Use when the schema is lost or was changed externally. |
-| `db:seed`           | `prisma db seed` → `tsx prisma/seed.ts` | Inserts the demo data (services, settings, customers). Run after a reset or a failed test run.                                          |
+| `db:seed`           | `prisma db seed` → `tsx prisma/seed.ts` | Inserts the demo data: 9 services, 6 demo customers, ~32 appointments across past/today/future. Idempotent — replaces only its own rows, never `User` or your bookings. Run after a reset or a failed test run. |
 | `db:studio`         | `prisma studio`                         | Opens the browser GUI to browse and edit tables. Use for quick data inspection.                                                         |
 
 ## Which database URL is used
