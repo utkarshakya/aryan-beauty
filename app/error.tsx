@@ -21,14 +21,14 @@ export default function Error({
 
   return (
     <Container size="narrow" className="py-16 text-center sm:py-24">
-      <h1 className="text-xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         Something went wrong
       </h1>
       <p className="mx-auto mt-3 max-w-md text-muted">
         We couldn&apos;t load this page. Please try again later.
       </p>
       {error?.message && (
-        <p className="mt-4 text-xs font-mono text-red-500 bg-red-50 p-2 rounded max-w-md mx-auto wrap-break-word">
+        <p className="mx-auto mt-4 max-w-md break-words rounded-control bg-danger-soft p-2 text-xs font-mono text-danger">
           {error.message}
         </p>
       )}

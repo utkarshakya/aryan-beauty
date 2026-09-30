@@ -5,7 +5,7 @@ import type { Service } from "@prisma/client";
 import ServiceCard from "./ServiceCard";
 import EmptyServices from "./EmptyServices";
 import Container from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, filterPillClasses } from "@/components/ui";
 
 const ALL_CATEGORIES = "All";
 
@@ -54,11 +54,7 @@ export default function ServicesFilter({
                   type="button"
                   onClick={() => setActiveCategory(category)}
                   aria-pressed={active}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-ring sm:px-4 sm:py-2 sm:text-sm ${
-                    active
-                      ? "bg-primary text-white"
-                      : "bg-primary-soft text-foreground hover:bg-primary-soft-strong"
-                  }`}
+                  className={filterPillClasses(active)}
                 >
                   {category}
                 </button>

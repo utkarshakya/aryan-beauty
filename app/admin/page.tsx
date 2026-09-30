@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
-import { Card, PageHeader, cardClassName } from "@/components/ui";
+import { Card, PageHeader, cardClassName, filterPillClasses } from "@/components/ui";
 import AdminAppointmentsList from "@/components/appointments/AdminAppointmentsList";
 import {
   getAdminAppointments,
@@ -262,21 +262,15 @@ export default async function AdminPage({
       <div className="mb-4 flex flex-wrap items-end gap-2">
         <Link
           href={makeAdminHref()}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
-            dateMode === "today"
-              ? "border-primary/30 bg-primary-soft text-primary-strong"
-              : "border-transparent text-muted hover:bg-neutral-soft"
-          }`}
+          aria-current={dateMode === "today" ? "page" : undefined}
+          className={filterPillClasses(dateMode === "today")}
         >
           Today
         </Link>
         <Link
           href={makeAdminHref("all")}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
-            dateMode === "all"
-              ? "border-primary/30 bg-primary-soft text-primary-strong"
-              : "border-transparent text-muted hover:bg-neutral-soft"
-          }`}
+          aria-current={dateMode === "all" ? "page" : undefined}
+          className={filterPillClasses(dateMode === "all")}
         >
           All dates
         </Link>

@@ -27,29 +27,19 @@ function formatTime(t: string): string {
 }
 
 export default async function Footer() {
-  let business;
-  try {
-    business = await getBusinessSettingsForDisplay();
-  } catch {
-    business = {
-      name: "Unknown Beauty",
-      tagline: "Your neighbourhood beauty parlour",
-      phoneDisplay: "+91 98765 43210",
-      phoneHref: "tel:+919876543210",
-      address: "Shop 12, Main Market Road",
-      addressLine2: "",
-      openingHours: {} as Record<string, { open: string; close: string }>,
-    };
-  }
+  const business = await getBusinessSettingsForDisplay();
+  const hoursDays = formatHoursDays(business.closedWeekdays);
+  const hoursTime = formatHoursTime(business.openingHours);
+
   return (
     <footer className="border-t border-border bg-muted-soft">
       <Container className="py-8 sm:py-10">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
             <p className="text-base font-bold tracking-tight sm:text-lg">
               Unknown <span className="text-primary">Beauty</span>
             </p>
-            <p className="mt-1 text-xs text-muted sm:mt-2 sm:text-sm">{business.tagline}.</p>
+            <p className="mt-1 text-sm text-muted sm:mt-2">{business.tagline}</p>
           </div>
 
           <div>
@@ -61,9 +51,7 @@ export default async function Footer() {
                 {business.address}
                 {business.addressLine2 ? `, ${business.addressLine2}` : ""}
               </p>
-              <p>
-                {formatHoursDays([])}: {formatHoursTime(business.openingHours)}
-              </p>
+              <p>{hoursTime ? `${hoursDays}: ${hoursTime}` : hoursDays}</p>
             </address>
           </div>
 

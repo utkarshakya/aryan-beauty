@@ -16,7 +16,7 @@ export default async function NotFound() {
       <p className="text-sm font-medium uppercase tracking-wide text-primary">
         {businessName}
       </p>
-      <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-4xl">
+      <h1 className="mt-2 text-display font-bold text-foreground">
         Page not found
       </h1>
       <p className="mt-3 max-w-md text-muted">

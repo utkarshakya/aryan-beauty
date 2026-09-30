@@ -1,7 +1,7 @@
 "use client";
 
 import { confirmAppointment } from "@/app/actions/appointments";
-import { Badge, EmptyState, badgeTone, cardClassName } from "@/components/ui";
+import { Badge, EmptyState, badgeTone, cardClassName, filterPillClasses } from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 import Link from "next/link";
@@ -83,20 +83,21 @@ export default function AdminAppointmentsList({
         className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-3 sm:pb-4"
         aria-label="Appointment status filters"
       >
-        {statusTabs.map((tab) => (
-          <Link
-            key={tab.value}
-            href={hrefForTab(tab.value)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
-              currentStatus === tab.value ||
-              (currentStatus === "default" && tab.value === "pending")
-                ? "border-primary/30 bg-primary-soft text-primary-strong"
-                : "border-transparent text-muted hover:bg-neutral-soft"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
+        {statusTabs.map((tab) => {
+          const active =
+            currentStatus === tab.value ||
+            (currentStatus === "default" && tab.value === "pending");
+          return (
+            <Link
+              key={tab.value}
+              href={hrefForTab(tab.value)}
+              aria-current={active ? "page" : undefined}
+              className={filterPillClasses(active)}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {appointments.length === 0 ? (
