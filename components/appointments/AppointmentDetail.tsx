@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { confirmAppointment } from "@/app/actions/appointments";
-import { Badge, badgeTone, cardClassName } from "@/components/ui";
+import { Badge, PageHeader, badgeTone, cardClassName } from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 
@@ -41,28 +40,17 @@ export default function AppointmentDetail({
 
   return (
     <div className="container mx-auto max-w-4xl px-3 py-4 sm:px-6 sm:py-8">
-      <div className="mb-8">
-        <Link
-          href="/admin"
-          className="text-sm font-medium text-primary hover:text-primary-strong"
-        >
-          ← Back to appointments
-        </Link>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-3 sm:mt-3">
-          <div>
-            <h1 className="text-xl font-bold text-foreground sm:text-3xl">
-              Appointment #{appointment.id}
-            </h1>
-            <p className="mt-1 text-sm text-muted sm:text-base">
-              Booked {formatDate(appointment.createdAt)} at{" "}
-              {formatTime(appointment.createdAt)}
-            </p>
-          </div>
+      <PageHeader
+        backHref="/admin"
+        backLabel="Back to dashboard"
+        title={`Appointment #${appointment.id}`}
+        subtitle={`Booked ${formatDate(appointment.createdAt)} at ${formatTime(appointment.createdAt)}`}
+        actions={
           <Badge tone={badgeTone(displayStatus)}>
             {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
           </Badge>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
         <section

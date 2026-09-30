@@ -1,5 +1,5 @@
 import CancelAppointmentButton from "./CancelAppointmentButton";
-import { Badge, badgeTone, cardClassName } from "@/components/ui";
+import { Badge, EmptyState, SectionHeading, badgeTone, cardClassName } from "@/components/ui";
 
 const formatDate = (date: Date | string) =>
   new Date(date).toLocaleDateString("en-IN", {
@@ -33,20 +33,13 @@ export default function AppointmentGroup({
   emptyMessage: string;
   appointments: Appointment[];
 }) {
+  const headingId = `${title.toLowerCase().replace(/\s+/g, "-")}-appointments`;
+
   return (
-    <section
-      aria-labelledby={`${title.toLowerCase().replace(/\s+/g, "-")}-appointments`}
-    >
-      <h2
-        id={`${title.toLowerCase().replace(/\s+/g, "-")}-appointments`}
-        className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl"
-      >
-        {title}
-      </h2>
+    <section aria-labelledby={headingId}>
+      <SectionHeading id={headingId} title={title} />
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted sm:p-6 sm:text-sm">
-          {emptyMessage}
-        </div>
+        <EmptyState title={emptyMessage} />
       ) : (
         <div className="space-y-3">
           {appointments.map((appointment) => (

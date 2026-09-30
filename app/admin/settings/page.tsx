@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getBusinessSettingsAction } from "@/app/actions/business";
-import { cardClassName } from "@/components/ui";
+import { PageHeader, cardClassName } from "@/components/ui";
 import BusinessSettingsForm from "@/components/business/BusinessSettingsForm";
 
 export const dynamic = "force-dynamic";
@@ -18,15 +17,12 @@ export default async function BusinessSettingsPage() {
 
   return (
     <div className="container mx-auto max-w-4xl px-3 py-4 sm:px-6 sm:py-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/admin" className="text-sm font-medium text-primary hover:text-primary-strong">
-            ← Back to dashboard
-          </Link>
-          <h1 className="mt-2 text-xl font-bold text-foreground sm:mt-3 sm:text-3xl">Business settings</h1>
-          <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">Manage your parlour&apos;s information, opening hours, and booking rules.</p>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/admin"
+        backLabel="Back to dashboard"
+        title="Business settings"
+        subtitle="Manage your parlour&apos;s information, opening hours, and booking rules."
+      />
 
       <section className={cardClassName("p-4 sm:p-6")} aria-labelledby="settings-heading">
         <h2 id="settings-heading" className="sr-only">Business settings form</h2>

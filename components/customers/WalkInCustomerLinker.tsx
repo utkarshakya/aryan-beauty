@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getWalkInCustomersAction, linkWalkInCustomerAction } from "@/app/actions/customers";
 import type { WalkInCustomer } from "@/lib/db/customers";
-import { Button } from "@/components/ui";
+import { Button, EmptyState } from "@/components/ui";
 
 export default function WalkInCustomerLinker() {
   const [walkInCustomers, setWalkInCustomers] = useState<WalkInCustomer[]>([]);
@@ -81,9 +81,7 @@ export default function WalkInCustomerLinker() {
       {loading ? (
         <div className="text-center py-8 text-muted">Loading walk-in customers…</div>
       ) : walkInCustomers.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted">
-          No unlinked walk-in customers.
-        </div>
+        <EmptyState title="No unlinked walk-in customers." />
       ) : (
         <div className="space-y-3">
           {walkInCustomers.map((customer) => (

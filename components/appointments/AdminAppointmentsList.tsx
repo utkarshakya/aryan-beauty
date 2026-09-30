@@ -1,7 +1,7 @@
 "use client";
 
 import { confirmAppointment } from "@/app/actions/appointments";
-import { Badge, badgeTone, cardClassName } from "@/components/ui";
+import { Badge, EmptyState, badgeTone, cardClassName } from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 import Link from "next/link";
@@ -101,23 +101,23 @@ export default function AdminAppointmentsList({
 
       {appointments.length === 0 ? (
         term ? (
-          <div className={cardClassName("p-6 text-center text-sm text-muted sm:p-10")}>
-            <p>No appointments match “{term}”.</p>
-            <p className="mt-1">
-              Try a different name or phone number, or{" "}
-              <Link
-                href={clearHref()}
-                className="font-medium text-primary underline hover:text-primary-strong"
-              >
-                clear the search
-              </Link>
-              .
-            </p>
-          </div>
+          <EmptyState
+            title={<>No appointments match “{term}”.</>}
+            body={
+              <>
+                Try a different name or phone number, or{" "}
+                <Link
+                  href={clearHref()}
+                  className="font-medium text-primary underline hover:text-primary-strong"
+                >
+                  clear the search
+                </Link>
+                .
+              </>
+            }
+          />
         ) : (
-          <div className={cardClassName("p-6 text-center text-sm text-muted sm:p-10")}>
-            {emptyMessage ?? "No appointments"}
-          </div>
+          <EmptyState title={emptyMessage ?? "No appointments"} />
         )
       ) : (
         <>

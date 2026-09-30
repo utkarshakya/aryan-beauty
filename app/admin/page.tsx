@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
-import { Card, cardClassName } from "@/components/ui";
+import { Card, PageHeader, cardClassName } from "@/components/ui";
 import AdminAppointmentsList from "@/components/appointments/AdminAppointmentsList";
 import {
   getAdminAppointments,
@@ -127,39 +127,33 @@ export default async function AdminPage({
 
   return (
     <div className="container mx-auto max-w-6xl px-3 py-5 sm:px-6 sm:py-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-primary">
-            Admin
-          </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Today&apos;s workspace
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            A quick view of the parlour and its appointments.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/services"
-            className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring"
-          >
-            Manage services
-          </Link>
-          <Link
-            href="/admin/settings"
-            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
-          >
-            Business settings
-          </Link>
-          <Link
-            href="/admin/staff"
-            className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
-          >
-            Manage staff
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Admin"
+        title="Today's workspace"
+        subtitle="A quick view of the parlour and its appointments."
+        actions={
+          <>
+            <Link
+              href="/admin/services"
+              className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring"
+            >
+              Manage services
+            </Link>
+            <Link
+              href="/admin/settings"
+              className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
+            >
+              Business settings
+            </Link>
+            <Link
+              href="/admin/staff"
+              className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
+            >
+              Manage staff
+            </Link>
+          </>
+        }
+      />
       <section
         className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-4 sm:gap-4"
         aria-label="Business summary"

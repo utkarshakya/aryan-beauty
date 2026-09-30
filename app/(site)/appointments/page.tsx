@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireActiveUser } from "@/lib/auth";
 import { getBusinessSettingsForDisplay } from "@/lib/db/business";
 import Container from "@/components/ui/Container";
-import PageHeader from "@/app/components/PageHeader";
+import { PageHeader, SectionHeading } from "@/components/ui";
 import BookAppointmentSection from "@/components/appointments/BookAppointmentSection";
 import AppointmentGroup from "@/components/appointments/AppointmentGroup";
 import EmptyServices from "@/app/components/EmptyServices";
@@ -84,16 +84,12 @@ export default async function AppointmentsPage({
       <PageHeader
         title="Appointments"
         subtitle="Track upcoming visits and review your booking history."
+        align="center"
       />
 
       <div className="space-y-7 sm:space-y-10">
         <section aria-labelledby="book-new">
-          <h2
-            id="book-new"
-            className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl"
-          >
-            Book new appointment
-          </h2>
+          <SectionHeading id="book-new" title="Book new appointment" />
           {services.length === 0 ? (
             <EmptyServices
               phoneDisplay={business.phoneDisplay}

@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import type { Service } from "@prisma/client";
-import PageHeader from "./PageHeader";
 import ServiceCard from "./ServiceCard";
 import EmptyServices from "./EmptyServices";
 import Container from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui";
 
 const ALL_CATEGORIES = "All";
 
@@ -34,6 +34,7 @@ export default function ServicesFilter({
       <PageHeader
         title="Our Services"
         subtitle="Browse our range of professional beauty services and book online."
+        align="center"
       />
 
       {services.length === 0 ? (

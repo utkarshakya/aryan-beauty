@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getServicesAction } from "@/app/actions/services";
-import { cardClassName } from "@/components/ui";
+import { EmptyState, PageHeader, cardClassName } from "@/components/ui";
 import ServiceEditor from "@/components/services/ServiceEditor";
 import ServiceForm from "@/components/services/ServiceForm";
 
@@ -19,21 +18,18 @@ export default async function ManageServicesPage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/admin" className="text-sm font-medium text-primary hover:text-primary-strong">
-            ← Back to appointments
-          </Link>
-          <h1 className="mt-2 text-xl font-bold text-foreground sm:mt-3 sm:text-3xl">Manage services</h1>
-          <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">Keep your public service menu and prices up to date.</p>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/admin"
+        backLabel="Back to dashboard"
+        title="Manage services"
+        subtitle="Keep your public service menu and prices up to date."
+      />
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
         <section className="space-y-4" aria-labelledby="services-heading">
           <h2 id="services-heading" className="text-lg font-semibold text-foreground">Current services</h2>
           {services.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border p-6 text-center text-muted">No services yet.</p>
+            <EmptyState title="No services yet." />
           ) : (
             services.map((service) => <ServiceEditor key={service.id} service={service} />)
           )}
