@@ -1,6 +1,14 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
-import { Card, PageHeader, cardClassName, filterPillClasses } from "@/components/ui";
+import {
+  Button,
+  ButtonLink,
+  Input,
+  PageHeader,
+  SummaryCard,
+  cardClassName,
+  filterPillClasses,
+} from "@/components/ui";
 import AdminAppointmentsList from "@/components/appointments/AdminAppointmentsList";
 import {
   getAdminAppointments,
@@ -133,24 +141,15 @@ export default async function AdminPage({
         subtitle="A quick view of the parlour and its appointments."
         actions={
           <>
-            <Link
-              href="/admin/services"
-              className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring"
-            >
+            <ButtonLink href="/admin/services" variant="primary">
               Manage services
-            </Link>
-            <Link
-              href="/admin/settings"
-              className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
-            >
+            </ButtonLink>
+            <ButtonLink href="/admin/settings" variant="outline">
               Business settings
-            </Link>
-            <Link
-              href="/admin/staff"
-              className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring"
-            >
+            </ButtonLink>
+            <ButtonLink href="/admin/staff" variant="outline">
               Manage staff
-            </Link>
+            </ButtonLink>
           </>
         }
       />
@@ -239,25 +238,19 @@ export default async function AdminPage({
           >
             Search
           </label>
-          <input
+          <Input
             id="appointment-search"
             name="search"
             defaultValue={searchParam}
             placeholder="Customer name or phone"
             autoComplete="off"
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus-ring"
           />
         </div>
         {hasExplicitStatus ? (
           <input type="hidden" name="status" value={statusParam} />
         ) : null}
         {dateFilter && <input type="hidden" name="date" value={dateFilter} />}
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring sm:px-5"
-        >
-          Search
-        </button>
+        <Button type="submit">Search</Button>
       </form>
       <div className="mb-4 flex flex-wrap items-end gap-2">
         <Link
@@ -286,13 +279,13 @@ export default async function AdminPage({
             >
               Date
             </label>
-            <input
-              id="appointment-date"
-              name="date"
-              type="date"
-              defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
-              className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus-ring"
-            />
+          <Input
+            id="appointment-date"
+            name="date"
+            type="date"
+            defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
+            className="sm:w-auto"
+          />
           </div>
           {hasExplicitStatus && (
             <input type="hidden" name="status" value={statusParam} />
@@ -300,12 +293,9 @@ export default async function AdminPage({
           {searchParam && (
             <input type="hidden" name="search" value={searchParam} />
           )}
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-ring sm:px-4 sm:py-2 sm:text-sm"
-          >
+          <Button type="submit" variant="outline">
             View date
-          </button>
+          </Button>
         </form>
       </div>
       <AdminAppointmentsList
@@ -322,25 +312,5 @@ export default async function AdminPage({
         }
       />
     </div>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <Card className="p-3 sm:p-5">
-      <p className="text-xs font-medium text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-foreground sm:text-3xl">
-        {value}
-      </p>
-      <p className="mt-1 text-[11px] text-muted sm:text-xs">{detail}</p>
-    </Card>
   );
 }

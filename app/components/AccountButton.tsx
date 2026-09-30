@@ -23,6 +23,26 @@ export default function AccountButton() {
       if (event.key === "Escape") {
         setOpen(false);
         buttonRef.current?.focus();
+        return;
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        const items = Array.from(
+          menuRef.current?.querySelectorAll<HTMLButtonElement>(
+            '[role="menuitem"]',
+          ) ?? [],
+        );
+        if (items.length === 0) return;
+        const currentIndex = items.indexOf(
+          document.activeElement as HTMLButtonElement,
+        );
+        event.preventDefault();
+        const nextIndex =
+          event.key === "ArrowDown"
+            ? (currentIndex + 1) % items.length
+            : currentIndex <= 0
+              ? items.length - 1
+              : currentIndex - 1;
+        items[nextIndex]?.focus();
       }
     };
     document.addEventListener("mousedown", onPointerDown);
@@ -61,7 +81,15 @@ export default function AccountButton() {
     .toUpperCase();
 
   return (
-    <div ref={containerRef} className="relative flex h-full items-center">
+    <div
+      ref={containerRef}
+      className="relative flex h-full items-center"
+      onBlur={(event) => {
+        if (!containerRef.current?.contains(event.relatedTarget)) {
+          setOpen(false);
+        }
+      }}
+    >
       <button
         ref={buttonRef}
         type="button"
@@ -99,7 +127,7 @@ export default function AccountButton() {
               setOpen(false);
               clerk.openUserProfile();
             }}
-            className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft"
+            className="block w-full rounded-control px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
           >
             Manage account
           </button>
@@ -110,7 +138,7 @@ export default function AccountButton() {
               setOpen(false);
               void clerk.signOut();
             }}
-            className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-danger transition-colors hover:bg-danger-soft"
+            className="block w-full rounded-control px-3 py-2.5 text-left text-sm font-medium text-danger transition-colors hover:bg-danger-soft focus-ring"
           >
             Sign out
           </button>

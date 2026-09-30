@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { updateBusinessSettingsAction } from "@/app/actions/business";
 import { BusinessSettings } from "@prisma/client";
-import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import {
+  Button,
+  Field,
+  FormBanner,
+  Input,
+  SectionHeading,
+  Select,
+  Textarea,
+  checkboxClass,
+} from "@/components/ui";
 
 const WEEKDAYS = [
   { key: "monday", label: "Monday" },
@@ -125,13 +134,11 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {success && (
-        <div className="rounded-lg bg-success-soft px-4 py-3 text-sm text-success" role="status">
-          Business settings saved successfully
-        </div>
+        <FormBanner>Business settings saved successfully</FormBanner>
       )}
 
-      <section className="space-y-4" aria-labelledby="basic-heading">
-        <h3 id="basic-heading" className="text-lg font-semibold text-foreground">Basic information</h3>
+      <section aria-labelledby="basic-heading">
+        <SectionHeading id="basic-heading" title="Basic information" />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Business name" error={errors.name}>
             <Input
@@ -198,21 +205,24 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         </div>
       </section>
 
-      <section className="space-y-4" aria-labelledby="hours-heading">
-        <h3 id="hours-heading" className="text-lg font-semibold text-foreground">Opening hours</h3>
-        <p className="text-sm text-muted">Uncheck a day to mark it as closed. Closed days won&apos;t show available slots.</p>
+      <section aria-labelledby="hours-heading">
+        <SectionHeading
+          id="hours-heading"
+          title="Opening hours"
+          description="Uncheck a day to mark it as closed. Closed days won&apos;t show available slots."
+        />
         <div className="space-y-2">
           {WEEKDAYS.map(day => {
             const closed = isClosed(day, closedWeekdays, openingHours);
             const hours = openingHours[day.key] ?? { open: "09:00", close: "18:00" };
             return (
-              <div key={day.key} className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-border bg-background/50">
+              <div key={day.key} className="flex flex-wrap items-center gap-3 rounded-control border border-border bg-background/50 p-3">
                 <label className="flex items-center gap-2 min-w-[100px] sm:min-w-[120px]">
                   <input
                     type="checkbox"
                     checked={!closed}
                     onChange={() => toggleClosedWeekday(WEEKDAYS.findIndex(d => d.key === day.key))}
-                    className="rounded border-border text-primary focus-ring"
+                    className={checkboxClass}
                   />
                   <span className="text-sm font-medium text-foreground">{day.label}</span>
                 </label>
@@ -246,9 +256,12 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         </div>
       </section>
 
-      <section className="space-y-4" aria-labelledby="closures-heading">
-        <h3 id="closures-heading" className="text-lg font-semibold text-foreground">Closures & holidays</h3>
-        <p className="text-sm text-muted">Add specific dates when the parlour is closed (holidays, vacation, etc.).</p>
+      <section aria-labelledby="closures-heading">
+        <SectionHeading
+          id="closures-heading"
+          title="Closures & holidays"
+          description="Add specific dates when the parlour is closed (holidays, vacation, etc.)."
+        />
         <div className="flex flex-wrap gap-2">
           <Input
             type="date"
@@ -283,8 +296,8 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         )}
       </section>
 
-      <section className="space-y-4" aria-labelledby="booking-heading">
-        <h3 id="booking-heading" className="text-lg font-semibold text-foreground">Booking rules</h3>
+      <section aria-labelledby="booking-heading">
+        <SectionHeading id="booking-heading" title="Booking rules" />
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Slot interval (minutes)" error={errors.slotIntervalMin}>
             <Select

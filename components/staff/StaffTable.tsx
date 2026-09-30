@@ -7,7 +7,7 @@ import {
   restoreUserAction,
 } from "@/app/actions/users";
 import AuthStatusBadge from "@/components/auth/AuthStatusBadge";
-import { Button, EmptyState } from "@/components/ui";
+import { Button, EmptyState, FormBanner, Select } from "@/components/ui";
 import type { AppUserSummary } from "@/lib/db/users";
 import type { UserRole } from "@/lib/auth";
 
@@ -63,11 +63,7 @@ export default function StaffTable({
 
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger" role="alert">
-          {error}
-        </div>
-      )}
+      {error && <FormBanner tone="danger">{error}</FormBanner>}
 
       {users.length === 0 ? (
         <EmptyState title="No accounts yet. Invite your first staff member above." />
@@ -80,7 +76,7 @@ export default function StaffTable({
             return (
               <li
                 key={user.clerkUserId}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-background p-4"
+                className="flex flex-wrap items-center gap-3 rounded-card border border-border bg-background p-4"
               >
                 <div className="min-w-[200px] flex-1">
                   <p className="font-medium text-foreground">
@@ -105,12 +101,12 @@ export default function StaffTable({
                       <label htmlFor={`role-${user.clerkUserId}`} className="sr-only">
                         Change role
                       </label>
-                      <select
+                      <Select
                         id={`role-${user.clerkUserId}`}
                         value={user.role === "admin" ? "admin" : user.role}
                         disabled={busy === user.clerkUserId || user.role === "admin"}
                         onChange={(e) => handleRoleChange(user, e.target.value as UserRole)}
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus-ring disabled:opacity-60"
+                        className="disabled:opacity-60"
                       >
                         {user.role === "admin" ? (
                           <option value="admin">Admin</option>
@@ -121,7 +117,7 @@ export default function StaffTable({
                             </option>
                           ))
                         )}
-                      </select>
+                      </Select>
 
                       {user.status === "active" ? (
                         <Button

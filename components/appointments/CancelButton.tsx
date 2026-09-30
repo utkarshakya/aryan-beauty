@@ -1,25 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { adminCancelAppointment as cancelAppointment } from "@/app/actions/appointments";
+import { ActionButton } from "@/components/ui";
 
 export default function CancelButton({ appointmentId }: { appointmentId: number }) {
+  const [pending, setPending] = useState(false);
+
   const handleSubmit = async () => {
+    if (pending) return;
     if (window.confirm("Cancel this appointment?")) {
-      const result = await cancelAppointment(appointmentId);
-      if (result.error) {
-        window.alert(result.error);
+      setPending(true);
+      try {
+        const result = await cancelAppointment(appointmentId);
+        if (result.error) {
+          window.alert(result.error);
+        }
+      } finally {
+        setPending(false);
       }
     }
   };
 
   return (
     <form action={handleSubmit}>
-      <button
-        type="submit"
-        className="text-red-600 hover:text-red-800 font-medium underline text-sm"
-      >
-        Cancel
-      </button>
+      <ActionButton type="submit" tone="danger" disabled={pending}>
+        {pending ? "Cancelling…" : "Cancel"}
+      </ActionButton>
     </form>
   );
 }

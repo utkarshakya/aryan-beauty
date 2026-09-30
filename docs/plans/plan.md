@@ -225,6 +225,64 @@ Acceptance checks: ✅ All passing.
 - [x] Disable/restore staff without deleting history.
 - [x] Prevent creation or modification of super-admin access from the app.
 
+## Manual Testing Checklist
+
+Restored from the README (deleted in `21bc0a3`); README links here. Run through before each release and after a fresh environment. Booking and admin mutations are Next.js Server Actions, so test them through the app UI — Postman is only needed for HTTP Route Handlers under `app/api/`.
+
+### Customer
+
+- [ ] Sign in and sign up through Clerk both work.
+- [ ] Book: pick a service and a valid future slot → success message with the chosen time.
+- [ ] Invalid phone number → inline error.
+- [ ] A time in the past, or a slot for a closed day/date, is not offered.
+- [ ] Refresh: the booking appears under upcoming appointments.
+- [ ] Cancel an upcoming appointment (beyond the cutoff) → it moves to history.
+- [ ] Cancelling inside the cutoff window is rejected with the cutoff message.
+- [ ] No way to see or cancel another customer's appointment.
+
+### Owner
+
+- [ ] `/admin` loads today's appointments; Pending is the default tab.
+- [ ] Confirm a pending appointment → moves to confirmed; re-submitting is a silent no-op.
+- [ ] Cancel an upcoming appointment → cancelled; Restore brings it back to confirmed.
+- [ ] A confirmed appointment whose end time passed shows as Completed with no Confirm/Cancel/Restore actions.
+- [ ] Picking a past date shows that day's appointments; All dates drops the today-anchor and orders newest first.
+- [ ] Search by customer name or partial phone finds appointments from any date; empty results show a clear "no match" state with a Clear search link.
+- [ ] The active tab and search term survive switching between Today / All dates / status tabs.
+- [ ] `/admin/appointments/[id]` shows customer contact, service snapshot (name, price, duration), date/time, notes, and status; an invalid id returns 404.
+- [ ] Service management in `/admin/services`: create, edit, activate, and deactivate; deactivated services disappear from booking and public pages.
+
+### Business settings
+
+- [ ] `/admin/settings` saves opening hours, closed weekdays, closures, slot interval, minimum booking notice, and cancellation cutoff.
+- [ ] A saved change affects new availability only — existing appointments are untouched.
+- [ ] Marketing fields (tagline, description, phone, address) appear on the public pages.
+
+### Staff management
+
+- [ ] Owner invites an email from `/admin/staff` → the invitee receives the Clerk invitation email.
+- [ ] The invitee accepts, signs up, and lands on the workspace as active `staff` (webhook applies the invited role, not customer).
+- [ ] Owner can promote an existing customer to Staff and demote staff back to Customer.
+- [ ] Disabling a staff member revokes their access immediately, and their booking/customer history stays intact.
+- [ ] Restore brings a disabled staff member back with their role preserved.
+- [ ] Owner cannot disable themselves, cannot change a super-admin account, and the UI offers no super-admin option.
+- [ ] An owner cannot grant the Admin role through the app.
+- [ ] Staff and customers cannot reach `/admin/staff` (redirected).
+- [ ] Viewing the list again after a role change shows the updated badge.
+
+### Access and safety
+
+- [ ] A customer cannot reach `/admin` (redirected).
+- [ ] Staff reaches `/admin` but not owner-only settings.
+- [ ] A disabled account loses access on the next request (role/status are read from the database, not the session).
+- [ ] A webhook-driven profile update does not change a user's role or disabled status.
+
+### Devices and accessibility
+
+- [ ] Customer and owner flows work on phone, tablet, and desktop.
+- [ ] Keyboard navigation works: every input and button reachable with Tab, focus is visible, inputs are labelled.
+- [ ] Text has sufficient contrast and pages do not overflow horizontally on a phone.
+
 ## Explicitly Postponed
 
 - Multiple parlours, branches, or tenants.

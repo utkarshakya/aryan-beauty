@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getStaffUsersAction } from "@/app/actions/users";
-import { PageHeader, cardClassName } from "@/components/ui";
+import { PageHeader, SectionHeading, cardClassName } from "@/components/ui";
 import StaffInviteForm from "@/components/staff/StaffInviteForm";
 import StaffTable from "@/components/staff/StaffTable";
 
@@ -26,8 +26,8 @@ export default async function ManageStaffPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
-        <section className="space-y-4" aria-labelledby="staff-heading">
-          <h2 id="staff-heading" className="text-lg font-semibold text-foreground">Accounts</h2>
+        <section aria-labelledby="staff-heading">
+          <SectionHeading id="staff-heading" title="Accounts" />
           <StaffTable users={users} currentClerkUserId={currentClerkUserId} />
         </section>
 
@@ -35,13 +35,12 @@ export default async function ManageStaffPage() {
           className={cardClassName("h-fit p-4 sm:p-6")}
           aria-labelledby="invite-heading"
         >
-          <h2 id="invite-heading" className="text-lg font-semibold text-foreground">Invite staff</h2>
-          <p className="mt-1 text-sm text-muted">
-            They get an email, sign up, and land on the workspace automatically.
-          </p>
-          <div className="mt-4">
-            <StaffInviteForm />
-          </div>
+          <SectionHeading
+            id="invite-heading"
+            title="Invite staff"
+            description="They get an email, sign up, and land on the workspace automatically."
+          />
+          <StaffInviteForm />
         </section>
       </div>
     </div>

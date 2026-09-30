@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { cancelMyAppointment } from "@/app/actions/appointments";
+import { ActionButton } from "@/components/ui";
 import type { CancellationState } from "@/lib/db/appointments";
 
 const initialState: CancellationState = {};
@@ -26,13 +27,9 @@ export default function CancelAppointmentButton({
       }}
     >
       <input type="hidden" name="appointmentId" value={appointmentId} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="text-sm font-medium text-danger underline transition-colors hover:text-danger/80"
-      >
+      <ActionButton type="submit" tone="danger" disabled={pending}>
         {pending ? "Cancelling…" : "Cancel appointment"}
-      </button>
+      </ActionButton>
       {state.error && (
         <p className="mt-2 text-sm text-danger" role="alert">
           {state.error}

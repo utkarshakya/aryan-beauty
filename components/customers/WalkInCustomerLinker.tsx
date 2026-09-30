@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getWalkInCustomersAction, linkWalkInCustomerAction } from "@/app/actions/customers";
 import type { WalkInCustomer } from "@/lib/db/customers";
-import { Button, EmptyState } from "@/components/ui";
+import { Button, EmptyState, FormBanner, Input, SectionHeading } from "@/components/ui";
 
 export default function WalkInCustomerLinker() {
   const [walkInCustomers, setWalkInCustomers] = useState<WalkInCustomer[]>([]);
@@ -47,36 +47,36 @@ export default function WalkInCustomerLinker() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Unlinked Walk-in Customers</h3>
-        <Button variant="secondary" size="md" disabled={loading} onClick={() => {
-          setLoading(true);
-          setErrors({});
-          setSuccess(null);
-          getWalkInCustomersAction().then((customers) => {
-            setWalkInCustomers(customers);
-            setLoading(false);
-          }).catch(() => {
-            setErrors({ form: "Failed to load walk-in customers" });
-            setLoading(false);
-          });
-        }}>
-          {loading ? "Loading…" : "Refresh"}
-        </Button>
-      </div>
+    <div>
+      <SectionHeading
+        title="Unlinked Walk-in Customers"
+        actions={
+          <Button
+            variant="secondary"
+            size="md"
+            disabled={loading}
+            onClick={() => {
+              setLoading(true);
+              setErrors({});
+              setSuccess(null);
+              getWalkInCustomersAction().then((customers) => {
+                setWalkInCustomers(customers);
+                setLoading(false);
+              }).catch(() => {
+                setErrors({ form: "Failed to load walk-in customers" });
+                setLoading(false);
+              });
+            }}
+          >
+            {loading ? "Loading…" : "Refresh"}
+          </Button>
+        }
+      />
 
-      {errors.form && (
-        <div className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger" role="alert">
-          {errors.form}
-        </div>
-      )}
+      <div className="space-y-4">
+        {errors.form && <FormBanner tone="danger">{errors.form}</FormBanner>}
 
-      {success && (
-        <div className="rounded-lg bg-success-soft px-4 py-3 text-sm text-success" role="status">
-          {success}
-        </div>
-      )}
+        {success && <FormBanner>{success}</FormBanner>}
 
       {loading ? (
         <div className="text-center py-8 text-muted">Loading walk-in customers…</div>
@@ -87,7 +87,7 @@ export default function WalkInCustomerLinker() {
           {walkInCustomers.map((customer) => (
             <div
               key={customer.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-background p-4"
+              className="flex flex-wrap items-center gap-3 rounded-card border border-border bg-background p-4"
             >
               <div className="flex-1 min-w-[200px]">
                 <p className="font-medium text-foreground">{customer.name}</p>
@@ -99,13 +99,14 @@ export default function WalkInCustomerLinker() {
                 <label htmlFor={`clerk-${customer.id}`} className="text-sm text-muted">
                   Clerk User ID:
                 </label>
-                <input
-                  id={`clerk-${customer.id}`}
-                  type="text"
-                  placeholder="user_..."
-                  required
-                  className="w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                />
+                <div className="w-[200px]">
+                  <Input
+                    id={`clerk-${customer.id}`}
+                    type="text"
+                    placeholder="user_..."
+                    required
+                  />
+                </div>
                 <Button
                   size="md"
                   disabled={linkingId === customer.id}
@@ -122,6 +123,7 @@ export default function WalkInCustomerLinker() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

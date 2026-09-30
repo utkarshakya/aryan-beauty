@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { inviteStaffAction } from "@/app/actions/users";
-import { Button, Field, Input } from "@/components/ui";
+import { Button, Field, FormBanner, Input } from "@/components/ui";
 
 const initialState: { errors?: Record<string, string>; success?: string } = {};
 
@@ -33,11 +33,7 @@ export default function StaffInviteForm() {
         </Button>
       </div>
 
-      {state.success && (
-        <p className="text-sm text-success" role="status">
-          {state.success}
-        </p>
-      )}
+      {state.success && <FormBanner>{state.success}</FormBanner>}
     </form>
   );
 }

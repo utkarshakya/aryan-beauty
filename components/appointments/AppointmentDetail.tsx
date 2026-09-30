@@ -1,5 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import { confirmAppointment } from "@/app/actions/appointments";
-import { Badge, PageHeader, badgeTone, cardClassName } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  PageHeader,
+  badgeTone,
+  cardClassName,
+  cardLabelHeadingClass,
+} from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 
@@ -37,6 +47,17 @@ export default function AppointmentDetail({
 }: AppointmentDetailProps) {
   const displayStatus = appointment.displayStatus;
   const isCompleted = displayStatus === "completed";
+  const [confirming, setConfirming] = useState(false);
+
+  const handleConfirm = async () => {
+    if (confirming) return;
+    setConfirming(true);
+    try {
+      await confirmAppointment(appointment.id);
+    } finally {
+      setConfirming(false);
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-4xl px-3 py-4 sm:px-6 sm:py-8">
@@ -59,7 +80,7 @@ export default function AppointmentDetail({
         >
           <h2
             id="customer-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted"
+            className={cardLabelHeadingClass}
           >
             Customer
           </h2>
@@ -105,7 +126,7 @@ export default function AppointmentDetail({
         >
           <h2
             id="service-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted"
+            className={cardLabelHeadingClass}
           >
             Service
           </h2>
@@ -137,7 +158,7 @@ export default function AppointmentDetail({
         >
           <h2
             id="schedule-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted"
+            className={cardLabelHeadingClass}
           >
             Schedule
           </h2>
@@ -164,7 +185,7 @@ export default function AppointmentDetail({
         >
           <h2
             id="notes-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-muted"
+            className={cardLabelHeadingClass}
           >
             Notes
           </h2>
@@ -177,16 +198,10 @@ export default function AppointmentDetail({
       {!isCompleted && displayStatus !== "cancelled" && (
         <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5">
           {displayStatus === "pending" && (
-            <form
-              action={confirmAppointment.bind(null, appointment.id)}
-              className="inline-flex"
-            >
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-strong focus-ring sm:px-5"
-              >
-                Confirm appointment
-              </button>
+            <form action={handleConfirm}>
+              <Button type="submit" disabled={confirming}>
+                {confirming ? "Confirming…" : "Confirm appointment"}
+              </Button>
             </form>
           )}
           <CancelButton appointmentId={appointment.id} />

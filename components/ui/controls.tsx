@@ -8,6 +8,8 @@ const controlClasses =
   "w-full rounded-control border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring sm:px-4 sm:py-2.5";
 const invalidClasses = "border-danger bg-danger-soft";
 
+export const checkboxClass = "rounded border-border text-primary focus-ring";
+
 type ControlProps = {
   className?: string;
   invalid?: boolean;

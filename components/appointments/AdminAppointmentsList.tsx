@@ -1,10 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { confirmAppointment } from "@/app/actions/appointments";
-import { Badge, EmptyState, badgeTone, cardClassName, filterPillClasses } from "@/components/ui";
+import {
+  ActionButton,
+  Badge,
+  EmptyState,
+  badgeTone,
+  cardClassName,
+  filterPillClasses,
+} from "@/components/ui";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 import Link from "next/link";
+
+const statusLabel = (status: string) =>
+  status.charAt(0).toUpperCase() + status.slice(1);
 
 type Appointment = {
   id: number;
@@ -56,6 +67,16 @@ export default function AdminAppointmentsList({
   emptyMessage,
 }: AppointmentsListProps) {
   const term = searchTerm?.trim();
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const handleConfirm = async (appointmentId: number) => {
+    if (confirmingId !== null) return;
+    setConfirmingId(appointmentId);
+    try {
+      await confirmAppointment(appointmentId);
+    } finally {
+      setConfirmingId(null);
+    }
+  };
   const statusWord =
     currentStatus === "all"
       ? null
@@ -78,7 +99,7 @@ export default function AdminAppointmentsList({
   };
 
   return (
-    <div className="space-y-5 rounded-2xl border border-border bg-muted-soft/40 p-3 sm:space-y-6 sm:p-5">
+    <div className="space-y-5 rounded-card border border-border bg-muted-soft/40 p-3 sm:space-y-6 sm:p-5">
       <nav
         className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-3 sm:pb-4"
         aria-label="Appointment status filters"
@@ -168,11 +189,11 @@ export default function AdminAppointmentsList({
                     )}
                   </div>
                   <Badge tone={badgeTone(displayStatus)}>
-                    {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+                    {statusLabel(displayStatus)}
                   </Badge>
                 </div>
 
-                <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-xs sm:gap-4 sm:text-sm">
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs sm:gap-4 sm:text-sm">
                   <div>
                     <dt className="text-muted">Service</dt>
                     <dd className="mt-1 font-medium text-foreground">
@@ -181,7 +202,7 @@ export default function AdminAppointmentsList({
                   </div>
                   <div>
                     <dt className="text-muted">Price</dt>
-                    <dd className="mt-1 font-medium text-foreground">
+                    <dd className="mt-1 text-right font-medium text-foreground">
                       ₹{Math.round(appointment.servicePrice)}
                     </dd>
                   </div>
@@ -219,15 +240,16 @@ export default function AdminAppointmentsList({
                 {!isCompleted && displayStatus !== "cancelled" && (
                   <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-border pt-3">
                     {displayStatus === "pending" && (
-                      <form
-                        action={confirmAppointment.bind(null, appointment.id)}
-                      >
-                        <button
+                      <form action={() => handleConfirm(appointment.id)}>
+                        <ActionButton
                           type="submit"
-                          className="font-medium text-green-600 underline hover:text-green-800"
+                          tone="success"
+                          disabled={confirmingId !== null}
                         >
-                          Confirm
-                        </button>
+                          {confirmingId === appointment.id
+                            ? "Confirming…"
+                            : "Confirm"}
+                        </ActionButton>
                       </form>
                     )}
                     {displayStatus !== "cancelled" && (
@@ -258,14 +280,14 @@ export default function AdminAppointmentsList({
                   <th className="px-3 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 {appointments.map((appointment) => {
                   const displayStatus = appointment.displayStatus ?? appointment.status;
                   const isCompleted = displayStatus === "completed";
 
                   return (
                   <tr key={appointment.id} className="hover:bg-neutral-soft">
-                    <td className="px-3 py-5">
+                    <td className="px-3 py-4">
                       <Link
                         href={`/admin/appointments/${appointment.id}`}
                         className="font-medium text-foreground hover:text-primary hover:underline"
@@ -278,7 +300,7 @@ export default function AdminAppointmentsList({
                         </p>
                       )}
                     </td>
-                    <td className="px-3 py-5">
+                    <td className="px-3 py-4">
                       <p className="font-medium text-foreground">
                         {appointment.serviceName}
                       </p>
@@ -287,7 +309,7 @@ export default function AdminAppointmentsList({
                         {Math.round(appointment.servicePrice)}
                       </p>
                     </td>
-                    <td className="px-3 py-5 text-foreground">
+                    <td className="px-3 py-4 text-foreground">
                       <p>
                         {new Date(appointment.startTime).toLocaleDateString(
                           "en-IN",
@@ -316,26 +338,24 @@ export default function AdminAppointmentsList({
                         )}
                       </p>
                     </td>
-                    <td className="px-3 py-5">
+                    <td className="px-3 py-4">
                       <Badge tone={badgeTone(displayStatus)}>
-                        {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+                        {statusLabel(displayStatus)}
                       </Badge>
                     </td>
-                    <td className="px-3 py-5 text-right">
+                    <td className="px-3 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
                         {!isCompleted && displayStatus === "pending" && (
-                          <form
-                            action={confirmAppointment.bind(
-                              null,
-                              appointment.id,
-                            )}
-                          >
-                            <button
+                          <form action={() => handleConfirm(appointment.id)}>
+                            <ActionButton
                               type="submit"
-                              className="text-green-600 hover:text-green-800 font-medium underline text-sm"
+                              tone="success"
+                              disabled={confirmingId !== null}
                             >
-                              Confirm
-                            </button>
+                              {confirmingId === appointment.id
+                                ? "Confirming…"
+                                : "Confirm"}
+                            </ActionButton>
                           </form>
                         )}
                         {!isCompleted && displayStatus !== "cancelled" && (

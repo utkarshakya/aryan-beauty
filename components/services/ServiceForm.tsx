@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createServiceAction } from "@/app/actions/services";
-import { Button, Field, Input, Textarea } from "@/components/ui";
+import { Button, Field, FormBanner, Input, Textarea, checkboxClass } from "@/components/ui";
 
 export default function ServiceForm() {
   const [name, setName] = useState("");
@@ -55,9 +55,7 @@ export default function ServiceForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {success && (
-        <div className="rounded-lg bg-success-soft px-4 py-3 text-sm text-success" role="status">
-          Service created successfully
-        </div>
+        <FormBanner>Service created successfully</FormBanner>
       )}
 
       <Field label="Name" error={errors.name}>
@@ -109,7 +107,7 @@ export default function ServiceForm() {
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
-            className="rounded border-border text-primary focus-ring"
+            className={checkboxClass}
           />
           Active
         </label>

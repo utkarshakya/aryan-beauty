@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "@/app/actions/services";
 import { Service } from "@prisma/client";
-import { Button, cardClassName, Field, Input, Textarea } from "@/components/ui";
+import { Button, FormBanner, cardClassName, checkboxClass, Field, Input, Textarea } from "@/components/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
   const [editing, setEditing] = useState(false);
@@ -95,6 +95,11 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
 
   return (
     <>
+      {errors.form && (
+        <FormBanner tone="danger" className="mb-4">
+          {errors.form}
+        </FormBanner>
+      )}
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="font-semibold text-foreground">Edit service</h3>
         <Button type="button" variant="ghost" size="md" onClick={onCancel}>
@@ -148,7 +153,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="rounded border-border text-primary focus-ring"
+              className={checkboxClass}
             />
             Active
           </label>

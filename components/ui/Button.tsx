@@ -1,10 +1,15 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger";
 
 const baseClasses =
-  "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center rounded-full font-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
 
 const sizeClasses = {
   md: "px-4 py-2.5 text-xs sm:px-5 sm:text-sm",
@@ -12,10 +17,13 @@ const sizeClasses = {
 } as const;
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white hover:bg-primary-strong",
-  secondary: "bg-primary-soft text-primary hover:bg-primary-soft-strong",
+  primary: "bg-primary text-background hover:bg-primary-strong",
+  secondary:
+    "bg-primary-soft text-primary hover:bg-primary-strong hover:text-background",
+  outline:
+    "border border-border bg-background text-foreground shadow-sm hover:bg-muted",
   ghost: "text-foreground hover:bg-neutral-soft",
-  danger: "bg-danger text-white hover:bg-danger/90",
+  danger: "bg-danger text-background hover:bg-danger/95",
 };
 
 type CommonProps = {
