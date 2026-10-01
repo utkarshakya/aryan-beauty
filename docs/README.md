@@ -4,12 +4,10 @@
 |---|---|
 | `product.md` | Product vision, roadmap, and principles |
 | `architecture.md` | Technical structure, stack, and engineering rules |
-| `plans/plan.md` | Active implementation checklist with detailed progress |
-| `plans/ui-plan.md` | UI/UX improvement plan for visual polish |
 | `scripts.md` | npm scripts: which are local, which open a DB connection, and which URL they use |
 | `ideas.md` | Future possibilities outside the active plan |
 
-Read `product.md` for product direction, `architecture.md` before changing technical structure, and `plans/plan.md` before starting implementation work.
+Read `product.md` for product direction and `architecture.md` before changing technical structure. Implementation work starts from a fresh plan in `docs/plans/`, written for the task at hand.
 
 ## Core Principle
 

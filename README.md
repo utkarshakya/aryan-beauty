@@ -30,8 +30,6 @@ Use `npm.cmd` in PowerShell if the Windows execution policy blocks `npm.ps1`.
 | [docs/README.md](docs/README.md)               | Documentation index and current state summary           |
 | [docs/product.md](docs/product.md)             | Product vision, roadmap, and current capabilities       |
 | [docs/architecture.md](docs/architecture.md)   | Technical structure, stack, auth, and engineering rules |
-| [docs/plans/plan.md](docs/plans/plan.md)       | Active implementation checklist with progress           |
-| [docs/plans/ui-plan.md](docs/plans/ui-plan.md) | UI/UX improvement plan                                  |
 | [docs/scripts.md](docs/scripts.md)             | npm scripts: local vs DB connections and URLs used      |
 | [docs/ideas.md](docs/ideas.md)                 | Future possibilities (not commitments)                  |
 
@@ -70,10 +68,6 @@ A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` s
 The seed only owns its own rows: it replaces the `@example.com` customers and their appointments, and never touches `User`, `BusinessSettings`, or bookings you made yourself. Safe to run repeatedly.
 
 To populate your own history on the customer "My appointments" page: sign in once (so your `User` row has your email — tests wipe it), then run `npm.cmd run db:seed`. It links 3 appointments to your account, skipped if you already have bookings.
-
-## Manual Testing
-
-See the [manual testing checklist](docs/plans/plan.md#manual-testing-checklist) in the implementation plan for customer, owner, business settings, staff management, and access/safety verification steps.
 
 Inspect database records with:
 
