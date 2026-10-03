@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
+    <ClerkProvider prefetchUI={false}>
       <html
         lang="en"
         className={`${fraunces.variable} h-full antialiased`}
