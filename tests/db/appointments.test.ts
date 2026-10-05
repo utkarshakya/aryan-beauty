@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { AppointmentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { resetDb } from "../helpers/db";
 import {
@@ -49,7 +50,7 @@ async function seedService(name = "Haircut", active = true, durationMin = 30) {
   });
 }
 
-async function seedAppointment(customerId: number, serviceId: number, start: Date, status = "confirmed", durationMin = 30) {
+async function seedAppointment(customerId: number, serviceId: number, start: Date, status: AppointmentStatus = "confirmed", durationMin = 30) {
   return prisma.appointment.create({
     data: {
       customerId,

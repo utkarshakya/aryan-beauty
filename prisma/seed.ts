@@ -1,6 +1,7 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { AppointmentStatus, PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { WEEKDAY_NAMES } from "../lib/constants";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -10,15 +11,6 @@ const prisma = new PrismaClient({ adapter });
 
 const DEMO_EMAIL_SUFFIX = "@example.com";
 const GAP_MIN = 15;
-const DAY_NAMES = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 const NOTES = [
   "",
   "Prefers morning slots",
@@ -27,12 +19,11 @@ const NOTES = [
   "Asked for the same stylist",
 ];
 
-type SeedStatus = "pending" | "confirmed" | "cancelled";
 type PlanItem = {
   offset: number;
   service: number;
   customer: number;
-  status: SeedStatus;
+  status: AppointmentStatus;
   slot: number;
 };
 
@@ -291,7 +282,7 @@ async function main() {
       String(day.getDate()).padStart(2, "0"),
     ].join("-");
 
-    const hours = openingHours[DAY_NAMES[day.getDay()]];
+    const hours = openingHours[WEEKDAY_NAMES[day.getDay()]];
     if (closedWeekdays.includes(day.getDay()) || !hours || closures.some((c) => c.date === dateKey)) {
       daysSkipped += 1;
       continue;

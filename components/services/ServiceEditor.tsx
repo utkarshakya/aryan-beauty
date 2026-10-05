@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "@/app/actions/services";
 import { Service } from "@prisma/client";
-import { Button, FormBanner, cardClassName, checkboxClass, Field, Input, Textarea } from "@/components/ui";
+import { SERVICE_CATEGORIES } from "@/lib/constants";
+import { Button, FormBanner, cardClassName, checkboxClass, Field, Input, Select, Textarea } from "@/components/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
   const [editing, setEditing] = useState(false);
@@ -20,7 +21,7 @@ export default function ServiceEditor({ service }: { service: Service }) {
                 {service.active ? "Active" : "Inactive"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-muted">{service.category} · ₹{Math.round(service.price)} · {service.durationMin} minutes</p>
+            <p className="mt-1 text-sm text-muted">{service.category} · ₹{service.price} · {service.durationMin} minutes</p>
             {service.description && <p className="mt-3 text-sm text-foreground">{service.description}</p>}
           </div>
           <Button type="button" variant="secondary" size="md" onClick={() => setEditing(true)}>
@@ -48,7 +49,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!name || name.length > 100) newErrors.name = "Enter a service name (max 100 chars)";
-    if (!Number.isFinite(price) || price < 0) newErrors.price = "Enter a valid price";
+    if (!Number.isInteger(price) || price < 0) newErrors.price = "Price must be a whole number of rupees";
     if (!Number.isInteger(durationMin) || durationMin <= 0) newErrors.durationMin = "Enter a valid duration in minutes";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -114,11 +115,17 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
             required
           />
         </Field>
-        <Field label="Category">
-          <Input
+        <Field label="Category" error={errors.category}>
+          <Select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-          />
+          >
+            {SERVICE_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
         </Field>
         <Field label="Price" error={errors.price}>
           <Input

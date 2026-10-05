@@ -3,7 +3,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import type { AppointmentStatus, Prisma } from "@prisma/client";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import {
   getAvailableSlots,
@@ -296,19 +296,19 @@ export async function getAdminAppointmentAction(id: number) {
 }
 
 export async function getAdminAppointments(
-  statusFilter: string[] | undefined,
+  statusFilter: AppointmentStatus[] | undefined,
   now = new Date(),
   opts: {
     search?: string;
     from?: Date;
     to?: Date;
     windowCompleted?: boolean;
+    completed?: boolean;
   } = {},
 ) {
   await requireAdmin();
-  const { search, from, to, windowCompleted } = opts;
-  const completedFilter =
-    statusFilter?.length === 1 && statusFilter[0] === "completed";
+  const { search, from, to, windowCompleted, completed } = opts;
+  const completedFilter = completed === true;
   const term = search?.trim();
   const customerFilter: Prisma.AppointmentWhereInput = term
     ? {

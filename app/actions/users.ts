@@ -5,6 +5,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { setUserRole, disableUser, restoreUser } from "@/lib/auth";
 import { getAppUsers } from "@/lib/db/users";
+import { GRANTABLE_ROLES } from "@/lib/constants";
 import type { UserRole } from "@/lib/auth";
 
 export async function getStaffUsersAction() {
@@ -50,7 +51,7 @@ export async function updateRoleAction(
   clerkUserId: string,
   role: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const allowed = new Set<string>(["staff", "customer", "admin"]);
+  const allowed = new Set<string>(GRANTABLE_ROLES);
 
   if (!allowed.has(role)) {
     return { ok: false, error: "Invalid role." };

@@ -51,7 +51,7 @@ export default function AppointmentGroup({
                   </h3>
                   <p className="mt-1 text-sm text-muted">
                     {appointment.serviceDurationMin} minutes · ₹
-                    {Math.round(appointment.servicePrice)}
+                    {appointment.servicePrice}
                   </p>
                 </div>
                 <Badge tone={badgeTone(appointment.status)}>

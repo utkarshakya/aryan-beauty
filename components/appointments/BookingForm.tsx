@@ -228,7 +228,7 @@ export default function BookingForm({
           </option>
           {services.map((service) => (
             <option key={service.id} value={service.id}>
-              {service.name} — ₹{Math.round(service.price)} (
+              {service.name} — ₹{service.price} (
               {service.durationMin} min)
             </option>
           ))}

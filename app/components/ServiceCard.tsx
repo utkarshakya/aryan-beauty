@@ -20,7 +20,7 @@ export default function ServiceCard({ service }: { service: Service }) {
       </p>
       <div className="mt-4 flex items-baseline justify-between border-t border-border pt-3">
         <span className="text-lg font-bold text-primary sm:text-xl">
-          ₹{Math.round(service.price)}
+          ₹{service.price}
         </span>
         <span className="text-sm text-muted">{service.durationMin} min</span>
       </div>

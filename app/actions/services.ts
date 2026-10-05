@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOwnerAdmin } from "@/lib/auth";
+import { SERVICE_CATEGORIES } from "@/lib/constants";
 import {
   getAllServices,
   getActiveServices,
@@ -30,9 +31,9 @@ export async function createServiceAction(
 
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const category =
-    String(formData.get("category") ?? "Other").trim() || "Other";
-  const price = Number(formData.get("price"));
+  const category = String(formData.get("category") ?? "").trim();
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const price = Number(priceRaw);
   const durationMin = Number(formData.get("durationMin"));
   const active = isActiveValue(formData.get("active"));
 
@@ -40,8 +41,12 @@ export async function createServiceAction(
 
   if (!name || name.length > 100)
     errors.name = "Enter a service name (max 100 chars)";
-  if (!Number.isFinite(price) || price < 0)
-    errors.price = "Enter a valid price";
+  if (!(SERVICE_CATEGORIES as readonly string[]).includes(category))
+    errors.category = "Choose a category";
+  if (priceRaw === "")
+    errors.price = "Enter a price";
+  else if (!Number.isInteger(price) || price < 0)
+    errors.price = "Price must be a whole number of rupees";
   if (!Number.isInteger(durationMin) || durationMin <= 0)
     errors.durationMin = "Enter a valid duration in minutes";
 
@@ -75,9 +80,9 @@ export async function updateServiceAction(
 
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const category =
-    String(formData.get("category") ?? "Other").trim() || "Other";
-  const price = Number(formData.get("price"));
+  const category = String(formData.get("category") ?? "").trim();
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const price = Number(priceRaw);
   const durationMin = Number(formData.get("durationMin"));
   const active = isActiveValue(formData.get("active"));
 
@@ -85,8 +90,12 @@ export async function updateServiceAction(
 
   if (!name || name.length > 100)
     errors.name = "Enter a service name (max 100 chars)";
-  if (!Number.isFinite(price) || price < 0)
-    errors.price = "Enter a valid price";
+  if (!(SERVICE_CATEGORIES as readonly string[]).includes(category))
+    errors.category = "Choose a category";
+  if (priceRaw === "")
+    errors.price = "Enter a price";
+  else if (!Number.isInteger(price) || price < 0)
+    errors.price = "Price must be a whole number of rupees";
   if (!Number.isInteger(durationMin) || durationMin <= 0)
     errors.durationMin = "Enter a valid duration in minutes";
 

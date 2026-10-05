@@ -203,7 +203,7 @@ export default function AdminAppointmentsList({
                   <div>
                     <dt className="text-muted">Price</dt>
                     <dd className="mt-1 text-right font-medium text-foreground">
-                      ₹{Math.round(appointment.servicePrice)}
+                      ₹{appointment.servicePrice}
                     </dd>
                   </div>
                   <div className="col-span-2">
@@ -306,7 +306,7 @@ export default function AdminAppointmentsList({
                       </p>
                       <p className="text-muted">
                         {appointment.serviceDurationMin} min · ₹
-                        {Math.round(appointment.servicePrice)}
+                        {appointment.servicePrice}
                       </p>
                     </td>
                     <td className="px-3 py-4 text-foreground">

@@ -146,7 +146,7 @@ export default function AppointmentDetail({
             <div>
               <dt className="text-muted">Price</dt>
               <dd className="mt-1 text-foreground">
-                ₹{Math.round(appointment.servicePrice)}
+                ₹{appointment.servicePrice}
               </dd>
             </div>
           </dl>

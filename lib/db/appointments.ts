@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Appointment, Service, Customer } from "@prisma/client";
+import { WEEKDAY_NAMES } from "@/lib/constants";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,8 +99,7 @@ export async function getAvailableSlots(
   if (!service) return [];
 
   const dayOfWeek = new Date(date + "T00:00:00").getDay();
-  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  const dayName = dayNames[dayOfWeek];
+  const dayName = WEEKDAY_NAMES[dayOfWeek];
 
   if (business.closedWeekdays.includes(dayOfWeek)) {
     return [];

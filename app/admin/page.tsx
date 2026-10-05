@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
+import type { AppointmentStatus } from "@prisma/client";
 import {
   Button,
   ButtonLink,
@@ -24,14 +25,15 @@ type StatusFilter =
   | "cancelled"
   | "completed";
 
-const STATUS_FILTER_MAP: Record<StatusFilter, string[] | undefined> = {
-  default: ["pending"],
-  all: undefined,
-  pending: ["pending"],
-  confirmed: ["confirmed"],
-  cancelled: ["cancelled"],
-  completed: ["completed"],
-};
+const STATUS_FILTER_MAP: Record<StatusFilter, AppointmentStatus[] | undefined> =
+  {
+    default: ["pending"],
+    all: undefined,
+    pending: ["pending"],
+    confirmed: ["confirmed"],
+    cancelled: ["cancelled"],
+    completed: undefined,
+  };
 
 const startOfToday = () => {
   const d = new Date();
@@ -128,6 +130,7 @@ export default async function AdminPage({
       from,
       to,
       windowCompleted: dateMode === "date",
+      completed: statusParam === "completed",
     }),
     getAdminAppointmentCounts(today, now),
     getUpcomingAppointments(today, now),

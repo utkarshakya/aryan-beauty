@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { createServiceAction } from "@/app/actions/services";
-import { Button, Field, FormBanner, Input, Textarea, checkboxClass } from "@/components/ui";
+import { SERVICE_CATEGORIES } from "@/lib/constants";
+import { Button, Field, FormBanner, Input, Select, Textarea, checkboxClass } from "@/components/ui";
 
 export default function ServiceForm() {
   const [name, setName] = useState("");
@@ -18,7 +19,9 @@ export default function ServiceForm() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!name || name.length > 100) newErrors.name = "Enter a service name (max 100 chars)";
-    if (!Number.isFinite(Number(price)) || Number(price) < 0) newErrors.price = "Enter a valid price";
+    if (price.trim() === "") newErrors.price = "Enter a price";
+    else if (!Number.isInteger(Number(price)) || Number(price) < 0)
+      newErrors.price = "Price must be a whole number of rupees";
     if (!Number.isInteger(Number(durationMin)) || Number(durationMin) <= 0) newErrors.durationMin = "Enter a valid duration in minutes";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -66,8 +69,17 @@ export default function ServiceForm() {
         />
       </Field>
 
-      <Field label="Category">
-        <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+      <Field label="Category" error={errors.category}>
+        <Select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          {SERVICE_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
