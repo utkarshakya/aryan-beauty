@@ -21,8 +21,7 @@ Every script in `package.json`, what it runs, and when to use it.
 
 | Script     | Full command      | What it does / when to use                                                            |
 | ---------- | ----------------- | ------------------------------------------------------------------------------------- |
-| `test`     | `vitest run`      | Runs the whole test suite. **Empties the dev database first** (truncates all tables). |
-| `posttest` | `npm run db:seed` | Runs automatically after a green `test`. Reloads the demo data the app shows.         |
+| `test`     | `vitest run`      | Runs the whole test suite. **Empties the dev database first** (truncates all tables) and does **not** reseed — run `db:seed` manually when you want demo data back. |
 
 ## Prisma — local only (no database connection)
 

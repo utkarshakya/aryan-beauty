@@ -55,7 +55,7 @@ Safety rails:
 
 To operate on production: comment the dev `DATABASE_URL`/`DIRECT_URL` lines in `.env` and uncomment the production ones, run your command, then restore.
 
-A green `npm.cmd run test` re-seeds demo data automatically via the `posttest` script. If a run fails, `posttest` is skipped and the database is left truncated — re-run the tests or seed manually with `npm.cmd run db:seed`.
+`npm.cmd run test` never reseeds — the database is left truncated after every run (pass or fail). Seed manually with `npm.cmd run db:seed` when you want demo data back.
 
 ### Demo data
 

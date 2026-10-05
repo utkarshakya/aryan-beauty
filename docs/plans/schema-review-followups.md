@@ -1,6 +1,6 @@
 # Schema review follow-ups
 
-Status: not started
+Status: in progress — prep only (posttest seed hook removed); schema work not started
 Scope: three schema decisions from the review session, plus two small hardening items and doc re-tracking.
 
 ## Decisions (locked)
@@ -10,18 +10,18 @@ Scope: three schema decisions from the review session, plus two small hardening 
 3. `Service.category` stays `String` in the DB, but becomes a fixed allowlist with a dropdown + server-side validation.
 4. Add `Appointment(customerId)` and `Appointment(serviceId)` indexes. **No** unique constraints on `Customer.phone`/`email` — shared family phones are legitimate.
 5. "Test complete flow on a real phone" is re-tracked in `docs/product.md` as a standalone pre-launch item, not gated on the out-of-scope People/permissions feature.
+6. **All data is dummy (dev + prod, confirmed)** — the original Step 0 pre-flight data checks are dropped entirely. Wipe instead of inspect (Step 0 below). Allowlist = `Hair, Skin, Nails, Makeup, Other` (matches seed + original default); no production value discovery needed.
+7. Stale duration claim resolved: correct `docs/product.md` to match the code (integer `> 0`, no 15–480 range).
 
 Explicitly out of scope: capability-based permissions (future note in `product.md`), Clerk `prefetchUI` headless redesign (closed), Customer uniqueness constraints.
 
-Open choice to confirm while executing: `docs/product.md:78` claims "duration 15–480 min" validation which the code does not enforce (only integer `> 0`). Default is to correct the doc to match the code unless told otherwise.
+## Prep — done
 
-## Step 0 — Pre-flight data checks (dev + prod)
+- [x] Removed the `posttest` seed hook from `package.json` — tests no longer reseed automatically; `npm run db:seed` is manual-only. Updated `README.md` and `docs/scripts.md` accordingly.
 
-Run against the dev database first, then production (README.md env-swap procedure, line 56). Fix or decide on anything unexpected **before** writing migration SQL.
+## Step 0 — Wipe dev data (replaces pre-flight checks)
 
-- [ ] `SELECT DISTINCT status FROM "Appointment"` — expect only `pending`/`confirmed`/`cancelled`. If any hand-set `completed` rows exist (e.g. edited via Studio), remap `completed → confirmed` in the migration SQL; the derived display still shows Completed for past ones.
-- [ ] `SELECT price FROM "Service" WHERE price <> trunc(price)` — any fractional prices get `round()`ed by the migration. Review the result rows if any exist.
-- [ ] `SELECT DISTINCT category FROM "Service"` — build the final allowlist: Hair, Skin, Nails, Makeup, Other, plus any real production values worth keeping. Typo values get `UPDATE`d to `'Other'` in the migration.
+- [ ] Truncate dev before creating the migration so junk rows (e.g. a Studio-set `completed`) cannot fail the enum cast: `npm run test` (truncates, now leaves the DB empty — also gives a green baseline), or a raw `TRUNCATE ... RESTART IDENTITY CASCADE`. Optionally `npm run db:seed` afterwards if demo data is wanted before migration (seed literals are valid for both old and new schema).
 
 ## Step 1 — Schema + constants
 
@@ -34,15 +34,14 @@ Run against the dev database first, then production (README.md env-swap procedur
 
 New file `lib/constants.ts` (no constants file exists today):
 
-- [ ] Export `SERVICE_CATEGORIES` (`as const`) with the final list from Step 0 and a derived `ServiceCategory` type.
+- [ ] Export `SERVICE_CATEGORIES` (`as const`) with the Decision 6 list (`Hair, Skin, Nails, Makeup, Other`) and a derived `ServiceCategory` type.
 
 ## Step 2 — Migration (create-only, hand-edited, dev-verified)
 
-- [ ] `npm run db:migrate -- --create-only`, then edit the generated SQL. Prisma's raw `ALTER ... TYPE` for text→enum and double→int usually fails on Postgres without a `USING` clause. Keep Prisma's statement order; expected shape:
+- [ ] `npm run db:migrate -- --create-only`, then edit the generated SQL. Prisma's raw `ALTER ... TYPE` for text→enum and double→int usually fails on Postgres without a `USING` clause — **still required even on empty tables** (no assignment cast exists, and the old `'pending'` text default needs `DROP DEFAULT`). No data-fix statements needed (Step 0 wipe). Keep Prisma's statement order; expected shape:
 
 ```sql
 CREATE TYPE "AppointmentStatus" AS ENUM ('pending','confirmed','cancelled');
--- + any category/status data fixes from Step 0
 ALTER TABLE "Appointment"
   ALTER COLUMN "status" DROP DEFAULT,
   ALTER COLUMN "status" TYPE "AppointmentStatus" USING "status"::"AppointmentStatus";
@@ -78,7 +77,7 @@ CREATE INDEX "Appointment_serviceId_idx" ON "Appointment"("serviceId");
 ## Step 4 — Docs
 
 - [ ] `docs/product.md:116`: reword to a standalone pre-launch checklist item, independent of the People/permissions feature ("run the full product flow on a real phone before launch").
-- [ ] `docs/product.md:77-78`: service management bullets — whole-rupee price, fixed category list; resolve the stale "duration 15–480 min" claim (default: correct the doc to match code).
+- [ ] `docs/product.md:77-78`: service management bullets — whole-rupee price, fixed category list; drop the stale "duration 15–480 min" claim (Decision 7: doc matches code).
 - [ ] Optional: one-liner in `docs/architecture.md` Data Rules (status is an enum with derived Completed, prices are whole rupees, categories are a fixed set).
 
 ## Step 5 — Verification
@@ -86,7 +85,7 @@ CREATE INDEX "Appointment_serviceId_idx" ON "Appointment"("serviceId");
 - [ ] `npm run db:validate`
 - [ ] `npm run typecheck`
 - [ ] `npm run lint`
-- [ ] `npm run test` (truncates + reseeds the dev DB)
+- [ ] `npm run test` (truncates the dev DB; **no longer reseeds** — run `npm run db:seed` manually if demo data is wanted)
 - [ ] `npm run build`
 - [ ] Manual smoke: decimal price rejected with a clear message, category dropdown works on create + edit, book → confirm → cancel → restore on both admin and customer pages.
 
@@ -94,7 +93,7 @@ CREATE INDEX "Appointment_serviceId_idx" ON "Appointment"("serviceId");
 
 Netlify's build only runs `prisma generate && next build` — it does **not** apply migrations.
 
-- [ ] Prod env swap in `.env` (README.md:56) → `npm run db:migrate:deploy`.
+- [ ] Prod env swap in `.env` (README.md:56) → **wipe prod first** (`TRUNCATE TABLE "Appointment", "BusinessSettings", "Customer", "Service", "User" RESTART IDENTITY CASCADE` — same tables the tests wipe; prod is dummy data, so this guarantees the deploy migration can't hit bad rows) → `npm run db:migrate:deploy` → restore `.env`.
 - [ ] Push → Netlify deploy. Migrating first is safe: the old deployed code binds text params that Postgres coerces to the enum/int during the window.
 
 ## Follow-ups noted, not in this round
