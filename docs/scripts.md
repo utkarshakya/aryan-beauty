@@ -39,11 +39,17 @@ Every script in `package.json`, what it runs, and when to use it.
 | `db:migrate`        | `prisma migrate dev`                    | Creates a migration from schema changes and applies it. **The everyday command** after editing the schema.                              |
 | `db:migrate:status` | `prisma migrate status`                 | Shows which migrations are applied vs pending. Use when the database and schema seem out of sync.                                       |
 | `db:migrate:deploy` | `prisma migrate deploy`                 | Applies pending migrations without prompting. Use in production/CI to ship migrations.                                                  |
-| `db:migrate:reset`  | `prisma migrate reset`                  | **Destructive:** drops every table, replays all migrations, then seeds. Use to get a clean database.                                    |
+| `db:migrate:reset`  | `prisma migrate reset`                  | **Destructive:** drops every table and replays all migrations (Prisma v7 does **not** seed afterwards — run `db:seed` explicitly). Use to get a clean database. |
 | `db:push`           | `prisma db push`                        | Writes schema changes straight to the database, no migration file. Prototyping only — prefer `db:migrate`.                              |
 | `db:pull`           | `prisma db pull`                        | Reverse-engineers the schema from the live database into `prisma/schema.prisma`. Use when the schema is lost or was changed externally. |
 | `db:seed`           | `prisma db seed` → `tsx prisma/seed.ts` | Inserts the demo data: 9 services, 6 demo customers, ~32 appointments across past/today/future. Idempotent — replaces only its own rows, never `User` or your bookings. Run after a reset or a failed test run. |
 | `db:studio`         | `prisma studio`                         | Opens the browser GUI to browse and edit tables. Use for quick data inspection.                                                         |
+
+## Custom database scripts
+
+| Script         | Full command                   | What it does / when to use                                                                                                                                                                             |
+| -------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `db:truncate`  | `tsx scripts/truncate-db.ts`   | **Destructive:** empties every table (except migration history) on whatever `DATABASE_URL` in `.env` points at. Prints the target host/database first and asks for confirmation; `npm run db:truncate -- --yes` skips the prompt. |
 
 ## Which database URL is used
 
@@ -53,4 +59,5 @@ Simple rule: **the Prisma CLI uses `DIRECT_URL`, everything else uses `DATABASE_
 - **App runtime → `DATABASE_URL`.** `lib/prisma.ts` connects with the Supabase pooler (port 6543) from `process.env`. It never reads `prisma.config.ts`.
 - **Seed → `DATABASE_URL`.** `prisma/seed.ts` builds its own pool from `process.env`, independent of the config.
 - **Tests → `DATABASE_URL`.** `tests/setup.ts` loads it from `.env` before any test runs.
+- **Truncate → `DATABASE_URL`.** `scripts/truncate-db.ts` loads it from `.env` (via `dotenv`) and connects through `lib/prisma.ts` like the app does.
 - **No connection at all:** `dev`, `start` (until a request hits the DB), `lint`, `typecheck`, `db:generate`, `db:validate`, `db:format`, `db:version`.

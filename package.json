@@ -17,6 +17,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:reset": "prisma migrate reset",
+    "db:truncate": "tsx scripts/truncate-db.ts",
     "db:push": "prisma db push",
     "db:pull": "prisma db pull",
     "db:seed": "prisma db seed",

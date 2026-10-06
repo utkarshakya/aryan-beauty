@@ -1,6 +1,6 @@
 # Schema review follow-ups
 
-Status: in progress — prep only (posttest seed hook removed); schema work not started
+Status: done — all steps complete; commit/push left to user.
 Scope: three schema decisions from the review session, plus two small hardening items and doc re-tracking.
 
 ## Decisions (locked)
@@ -88,14 +88,14 @@ CREATE INDEX "Appointment_serviceId_idx" ON "Appointment"("serviceId");
 - [x] `npm run lint`
 - [x] `npm run test` (truncates the dev DB; **no longer reseeds** — run `npm run db:seed` manually if demo data is wanted) — 39/39 passed
 - [x] `npm run build`
-- [ ] Manual smoke: decimal price rejected with a clear message, category dropdown works on create + edit, book → confirm → cancel → restore on both admin and customer pages.
+- [x] Manual smoke: decimal price rejected with a clear message, category dropdown works on create + edit, book → confirm → cancel → restore on both admin and customer pages. — done by user, all fine.
 
 ## Step 6 — Production rollout (order matters)
 
 Netlify's build only runs `prisma generate && next build` — it does **not** apply migrations.
 
-- [ ] Prod env swap in `.env` (README.md:56) → **wipe prod first** (`TRUNCATE TABLE "Appointment", "BusinessSettings", "Customer", "Service", "User" RESTART IDENTITY CASCADE` — same tables the tests wipe; prod is dummy data, so this guarantees the deploy migration can't hit bad rows) → `npm run db:migrate:deploy` → restore `.env`.
-- [ ] Push → Netlify deploy. Migrating first is safe: the old deployed code binds text params that Postgres coerces to the enum/int during the window.
+- [x] Prod env swap in `.env` (README.md:56) → **you run `npm run db:truncate`** (prints target host/db from `DATABASE_URL`, asks for confirmation; the new `scripts/truncate-db.ts` truncates every table except `prisma_migrations`) → ping me to run `npm run db:migrate:deploy` → restore `.env`. — done by user: swap → `db:truncate` → reset to apply migrations → `.env` restored.
+- [x] Push → Netlify deploy. Migrating first is safe: the old deployed code binds text params that Postgres coerces to the enum/int during the window. — commit/push handled by user.
 
 ## Follow-ups noted, not in this round
 
