@@ -74,8 +74,8 @@ If real usage shows that the product works for more than the first parlour, cons
 - **Validated transitions**: pending→confirmed, pending/confirmed→cancelled (before cutoff), cancelled→confirmed (restore, while upcoming)
 
 ### Service Management
-- **Create/edit services**: Name, category, price, duration, active toggle
-- **Validation**: Required name, positive price, duration 15–480 min
+- **Create/edit services**: Name, fixed category list (Hair, Skin, Nails, Makeup, Other), whole-rupee price, duration, active toggle
+- **Validation**: Required name, whole-rupee (integer) price, category from the fixed list, integer duration greater than 0 minutes
 - **Snapshots**: Appointment captures service name, price, duration at booking time
 - **Inactive handling**: Hidden from booking/public pages, historical appointments preserved
 
@@ -113,4 +113,6 @@ Planned ideas:
 - Apply the new permissions to appointments, services, business settings, and customer actions.
 - Add tests and manual checks for each role and permission combination.
 
-After this feature is complete, run the full product flow on a real phone before launch.
+## Pre-launch checklist
+
+- Run the full product flow on a real phone before launch.

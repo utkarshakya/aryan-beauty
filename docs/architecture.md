@@ -101,6 +101,7 @@ Every protected page and every Server Action must perform a server-side check. S
 - Booking conflicts use interval overlap checks and ignore cancelled rows.
 - Appointment snapshots (`serviceName`, `servicePrice`, `serviceDurationMin`) captured at booking time preserve historical accuracy.
 - `BusinessSettings` is a singleton (one row) controlling scheduling rules and marketing content.
+- `Appointment.status` is a 3-value enum (`pending`/`confirmed`/`cancelled`) with Completed derived from a past `endTime`; `Service.price` is whole rupees (integer); `Service.category` is a fixed allowlist.
 
 ## Testing Locally
 

@@ -77,17 +77,17 @@ CREATE INDEX "Appointment_serviceId_idx" ON "Appointment"("serviceId");
 
 ## Step 4 — Docs
 
-- [ ] `docs/product.md:116`: reword to a standalone pre-launch checklist item, independent of the People/permissions feature ("run the full product flow on a real phone before launch").
-- [ ] `docs/product.md:77-78`: service management bullets — whole-rupee price, fixed category list; drop the stale "duration 15–480 min" claim (Decision 7: doc matches code).
-- [ ] Optional: one-liner in `docs/architecture.md` Data Rules (status is an enum with derived Completed, prices are whole rupees, categories are a fixed set).
+- [x] `docs/product.md:116`: reword to a standalone pre-launch checklist item, independent of the People/permissions feature ("run the full product flow on a real phone before launch").
+- [x] `docs/product.md:77-78`: service management bullets — whole-rupee price, fixed category list; drop the stale "duration 15–480 min" claim (Decision 7: doc matches code).
+- [x] Optional: one-liner in `docs/architecture.md` Data Rules (status is an enum with derived Completed, prices are whole rupees, categories are a fixed set).
 
 ## Step 5 — Verification
 
-- [ ] `npm run db:validate`
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run test` (truncates the dev DB; **no longer reseeds** — run `npm run db:seed` manually if demo data is wanted)
-- [ ] `npm run build`
+- [x] `npm run db:validate`
+- [x] `npm run typecheck`
+- [x] `npm run lint`
+- [x] `npm run test` (truncates the dev DB; **no longer reseeds** — run `npm run db:seed` manually if demo data is wanted) — 39/39 passed
+- [x] `npm run build`
 - [ ] Manual smoke: decimal price rejected with a clear message, category dropdown works on create + edit, book → confirm → cancel → restore on both admin and customer pages.
 
 ## Step 6 — Production rollout (order matters)
