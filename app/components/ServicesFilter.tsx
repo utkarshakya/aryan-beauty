@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Service } from "@prisma/client";
 import ServiceCard from "./ServiceCard";
+import { serviceGridClasses } from "./serviceGrid";
 import EmptyServices from "./EmptyServices";
 import Container from "@/components/ui/Container";
 import { PageHeader, filterPillClasses } from "@/components/ui";
@@ -66,7 +67,7 @@ export default function ServicesFilter({
             {filteredServices.length === 1 ? "service" : "services"}
           </p>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+          <div className={serviceGridClasses}>
             {filteredServices.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}

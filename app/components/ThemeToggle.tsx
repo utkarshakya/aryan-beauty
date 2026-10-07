@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 const getTheme = () =>
   typeof document !== "undefined" &&
@@ -21,16 +21,6 @@ export default function ThemeToggle({
   variant?: "icon" | "menu";
 }) {
   const isDark = useSyncExternalStore(subscribeToTheme, getTheme, () => false);
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("theme");
-    const shouldUseDark =
-      savedTheme === "dark" ||
-      (savedTheme !== "light" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-    document.documentElement.classList.toggle("dark", shouldUseDark);
-  }, []);
 
   function toggleTheme() {
     const nextIsDark = !isDark;
@@ -77,7 +67,7 @@ export default function ThemeToggle({
       <button
         type="button"
         onClick={toggleTheme}
-        className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
+        className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
       >
         <span className="flex items-center gap-2.5">
           {icon}
@@ -93,7 +83,7 @@ export default function ThemeToggle({
       onClick={toggleTheme}
       aria-label={label}
       title={label}
-      className="rounded-full p-1.5 text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:p-2"
+      className="flex h-[44px] w-[44px] items-center justify-center rounded-full text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring"
     >
       {icon}
     </button>

@@ -185,7 +185,7 @@ export default function BookingForm({
           <button
             type="button"
             onClick={() => setDismissedError(errors.form ?? null)}
-            className="rounded-full p-1 font-bold leading-none transition-colors hover:bg-danger/10 focus-ring"
+            className="-my-2 flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full font-bold leading-none transition-colors hover:bg-danger/10 focus-ring"
             aria-label="Dismiss error"
           >
             <svg

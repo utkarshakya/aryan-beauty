@@ -1,4 +1,5 @@
 import ServiceCard from "./ServiceCard";
+import { serviceGridClasses } from "./serviceGrid";
 import Container from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui";
@@ -20,14 +21,9 @@ export default function ServicesPreview({ services }: { services: Service[] }) {
             </ButtonLink>
           }
         />
-        <div className="grid grid-cols-1 justify-items-center gap-4 sm:grid-cols-2 sm:justify-items-stretch sm:gap-6 lg:grid-cols-3">
+        <div className={serviceGridClasses}>
           {services.map((service) => (
-            <div
-              key={service.id}
-              className="w-full max-w-[320px] sm:max-w-none"
-            >
-              <ServiceCard service={service} />
-            </div>
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
       </Container>

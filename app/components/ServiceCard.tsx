@@ -6,7 +6,7 @@ export default function ServiceCard({ service }: { service: Service }) {
   return (
     <article
       className={cardClassName(
-        "flex h-full flex-col p-4 transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-6",
+        "relative flex h-full flex-col p-4 transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-6",
       )}
     >
       <p className="text-xs font-medium uppercase tracking-wide text-primary">
@@ -24,7 +24,10 @@ export default function ServiceCard({ service }: { service: Service }) {
         </span>
         <span className="text-sm text-muted">{service.durationMin} min</span>
       </div>
-      <ButtonLink href={`/appointments?serviceId=${service.id}`} className="mt-5 w-full">
+      <ButtonLink
+        href={`/appointments?serviceId=${service.id}`}
+        className="mt-5 w-full after:absolute after:inset-0 after:content-['']"
+      >
         Book Now
       </ButtonLink>
     </article>

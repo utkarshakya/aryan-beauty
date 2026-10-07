@@ -217,7 +217,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
             const hours = openingHours[day.key] ?? { open: "09:00", close: "18:00" };
             return (
               <div key={day.key} className="flex flex-wrap items-center gap-3 rounded-control border border-border bg-background/50 p-3">
-                <label className="flex items-center gap-2 min-w-[100px] sm:min-w-[120px]">
+                <label className="flex min-h-[44px] items-center gap-2 min-w-[100px] sm:min-w-[120px]">
                   <input
                     type="checkbox"
                     checked={!closed}

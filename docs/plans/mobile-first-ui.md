@@ -1,6 +1,6 @@
 # Mobile-first UI, UX, loading and error handling
 
-Status: not started
+Status: Phase 0 complete (DoD passed). Next: Phase 1.
 Scope: whole app (public site, booking flow, admin), phased so each phase ships independently.
 Decisions (locked): everything in one phased plan; restructure = multi-step booking wizard + admin sticky tab bar + dashboard reworked in place; custom lightweight toast (no new deps); ConfirmDialog = native `<dialog>` + `showModal()`; visual polish = token-driven pass with explicit DoD checklist; one dev-only a11y dep allowed in Phase 6; verify with Lighthouse mobile ≥90 plus a manual viewport checklist.
 
@@ -32,17 +32,18 @@ Decisions (locked): everything in one phased plan; restructure = multi-step book
 - **Tap targets:** px literals (`min-h-[44px]`), standalone controls only.
 - **No new runtime deps.** Dev-only a11y tooling allowed in Phase 6 only.
 
-## Phase 0 — Foundations (primitives first)
+## Phase 0 — Foundations (primitives first) — DONE
 
-- [ ] iOS zoom fix: `components/ui/controls.tsx` → `text-[16px] sm:text-sm` (px value bypasses the root shrink on mobile only; desktop keeps 14px). Keep `html{font-size:93.75%}`.
-- [ ] Tap targets ≥44px via px values, standalone controls only: `ActionButton` standalone usage `min-h-[44px]` (inline-in-sentence usage left alone); `FilterPill` mobile `min-h-[44px]` centered; hamburger `p-2.5` + `h-6 w-6`; avatar `p-2 h-8 w-8`; BookingForm dismiss button `p-2`; audit + fix `ThemeToggle`, mobile-menu items (NavbarClient), footer links, `PageHeader` back arrow hit area, `Button` md, `ServiceCard` whole-card tap area.
-- [ ] Dark-mode pre-hydration script in `app/layout.tsx` (`dangerouslySetInnerHTML` + `suppressHydrationWarning`); refactor `ThemeToggle.tsx` to stop re-applying the class in `useEffect`. *(moved from Phase 5 — most visible jank, ~10 lines)*
-- [ ] Motion tokens in `globals.css`: `--duration-fast/base` (120/180ms), `--ease-out`, and a written `motion-reduce` policy (disable transforms/opacity transitions; skeletons fall back to static). Later phases consume these, never hand-roll durations.
-- [ ] New `components/ui/Skeleton.tsx` primitive; rebuild `app/(site)/services/loading.tsx` and `app/(site)/appointments/loading.tsx` on it.
-- [ ] Safe-area: `env(safe-area-inset-bottom)` padding on mobile menu, toast tray, sticky tab bar, wizard action bar.
-- [ ] Unify service grids + skeleton on one class pattern; drop home's `max-w-[320px]` wrapper.
-- [ ] Fix PageHeader back-arrow mojibake (PageHeader.tsx:40).
-- [ ] `Field.tsx`: wire `aria-describedby` (hint only when no error; error via `aria-errormessage` + `aria-invalid`).
+- [x] iOS zoom fix: `components/ui/controls.tsx` → `text-[16px] sm:text-sm` (px value bypasses the root shrink on mobile only; desktop keeps 14px). Keep `html{font-size:93.75%}`.
+- [x] Tap targets ≥44px via px values, standalone controls only. **Deviation:** rem-based `p-2.5 + h-6 w-6` still yields 41.25px under the root shrink, so all icon buttons use px boxes (`h-[44px] w-[44px]`): hamburger, avatar, ThemeToggle icon, BookingForm dismiss (`-my-2` to not inflate banner). Also fixed beyond original list: `Button` `min-h-11`→`min-h-[44px]`, `ActionButton` `min-h-7`→`min-h-[44px]` (all current usages are standalone), desktop+mobile nav links, Login link, account-menu items, footer links (via `inline-flex min-h-[44px] items-center`), `PageHeader` back link, checkbox labels in ServiceForm/ServiceEditor/BusinessSettingsForm, `ServiceCard` whole-card via stretched-link `after:absolute after:inset-0` (+`relative` on article).
+- [x] Dark-mode pre-hydration script in `app/layout.tsx` (`dangerouslySetInnerHTML` + `suppressHydrationWarning`); `ThemeToggle.tsx` `useEffect` removed. **Note:** script sits as first child of `<body>` (App Router doesn't bless a manual `<head>`), verified in served HTML.
+- [x] Motion tokens in `globals.css`: `--duration-fast/base` (120/180ms), `--ease-out`, `prefers-reduced-motion` kill-switch (animations/transitions → 0.01ms, incl. skeleton pulse). `body` transition now uses tokens.
+- [x] New `components/ui/Skeleton.tsx` (`Skeleton` + `SkeletonGroup` with `role="status"`); both `loading.tsx` rebuilt on it.
+- [x] Safe-area: `pb-safe` utility (`env(safe-area-inset-bottom, 0px)`) + `viewport: { viewportFit: "cover" }` export (prerequisite — verified in served meta). Applied to mobile menu + footer. Toast tray / tab bar / wizard bar get it when built in Phases 2/4/3.
+- [x] Unify service grids: shared `app/components/serviceGrid.ts` (`grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3`) used by ServicesPreview, ServicesFilter, services skeleton; `max-w-[320px]` wrapper dropped.
+- [x] PageHeader back arrow: `←` char → inline SVG arrow (byte-level check showed the char was valid UTF-8; SVG removes any encoding ambiguity) + 44px hit area.
+- [x] `Field.tsx`: `aria-describedby` (hint id when no error), `aria-errormessage` (error id) wired on the control; ids on hint/error `<p>`s. Hint stays visible when an error shows (ARIA wiring changes, rendering doesn't).
+- [x] **DoD passed:** `typecheck` ✓ `lint` ✓ `build` ✓ + served-HTML smoke test (theme script, viewport-fit, 16px/duration/safe-area/reduced-motion all in compiled CSS).
 
 ## Phase 1 — Loading & error handling
 

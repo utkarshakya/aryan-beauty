@@ -9,5 +9,6 @@ export * from "./FilterPill";
 export * from "./FormBanner";
 export * from "./PageHeader";
 export * from "./SectionHeading";
+export * from "./Skeleton";
 export * from "./SummaryCard";
 export * from "./controls";

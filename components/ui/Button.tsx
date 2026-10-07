@@ -9,7 +9,7 @@ export type ButtonVariant =
   | "danger";
 
 const baseClasses =
-  "inline-flex min-h-11 items-center justify-center rounded-full font-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex min-h-[44px] items-center justify-center rounded-full font-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
 
 const sizeClasses = {
   md: "px-4 py-2.5 text-xs sm:px-5 sm:text-sm",

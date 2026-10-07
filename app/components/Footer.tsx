@@ -32,7 +32,7 @@ export default async function Footer() {
   const hoursTime = formatHoursTime(business.openingHours);
 
   return (
-    <footer className="border-t border-border bg-muted-soft">
+    <footer className="border-t border-border bg-muted-soft pb-safe">
       <Container className="py-8 sm:py-10">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
@@ -59,11 +59,11 @@ export default async function Footer() {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
               Contact
             </h2>
-            <ul className="mt-2 space-y-1 text-sm text-muted">
+            <ul className="mt-1 space-y-0.5 text-sm text-muted">
               <li>
                 <a
                   href={business.phoneHref}
-                  className="font-medium text-primary transition-colors hover:text-primary-strong"
+                  className="inline-flex min-h-[44px] items-center font-medium text-primary transition-colors hover:text-primary-strong"
                 >
                   {business.phoneDisplay}
                 </a>
@@ -71,7 +71,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/services"
-                  className="transition-colors hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground"
                 >
                   Services
                 </Link>
@@ -79,7 +79,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/appointments"
-                  className="transition-colors hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground"
                 >
                   Book an appointment
                 </Link>

@@ -20,7 +20,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function desktopLinkClass(active: boolean) {
-  return `rounded-full px-3.5 py-2 text-sm transition-colors focus-ring ${
+  return `inline-flex min-h-[44px] items-center rounded-full px-3.5 py-2 text-sm transition-colors focus-ring ${
     active
       ? "bg-primary-soft font-medium text-primary-strong"
       : "text-muted hover:bg-neutral-soft hover:text-foreground"
@@ -28,7 +28,7 @@ function desktopLinkClass(active: boolean) {
 }
 
 function mobileLinkClass(active: boolean) {
-  return `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-ring ${
+  return `flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-ring ${
     active
       ? "bg-primary-soft text-primary-strong"
       : "text-foreground hover:bg-neutral-soft"
@@ -97,12 +97,12 @@ export default function NavbarClient({
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               onClick={() => setMenuOpen((open) => !open)}
-              className="rounded-full p-1.5 text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:hidden"
+              className="flex h-[44px] w-[44px] items-center justify-center rounded-full text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:hidden"
             >
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
-                className="h-5 w-5"
+                className="h-6 w-6"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -150,7 +150,7 @@ export default function NavbarClient({
           <nav
             id="mobile-menu"
             ref={menuRef}
-            className="border-t border-border py-2 sm:hidden"
+            className="border-t border-border py-2 pb-safe sm:hidden"
             aria-label="Mobile navigation"
           >
             {items.map((item) => (

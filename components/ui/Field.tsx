@@ -8,6 +8,8 @@ const errorClasses = "mt-1.5 text-sm text-danger";
 type ControlChildProps = {
   id?: string;
   invalid?: boolean;
+  "aria-describedby"?: string;
+  "aria-errormessage"?: string;
 };
 
 export function Field({
@@ -28,10 +30,14 @@ export function Field({
   const generatedId = useId();
   const childProps = isValidElement(children) ? children.props : null;
   const id = childProps?.id ?? htmlFor ?? generatedId;
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
   const control = isValidElement(children)
     ? cloneElement(children, {
         id,
         invalid: Boolean(error) || childProps?.invalid,
+        "aria-describedby": error ? undefined : hint ? hintId : undefined,
+        "aria-errormessage": error ? errorId : undefined,
       })
     : children;
 
@@ -41,9 +47,13 @@ export function Field({
         {label}
       </label>
       {control}
-      {hint && <p className={hintClasses}>{hint}</p>}
+      {hint && (
+        <p id={hintId} className={hintClasses}>
+          {hint}
+        </p>
+      )}
       {error && (
-        <p className={errorClasses} role="alert">
+        <p id={errorId} className={errorClasses} role="alert">
           {error}
         </p>
       )}

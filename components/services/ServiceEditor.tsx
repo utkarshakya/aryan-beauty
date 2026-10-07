@@ -155,7 +155,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
           />
         </Field>
         <div className="sm:col-span-2 flex items-center gap-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <label className="flex min-h-[44px] items-center gap-2 text-sm font-medium text-foreground">
             <input
               type="checkbox"
               checked={active}

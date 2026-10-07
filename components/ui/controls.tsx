@@ -5,7 +5,7 @@ import type {
 } from "react";
 
 const controlClasses =
-  "w-full rounded-control border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted/70 transition-colors focus-ring sm:px-4 sm:py-2.5";
+  "w-full rounded-control border border-border bg-background px-3 py-2 text-[16px] text-foreground placeholder:text-muted/70 transition-colors focus-ring sm:px-4 sm:py-2.5 sm:text-sm";
 const invalidClasses = "border-danger bg-danger-soft";
 
 export const checkboxClass = "rounded border-border text-primary focus-ring";
