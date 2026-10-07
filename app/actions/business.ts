@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOwnerAdmin } from "@/lib/auth";
+import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
 import {
   getBusinessSettingsOrCreate,
   updateBusinessSettings,
@@ -68,23 +69,28 @@ export async function updateBusinessSettingsAction(
 
   if (Object.keys(errors).length > 0) return { errors };
 
-  await updateBusinessSettings({
-    name,
-    phone,
-    address,
-    timeZone,
-    openingHours,
-    closedWeekdays,
-    closures,
-    slotIntervalMin,
-    minBookingNoticeMin,
-    cancellationCutoffMin,
-  });
+  try {
+    await updateBusinessSettings({
+      name,
+      phone,
+      address,
+      timeZone,
+      openingHours,
+      closedWeekdays,
+      closures,
+      slotIntervalMin,
+      minBookingNoticeMin,
+      cancellationCutoffMin,
+    });
 
-  revalidatePath("/admin/settings");
-  revalidatePath("/admin");
-  revalidatePath("/appointments");
-  revalidatePath("/");
+    revalidatePath("/admin/settings");
+    revalidatePath("/admin");
+    revalidatePath("/appointments");
+    revalidatePath("/");
+  } catch (error) {
+    logServerError("updateBusinessSettingsAction", error);
+    return { errors: { form: GENERIC_FORM_ERROR } };
+  }
 
   return { success: "Business settings saved successfully" };
 }

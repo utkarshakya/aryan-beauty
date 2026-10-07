@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateServiceAction, toggleServiceAction } from "@/app/actions/services";
 import { Service } from "@prisma/client";
 import { SERVICE_CATEGORIES } from "@/lib/constants";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { Button, FormBanner, cardClassName, checkboxClass, Field, Input, Select, Textarea } from "@/components/ui";
 
 export default function ServiceEditor({ service }: { service: Service }) {
@@ -73,6 +74,9 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
         onCancel();
         router.refresh();
       }
+    } catch (error) {
+      logClientError("action:updateService", error);
+      setErrors({ form: GENERIC_FORM_ERROR });
     } finally {
       setSaving(false);
     }
@@ -80,6 +84,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
 
   const handleToggle = async () => {
     setSaving(true);
+    setErrors({});
     try {
       const result = await toggleServiceAction(service.id, !active);
       if (result.errors) {
@@ -89,6 +94,9 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
 
       setActive(!active);
       router.refresh();
+    } catch (error) {
+      logClientError("action:toggleService", error);
+      setErrors({ form: GENERIC_FORM_ERROR });
     } finally {
       setSaving(false);
     }

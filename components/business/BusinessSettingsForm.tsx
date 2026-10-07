@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updateBusinessSettingsAction } from "@/app/actions/business";
 import { BusinessSettings } from "@prisma/client";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import {
   Button,
   Field,
@@ -101,6 +102,9 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       }
+    } catch (error) {
+      logClientError("action:updateBusinessSettings", error);
+      setErrors({ form: GENERIC_FORM_ERROR });
     } finally {
       setSaving(false);
     }
@@ -136,6 +140,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
       {success && (
         <FormBanner>Business settings saved successfully</FormBanner>
       )}
+      {errors.form && <FormBanner tone="danger">{errors.form}</FormBanner>}
 
       <section aria-labelledby="basic-heading">
         <SectionHeading id="basic-heading" title="Basic information" />
@@ -149,7 +154,13 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
             />
           </Field>
           <Field label="Phone">
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
           </Field>
           <Field label="Address" className="sm:col-span-2">
             <Textarea
@@ -165,10 +176,19 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
             />
           </Field>
           <Field label="Phone (storage)">
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
           </Field>
           <Field label="Phone (display)">
             <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               value={phoneDisplay}
               onChange={(e) => setPhoneDisplay(e.target.value)}
             />
@@ -265,6 +285,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
         <div className="flex flex-wrap gap-2">
           <Input
             type="date"
+            autoComplete="off"
             value={closureDate}
             onChange={(e) => setClosureDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}

@@ -5,11 +5,13 @@ import { confirmAppointment } from "@/app/actions/appointments";
 import {
   Badge,
   Button,
+  FormBanner,
   PageHeader,
   badgeTone,
   cardClassName,
   cardLabelHeadingClass,
 } from "@/components/ui";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 
@@ -48,12 +50,17 @@ export default function AppointmentDetail({
   const displayStatus = appointment.displayStatus;
   const isCompleted = displayStatus === "completed";
   const [confirming, setConfirming] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const handleConfirm = async () => {
     if (confirming) return;
     setConfirming(true);
+    setActionError(null);
     try {
       await confirmAppointment(appointment.id);
+    } catch (error) {
+      logClientError("action:confirmAppointment", error);
+      setActionError(GENERIC_FORM_ERROR);
     } finally {
       setConfirming(false);
     }
@@ -72,6 +79,12 @@ export default function AppointmentDetail({
           </Badge>
         }
       />
+
+      {actionError && (
+        <div className="mb-4">
+          <FormBanner tone="danger">{actionError}</FormBanner>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
         <section

@@ -9,6 +9,7 @@ import {
   type TimeSlot,
 } from "@/app/actions/appointments";
 import { Button, ButtonLink, Field, Input, Select, cardClassName } from "@/components/ui";
+import { logClientError } from "@/lib/errors";
 
 const initialState: BookingState = { errors: {} };
 
@@ -59,6 +60,9 @@ export default function BookingForm({
     key: string;
     slots: TimeSlot[];
   }>({ key: "", slots: [] });
+  const [slotErrorKey, setSlotErrorKey] = useState<string | null>(null);
+  const [slotRetryToken, setSlotRetryToken] = useState(0);
+  const [clientPhoneError, setClientPhoneError] = useState<string | null>(null);
 
   const errors = state && "errors" in state ? state.errors : {};
   const selectedService = services.find(
@@ -70,21 +74,40 @@ export default function BookingForm({
   const loadingSlots = Boolean(
     selectedDate && selectedServiceId && slotState.key !== slotKey,
   );
+  const slotFailed = slotErrorKey === slotKey;
 
   useEffect(() => {
     if (!selectedDate || !selectedServiceId) return;
 
     let active = true;
-    getAvailableSlots(Number(selectedServiceId), selectedDate).then(
-      (availableSlots) => {
-        if (active) setSlotState({ key: slotKey, slots: availableSlots });
-      },
-    );
+    getAvailableSlots(Number(selectedServiceId), selectedDate)
+      .then((availableSlots) => {
+        if (!active) return;
+        setSlotState({ key: slotKey, slots: availableSlots });
+        setSlotErrorKey(null);
+      })
+      .catch((error) => {
+        if (!active) return;
+        logClientError("action:getAvailableSlots", error);
+        // Resolve the loading state so the select isn't permanently disabled;
+        // the error row below offers a Retry.
+        setSlotState({ key: slotKey, slots: [] });
+        setSlotErrorKey(slotKey);
+      });
 
     return () => {
       active = false;
     };
-  }, [selectedDate, selectedServiceId, slotKey]);
+  }, [selectedDate, selectedServiceId, slotKey, slotRetryToken]);
+
+  const retrySlotFetch = () => {
+    setSlotState({ key: "", slots: [] });
+    setSlotErrorKey(null);
+    setSlotRetryToken((token) => token + 1);
+  };
+
+  const validatePhone = (value: string) =>
+    !value || /^[6-9]\d{9}$/.test(value);
 
   if (state && "success" in state) {
     const { serviceName, startTime, name, phone } = state.success;
@@ -168,6 +191,12 @@ export default function BookingForm({
   }
 
   const submit = (formData: FormData) => {
+    const phone = String(formData.get("phone") ?? "").trim();
+    if (!validatePhone(phone)) {
+      setClientPhoneError("Enter a valid 10-digit Indian mobile number");
+      return;
+    }
+    setClientPhoneError(null);
     formAction(formData);
   };
 
@@ -241,7 +270,7 @@ export default function BookingForm({
             Mobile <span className="font-normal text-muted">(optional)</span>
           </>
         }
-        error={errors.phone}
+        error={errors.phone ?? clientPhoneError ?? undefined}
       >
         <Input
           id="phone"
@@ -249,7 +278,9 @@ export default function BookingForm({
           type="tel"
           autoComplete="tel"
           inputMode="numeric"
+          enterKeyHint="next"
           placeholder="10-digit mobile number"
+          onChange={() => setClientPhoneError(null)}
         />
       </Field>
 
@@ -292,9 +323,11 @@ export default function BookingForm({
                 ? "Finding available times..."
                 : !selectedDate
                   ? "Choose a date first"
-                  : slots.length === 0
-                    ? "No times available"
-                    : "Select a time"}
+                  : slotFailed
+                    ? "Couldn't load times"
+                    : slots.length === 0
+                      ? "No times available"
+                      : "Select a time"}
             </option>
             {slots.map((slot) => (
               <option key={slot.value} value={slot.value}>
@@ -303,6 +336,25 @@ export default function BookingForm({
             ))}
           </Select>
         </Field>
+        {slotFailed && (
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-danger-soft px-3 py-2.5 text-xs text-danger sm:text-sm"
+          >
+            <span>
+              Couldn&apos;t load available times. Check your connection and try
+              again.
+            </span>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={retrySlotFetch}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
       </div>
 
       <Button type="submit" disabled={pending} className="w-full" size="lg">

@@ -1,6 +1,6 @@
 # Mobile-first UI, UX, loading and error handling
 
-Status: Phase 0 complete (DoD passed). Next: Phase 1.
+Status: Phase 1 complete (DoD passed). Next: Phase 2.
 Scope: whole app (public site, booking flow, admin), phased so each phase ships independently.
 Decisions (locked): everything in one phased plan; restructure = multi-step booking wizard + admin sticky tab bar + dashboard reworked in place; custom lightweight toast (no new deps); ConfirmDialog = native `<dialog>` + `showModal()`; visual polish = token-driven pass with explicit DoD checklist; one dev-only a11y dep allowed in Phase 6; verify with Lighthouse mobile ≥90 plus a manual viewport checklist.
 
@@ -47,17 +47,20 @@ Decisions (locked): everything in one phased plan; restructure = multi-step book
 
 ## Phase 1 — Loading & error handling
 
-- [ ] Add `app/global-error.tsx` (root-layout failures currently fall to Next's default page).
-- [ ] Add segment `error.tsx` for `(site)` and `admin` — friendly copy + retry via `reset()`; the admin one must render inside the admin shell so navigation survives a crash. (Root `app/error.tsx` exists — do not duplicate it.)
-- [ ] Add `not-found.tsx` for `/admin/appointments/[id]`.
-- [ ] Error-logging convention: every boundary and catch logs `console.error` with route context; server errors carry `digest`; never render `error.message`/stack in production UI (generic copy + digest reference).
-- [ ] Stop swallowing: home + `/services` remove catch-to-empty and throw into `error.tsx`.
-- [ ] Loading skeletons for every admin route (dashboard, services, staff, settings) — today they get only the generic root spinner.
-- [ ] Client `catch` in all 6 `try/finally` handlers → set a form-level error; BookingForm slot fetch gets `.catch()` → error row with "Retry" (fixes permanently-disabled select).
-- [ ] Server actions: wrap unwrapped DB writes (services.ts, business.ts, customers.ts) in try/catch returning `errors.form` = generic message; standardize on the `{ errors, success }` shape.
-- [ ] **Vitest coverage for the standardized server-action error shape** (only automatable part of this plan; uses existing DB test setup).
-- [ ] Form UX baseline: `autoComplete="tel"`/`inputMode="tel"`/`enterKeyHint` on phone, sensible attrs on date fields; submit button loading/disabled state while action pending; client-side phone pre-validation before server round-trip; `required` semantics.
-- [ ] Out of scope: Suspense/streaming restructure — pages keep direct awaits + segment `loading.tsx`.
+- [x] Add `app/global-error.tsx` (root-layout failures currently fall to Next's default page). Own `<html>/<body>` + re-imports `globals.css`, font variable, and theme init script (Next 16.3: global-error gets no global styles automatically).
+- [x] Add segment `error.tsx` for `(site)` and `admin` — friendly copy + retry via `retry()` (stable in Next 16.3); the admin one must render inside the admin shell so navigation survives a crash. (Root `app/error.tsx` exists — do not duplicate it; refactor it onto the shared `ErrorState`.)
+- [x] Add `not-found.tsx` for `/admin/appointments/[id]` (renders inside the admin shell; `EmptyState` + back-to-dashboard link).
+- [x] Error-logging convention: every boundary and catch logs `console.error` with route context; server errors carry `digest`; never render `error.message`/stack in production UI (generic copy + digest reference). Documented in `docs/architecture.md` ("Error Handling and Logging") + shared helpers in `lib/errors.ts`.
+- [x] Stop swallowing: home + `/services` remove catch-to-empty and throw into `error.tsx`.
+- [x] Loading skeletons for every admin route (dashboard, services, staff, settings + appointment detail — detail added beyond the original 4) — today they get only the generic root spinner.
+- [x] Client `catch` in **all 10 catch-less handlers** (original 6 + CancelButton, RestoreButton, WalkInCustomerLinker, StaffTable's bare await — the latter 4 were missed in the first audit) → set a form-level error / inline banner; BookingForm slot fetch gets `.catch()` → error row with "Retry" (fixes permanently-disabled select).
+- [x] Server actions: wrap unwrapped DB writes (services.ts, business.ts, customers.ts + appointment mutations) in try/catch returning the generic `errors.form` message; each action **keeps its existing return shape** (no cross-shape conversion — `{ ok, error }` → `{ errors, success }` conversion is deferred to Phase 2 where consumers get reworked).
+- [x] **Vitest coverage for the standardized server-action error shape** (only automatable part of this plan; uses existing DB test setup) — `tests/actions/error-shape.test.ts`, 16 tests incl. sentinel-leak assertions.
+- [x] Form UX baseline: `autoComplete="tel"`/`inputMode="tel"`/`enterKeyHint` on phone, sensible attrs on date fields; submit button loading/disabled state while action pending (audited — already present everywhere async); client-side phone pre-validation before server round-trip (BookingForm + CustomerProfileForm); `required` semantics (audited).
+- [x] Render `errors.form` in ServiceForm + BusinessSettingsForm (moved here from Phase 2 — without it the new catches display nothing).
+- Out of scope (by decision): Suspense/streaming restructure — pages keep direct awaits + segment `loading.tsx`.
+
+**Phase 1 DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (55 tests) `build` ✓ + served smoke (`/` 200, `/services` 200, unknown route 404).
 
 ## Phase 2 — Feedback layer (custom toast, no new deps)
 
@@ -66,7 +69,7 @@ Decisions (locked): everything in one phased plan; restructure = multi-step book
 - [ ] Replace `window.alert` errors (CancelButton, RestoreButton) with toasts; toast success for row actions (confirm/cancel/restore, staff invite/disable, settings saved).
 - [ ] Replace `window.confirm` (4 sites) with `components/ui/Dialog.tsx` built on **native `<dialog>` + `showModal()`** (focus trap, Escape, backdrop, top-layer — all free); mobile-friendly layout, `motion-reduce`-safe close.
 - [ ] Keep contextual inline `FormBanner` for form-level messages; unify BookingForm's hand-rolled dismissible banner on the same pattern.
-- [ ] `errors.form` display in ServiceForm + BusinessSettingsForm (currently dropped).
+
 
 ## Phase 3 — Booking flow → multi-step wizard
 

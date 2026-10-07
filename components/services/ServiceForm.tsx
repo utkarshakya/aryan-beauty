@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createServiceAction } from "@/app/actions/services";
 import { SERVICE_CATEGORIES } from "@/lib/constants";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { Button, Field, FormBanner, Input, Select, Textarea, checkboxClass } from "@/components/ui";
 
 export default function ServiceForm() {
@@ -31,6 +32,7 @@ export default function ServiceForm() {
     e.preventDefault();
     if (!validate()) return;
     setSaving(true);
+    setSuccess(false);
     try {
       const formData = new FormData();
       formData.set("name", name);
@@ -50,6 +52,9 @@ export default function ServiceForm() {
         setPrice("");
         setDurationMin("");
       }
+    } catch (error) {
+      logClientError("action:createService", error);
+      setErrors({ form: GENERIC_FORM_ERROR });
     } finally {
       setSaving(false);
     }
@@ -60,6 +65,7 @@ export default function ServiceForm() {
       {success && (
         <FormBanner>Service created successfully</FormBanner>
       )}
+      {errors.form && <FormBanner tone="danger">{errors.form}</FormBanner>}
 
       <Field label="Name" error={errors.name}>
         <Input

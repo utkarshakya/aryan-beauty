@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { AppointmentStatus, Prisma } from "@prisma/client";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
+import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
 import {
   getAvailableSlots,
   createAppointmentTx,
@@ -186,7 +187,8 @@ export async function createAppointment(
         },
       };
     }
-    return { errors: { form: "Something went wrong. Please try again." } };
+    logServerError("createAppointment", error);
+    return { errors: { form: GENERIC_FORM_ERROR } };
   }
 }
 
@@ -201,30 +203,36 @@ export async function cancelMyAppointment(
     return { error: "That appointment could not be found." };
   }
 
-  const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!appUser) return { error: "User not found" };
+  try {
+    const appUser = await prisma.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (!appUser) return { error: "User not found" };
 
-  const customer = await prisma.customer.findUnique({
-    where: { userId: appUser.id },
-  });
-  if (!customer) return { error: "User not found" };
+    const customer = await prisma.customer.findUnique({
+      where: { userId: appUser.id },
+    });
+    if (!customer) return { error: "User not found" };
 
-  const cancelled = await cancelAppointment(appointmentId, customer.id);
+    const cancelled = await cancelAppointment(appointmentId, customer.id);
 
-  if (!cancelled) {
-    const { getBusinessSettingsForAvailability } =
-      await import("@/lib/db/business");
-    const business = await getBusinessSettingsForAvailability();
-    const hours = Math.round(business.cancellationCutoffMin / 60);
-    return {
-      error: `Appointments can only be cancelled more than ${hours} hour${hours !== 1 ? "s" : ""} before the visit.`,
-    };
+    if (!cancelled) {
+      const { getBusinessSettingsForAvailability } =
+        await import("@/lib/db/business");
+      const business = await getBusinessSettingsForAvailability();
+      const hours = Math.round(business.cancellationCutoffMin / 60);
+      return {
+        error: `Appointments can only be cancelled more than ${hours} hour${hours !== 1 ? "s" : ""} before the visit.`,
+      };
+    }
+
+    revalidatePath("/appointments");
+    revalidatePath("/admin");
+  } catch (error) {
+    logServerError("cancelMyAppointment", error);
+    return { error: GENERIC_FORM_ERROR };
   }
 
-  revalidatePath("/appointments");
-  revalidatePath("/admin");
   return { success: "Appointment cancelled successfully." };
 }
 
@@ -234,11 +242,18 @@ export async function confirmAppointment(id: number) {
   await requireAdmin();
   if (!Number.isInteger(id) || id <= 0) return;
 
-  const applied = await confirmAppointmentTransition(id);
-  if (!applied) return;
+  try {
+    const applied = await confirmAppointmentTransition(id);
+    if (!applied) return;
 
-  revalidatePath("/admin");
-  revalidatePath(`/admin/appointments/${id}`);
+    revalidatePath("/admin");
+    revalidatePath(`/admin/appointments/${id}`);
+  } catch (error) {
+    // No result shape to return (void action) — log with context and rethrow
+    // so the client-side catch surfaces a generic message.
+    logServerError("confirmAppointment", error);
+    throw error;
+  }
 }
 
 export async function adminCancelAppointment(id: number) {
@@ -246,10 +261,16 @@ export async function adminCancelAppointment(id: number) {
   if (!Number.isInteger(id) || id <= 0)
     return { ok: false, error: "That appointment could not be found." };
 
-  const applied = await adminCancelAppointmentTransition(id);
-  if (applied) {
-    revalidatePath("/admin");
-    revalidatePath(`/admin/appointments/${id}`);
+  let applied: boolean;
+  try {
+    applied = await adminCancelAppointmentTransition(id);
+    if (applied) {
+      revalidatePath("/admin");
+      revalidatePath(`/admin/appointments/${id}`);
+    }
+  } catch (error) {
+    logServerError("adminCancelAppointment", error);
+    return { ok: false, error: GENERIC_FORM_ERROR };
   }
   return {
     ok: applied,
@@ -264,10 +285,16 @@ export async function restoreAppointmentAction(id: number) {
   if (!Number.isInteger(id) || id <= 0)
     return { ok: false, error: "That appointment could not be found." };
 
-  const applied = await restoreAppointment(id);
-  if (applied) {
-    revalidatePath("/admin");
-    revalidatePath(`/admin/appointments/${id}`);
+  let applied: boolean;
+  try {
+    applied = await restoreAppointment(id);
+    if (applied) {
+      revalidatePath("/admin");
+      revalidatePath(`/admin/appointments/${id}`);
+    }
+  } catch (error) {
+    logServerError("restoreAppointmentAction", error);
+    return { ok: false, error: GENERIC_FORM_ERROR };
   }
   return {
     ok: applied,

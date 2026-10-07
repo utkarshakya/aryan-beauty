@@ -61,7 +61,7 @@ Design tokens live in `app/globals.css` under `@theme`; dark-mode overrides are 
 - **Typography**: body text uses the system stack (`font-sans`). Headings `h1`–`h3` use Fraunces automatically via a base rule in `globals.css`; the font is loaded in `app/fonts.ts` with `next/font` (build-time, self-hosted — no runtime CDN). For display text outside headings, use the `font-display` utility. Hero-scale copy uses `text-display`.
 - **Shape**: `rounded-card` (`--radius-card`) for cards/panels, `rounded-control` (`--radius-control`) for inputs and selects, `rounded-full` for buttons and pills. Elevation uses `shadow-card`.
 - **Focus**: use the `focus-ring` utility for every interactive element. Never hand-roll `ring-*`/`outline-*` focus classes; the utility is defined once in `globals.css` and renders a 2px primary outline with a 2px offset so the gap shows the real background in both themes.
-- **Primitives**: reach for `components/ui/` (`Button`, `Container`, `Card`, `Badge`, and the form controls `Field` with `Input`/`Textarea`/`Select`) before writing class strings by hand; further shared primitives are added there as patterns repeat. Wrap a labelled control in `Field` — it owns the label, hint, and error text and wires the control's `id`, `aria-invalid`, and error styling. `Card` renders the standard card shell (`rounded-card` + `shadow-card`); pass padding via `className`, or use the `cardClassName()` helper when the root element must stay a `section`/`article`; `cardLabelHeadingClass` is the uppercase card-label heading style. `Badge` takes a `tone` (`pending`/`confirmed`/`completed`/`cancelled`/`neutral`) — use `badgeTone(status)` to coerce a raw status string with a neutral fallback. `PageHeader` is the standard page title block (optional `eyebrow`, `backHref`/`backLabel`, `subtitle`, and an `actions` slot) — use it instead of hand-rolling an `h1` plus description. `EmptyState` is the standard empty-list placeholder (`title` plus optional `icon`/`body`/`actions`) — never hand-roll a dashed box. `SectionHeading` is the standard section `h2` (optional `description`/`actions`, `id` for `aria-labelledby`, `size="lg"` for landing sections). `SummaryCard` is the stat tile (`label`/`value`/`detail`). `ActionButton` is the inline text action button (`tone="primary" | "success" | "danger"`, underlined + `focus-ring`) — use it for in-row actions like Confirm/Cancel/Restore instead of colored hand-rolled buttons. `FormBanner` is the form-level success/dailure notice (`tone` defaults to `success`; `danger` sets `role="alert"`). `ButtonLink` mirrors `Button` as a link and supports the same variants plus `outline`.
+- **Primitives**: reach for `components/ui/` (`Button`, `Container`, `Card`, `Badge`, and the form controls `Field` with `Input`/`Textarea`/`Select`) before writing class strings by hand; further shared primitives are added there as patterns repeat. Wrap a labelled control in `Field` — it owns the label, hint, and error text and wires the control's `id`, `aria-invalid`, and error styling. `Card` renders the standard card shell (`rounded-card` + `shadow-card`); pass padding via `className`, or use the `cardClassName()` helper when the root element must stay a `section`/`article`; `cardLabelHeadingClass` is the uppercase card-label heading style. `Badge` takes a `tone` (`pending`/`confirmed`/`completed`/`cancelled`/`neutral`) — use `badgeTone(status)` to coerce a raw status string with a neutral fallback. `PageHeader` is the standard page title block (optional `eyebrow`, `backHref`/`backLabel`, `subtitle`, and an `actions` slot) — use it instead of hand-rolling an `h1` plus description. `EmptyState` is the standard empty-list placeholder (`title` plus optional `icon`/`body`/`actions`) — never hand-roll a dashed box. `SectionHeading` is the standard section `h2` (optional `description`/`actions`, `id` for `aria-labelledby`, `size="lg"` for landing sections). `SummaryCard` is the stat tile (`label`/`value`/`detail`). `ActionButton` is the inline text action button (`tone="primary" | "success" | "danger"`, underlined + `focus-ring`) — use it for in-row actions like Confirm/Cancel/Restore instead of colored hand-rolled buttons. `FormBanner` is the form-level success/dailure notice (`tone` defaults to `success`; `danger` sets `role="alert"`). `ButtonLink` mirrors `Button` as a link and supports the same variants plus `outline`. `Skeleton`/`SkeletonGroup` are the loading placeholders (`SkeletonGroup` owns the `role="status"` + screen-reader label; use one per loading view). `ErrorState` is the shared error-boundary body (heading, copy, dev-only `error.message`, digest reference, retry button).
 
 Unused tokens are pruned from the built CSS until a component uses them — that is expected.
 
@@ -103,13 +103,30 @@ Every protected page and every Server Action must perform a server-side check. S
 - `BusinessSettings` is a singleton (one row) controlling scheduling rules and marketing content.
 - `Appointment.status` is a 3-value enum (`pending`/`confirmed`/`cancelled`) with Completed derived from a past `endTime`; `Service.price` is whole rupees (integer); `Service.category` is a fixed allowlist.
 
+## Error Handling and Logging
+
+Boundaries (all render inside their segment's layout, so Navbar/Footer/nav survive):
+
+- `app/global-error.tsx` — root-layout failures only; defines its own `<html>/<body>`, re-imports `globals.css`, the font variable, and the theme init script.
+- `app/error.tsx` — root-level catch-all below the root layout.
+- `app/(site)/error.tsx`, `app/admin/error.tsx` — segment boundaries; both wrap `ErrorState`.
+- Colocated `not-found.tsx` files (e.g. `app/admin/appointments/[id]/`) catch `notFound()` inside the shell.
+
+Convention (`lib/errors.ts` exports `GENERIC_FORM_ERROR`, `logServerError`, `logClientError`):
+
+- **Boundaries** log `console.error("[error:<scope>]", error)` in a `useEffect`.
+- **Server actions** wrap DB work in `try/catch` (auth guards stay *outside* the try so `redirect()` propagates), log with `logServerError(scope, error)`, and return their generic failure (`{ errors: { form: GENERIC_FORM_ERROR } }` or the action's existing failure shape). Expected/domain errors are return values, not throws.
+- **Client handlers** catch rejected action calls, log with `logClientError(scope, error)`, and surface `GENERIC_FORM_ERROR` inline (`FormBanner`/alert) — pending state is always reset in `finally`.
+- **Never swallow in pages:** a failed page-level fetch throws into the segment `error.tsx`; never render catch-to-empty data as if it were real.
+- **Never leak internals:** production UI renders only the generic copy plus `error.digest`; `error.message`/stack appear only when `NODE_ENV === "development"`. Raw `Error` messages are logged, never returned to the client.
+
 ## Testing Locally
 
 Use the product itself to test customer and admin flows, then use Prisma Studio to inspect saved records:
 
 ```powershell
 npm.cmd run dev
-npm.cmd run prisma:studio
+npm.cmd run db:studio
 ```
 
 Run the test suite:

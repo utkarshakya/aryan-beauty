@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getWalkInCustomersAction, linkWalkInCustomerAction } from "@/app/actions/customers";
 import type { WalkInCustomer } from "@/lib/db/customers";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { Button, EmptyState, FormBanner, Input, SectionHeading } from "@/components/ui";
 
 export default function WalkInCustomerLinker() {
@@ -41,6 +42,9 @@ export default function WalkInCustomerLinker() {
         const customers = await getWalkInCustomersAction();
         setWalkInCustomers(customers);
       }
+    } catch (error) {
+      logClientError("action:linkWalkInCustomer", error);
+      setErrors({ form: GENERIC_FORM_ERROR });
     } finally {
       setLinkingId(null);
     }

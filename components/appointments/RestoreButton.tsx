@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { restoreAppointmentAction } from "@/app/actions/appointments";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { ActionButton } from "@/components/ui";
 
 export default function RestoreButton({
@@ -20,6 +21,9 @@ export default function RestoreButton({
         if (result.error) {
           window.alert(result.error);
         }
+      } catch (error) {
+        logClientError("action:restoreAppointment", error);
+        window.alert(GENERIC_FORM_ERROR);
       } finally {
         setPending(false);
       }

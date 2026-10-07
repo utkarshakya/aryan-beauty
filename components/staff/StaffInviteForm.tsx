@@ -25,6 +25,9 @@ export default function StaffInviteForm() {
             name="email"
             type="email"
             required
+            autoComplete="email"
+            inputMode="email"
+            enterKeyHint="send"
             placeholder="worker@example.com"
           />
         </Field>

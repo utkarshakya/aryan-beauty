@@ -7,6 +7,7 @@ import {
   restoreUserAction,
 } from "@/app/actions/users";
 import AuthStatusBadge from "@/components/auth/AuthStatusBadge";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { Button, EmptyState, FormBanner, Select } from "@/components/ui";
 import type { AppUserSummary } from "@/lib/db/users";
 import type { UserRole } from "@/lib/auth";
@@ -34,15 +35,21 @@ export default function StaffTable({
   ) => {
     setBusy(id);
     setError(null);
-    const result = await action();
-    setBusy(null);
+    try {
+      const result = await action();
 
-    if (!result.ok) {
-      setError(result.error ?? "Something went wrong.");
-      return;
+      if (!result.ok) {
+        setError(result.error ?? "Something went wrong.");
+        return;
+      }
+
+      window.location.reload();
+    } catch (err) {
+      logClientError("action:staffMutation", err);
+      setError(GENERIC_FORM_ERROR);
+    } finally {
+      setBusy(null);
     }
-
-    window.location.reload();
   };
 
   const handleRoleChange = (user: StaffUser, role: UserRole) => {

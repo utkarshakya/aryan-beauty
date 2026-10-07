@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { SERVICE_CATEGORIES } from "@/lib/constants";
+import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
 import {
   getAllServices,
   getActiveServices,
@@ -52,18 +53,23 @@ export async function createServiceAction(
 
   if (Object.keys(errors).length > 0) return { errors };
 
-  await createService({
-    name,
-    description,
-    category,
-    price,
-    durationMin,
-    active,
-  });
-  revalidatePath("/admin/services");
-  revalidatePath("/services");
-  revalidatePath("/appointments");
-  revalidatePath("/");
+  try {
+    await createService({
+      name,
+      description,
+      category,
+      price,
+      durationMin,
+      active,
+    });
+    revalidatePath("/admin/services");
+    revalidatePath("/services");
+    revalidatePath("/appointments");
+    revalidatePath("/");
+  } catch (error) {
+    logServerError("createServiceAction", error);
+    return { errors: { form: GENERIC_FORM_ERROR } };
+  }
 
   return { success: "Service created successfully" };
 }
@@ -101,18 +107,23 @@ export async function updateServiceAction(
 
   if (Object.keys(errors).length > 0) return { errors };
 
-  await updateService(id, {
-    name,
-    description,
-    category,
-    price,
-    durationMin,
-    active,
-  });
-  revalidatePath("/admin/services");
-  revalidatePath("/services");
-  revalidatePath("/appointments");
-  revalidatePath("/");
+  try {
+    await updateService(id, {
+      name,
+      description,
+      category,
+      price,
+      durationMin,
+      active,
+    });
+    revalidatePath("/admin/services");
+    revalidatePath("/services");
+    revalidatePath("/appointments");
+    revalidatePath("/");
+  } catch (error) {
+    logServerError("updateServiceAction", error);
+    return { errors: { form: GENERIC_FORM_ERROR } };
+  }
 
   return { success: "Service updated successfully" };
 }
@@ -126,11 +137,16 @@ export async function toggleServiceAction(
   if (!Number.isInteger(id) || id <= 0)
     return { errors: { form: "Invalid service" } };
 
-  await toggleService(id, active);
-  revalidatePath("/admin/services");
-  revalidatePath("/services");
-  revalidatePath("/appointments");
-  revalidatePath("/");
+  try {
+    await toggleService(id, active);
+    revalidatePath("/admin/services");
+    revalidatePath("/services");
+    revalidatePath("/appointments");
+    revalidatePath("/");
+  } catch (error) {
+    logServerError("toggleServiceAction", error);
+    return { errors: { form: GENERIC_FORM_ERROR } };
+  }
 
   return { success: `Service ${active ? "activated" : "deactivated"}` };
 }

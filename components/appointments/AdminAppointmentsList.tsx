@@ -6,10 +6,12 @@ import {
   ActionButton,
   Badge,
   EmptyState,
+  FormBanner,
   badgeTone,
   cardClassName,
   filterPillClasses,
 } from "@/components/ui";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
 import Link from "next/link";
@@ -68,11 +70,16 @@ export default function AdminAppointmentsList({
 }: AppointmentsListProps) {
   const term = searchTerm?.trim();
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const handleConfirm = async (appointmentId: number) => {
     if (confirmingId !== null) return;
     setConfirmingId(appointmentId);
+    setActionError(null);
     try {
       await confirmAppointment(appointmentId);
+    } catch (error) {
+      logClientError("action:confirmAppointment", error);
+      setActionError(GENERIC_FORM_ERROR);
     } finally {
       setConfirmingId(null);
     }
@@ -100,6 +107,7 @@ export default function AdminAppointmentsList({
 
   return (
     <div className="space-y-5 rounded-card border border-border bg-muted-soft/40 p-3 sm:space-y-6 sm:p-5">
+      {actionError && <FormBanner tone="danger">{actionError}</FormBanner>}
       <nav
         className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-3 sm:pb-4"
         aria-label="Appointment status filters"

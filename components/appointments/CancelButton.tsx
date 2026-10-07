@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { adminCancelAppointment as cancelAppointment } from "@/app/actions/appointments";
+import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import { ActionButton } from "@/components/ui";
 
 export default function CancelButton({ appointmentId }: { appointmentId: number }) {
@@ -16,6 +17,9 @@ export default function CancelButton({ appointmentId }: { appointmentId: number 
         if (result.error) {
           window.alert(result.error);
         }
+      } catch (error) {
+        logClientError("action:adminCancelAppointment", error);
+        window.alert(GENERIC_FORM_ERROR);
       } finally {
         setPending(false);
       }

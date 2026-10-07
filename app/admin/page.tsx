@@ -286,6 +286,7 @@ export default async function AdminPage({
             id="appointment-date"
             name="date"
             type="date"
+            autoComplete="off"
             defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
             className="sm:w-auto"
           />

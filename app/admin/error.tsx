@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
 
-export default function Error({
+export default function AdminError({
   error,
   reset,
   retry,
@@ -13,10 +13,17 @@ export default function Error({
   retry?: () => void;
 }) {
   useEffect(() => {
-    console.error("[error:root]", error);
+    console.error("[error:admin]", error);
   }, [error]);
 
   const handleRetry = retry || reset || (() => window.location.reload());
 
-  return <ErrorState error={error} onRetry={handleRetry} />;
+  return (
+    <ErrorState
+      error={error}
+      onRetry={handleRetry}
+      title="Admin section unavailable"
+      body="We couldn't load this admin page. The navigation above still works — try again, or pick another section."
+    />
+  );
 }

@@ -12,32 +12,19 @@ export const metadata: Metadata = {
 };
 
 export default async function ServicesPage() {
-  let services: Awaited<ReturnType<typeof prisma.service.findMany>> = [];
-  let phoneDisplay = "+91 98765 43210";
-  let phoneHref = "tel:+919876543210";
-
-  try {
-    const [fetchedServices, business] = await Promise.all([
-      prisma.service.findMany({
-        where: { active: true },
-        orderBy: [{ category: "asc" }, { name: "asc" }],
-      }),
-      getBusinessSettingsForDisplay(),
-    ]);
-    services = fetchedServices;
-    if (business) {
-      phoneDisplay = business.phoneDisplay;
-      phoneHref = business.phoneHref;
-    }
-  } catch (error) {
-    console.error("Error fetching services page data from database:", error);
-  }
+  const [services, business] = await Promise.all([
+    prisma.service.findMany({
+      where: { active: true },
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    }),
+    getBusinessSettingsForDisplay(),
+  ]);
 
   return (
     <ServicesFilter
       services={services}
-      phoneDisplay={phoneDisplay}
-      phoneHref={phoneHref}
+      phoneDisplay={business?.phoneDisplay ?? "+91 98765 43210"}
+      phoneHref={business?.phoneHref ?? "tel:+919876543210"}
     />
   );
 }

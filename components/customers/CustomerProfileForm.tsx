@@ -11,12 +11,19 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
   const [name, setName] = useState(initialData.name);
   const [phone, setPhone] = useState(initialData.phone ?? "");
   const [email, setEmail] = useState(initialData.email ?? "");
+  const [clientPhoneError, setClientPhoneError] = useState<string | null>(null);
 
   const errors = state.errors ?? {};
 
   const handleSubmit = (formData: FormData) => {
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone && !/^[6-9]\d{9}$/.test(trimmedPhone)) {
+      setClientPhoneError("Enter a valid 10-digit Indian mobile number");
+      return;
+    }
+    setClientPhoneError(null);
     formData.set("name", name);
-    formData.set("phone", phone);
+    formData.set("phone", trimmedPhone);
     formData.set("email", email);
     formAction(formData);
   };
@@ -58,7 +65,7 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
             Mobile <span className="font-normal text-muted">(optional)</span>
           </>
         }
-        error={errors.phone}
+        error={errors.phone ?? clientPhoneError ?? undefined}
       >
         <Input
           id="phone"
@@ -66,9 +73,13 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
           type="tel"
           autoComplete="tel"
           inputMode="numeric"
+          enterKeyHint="next"
           placeholder="10-digit mobile number"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            setClientPhoneError(null);
+          }}
         />
       </Field>
 
