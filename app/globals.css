@@ -45,15 +45,15 @@
   --font-display: var(--font-fraunces);
 }
 
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-  transition: background-color var(--duration-base) var(--ease-out),
-    color var(--duration-base) var(--ease-out);
-}
-
 @layer base {
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    transition: background-color var(--duration-base) var(--ease-out),
+      color var(--duration-base) var(--ease-out);
+  }
+
   h1,
   h2,
   h3 {
