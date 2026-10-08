@@ -3,34 +3,52 @@
 import { useState } from "react";
 import { adminCancelAppointment as cancelAppointment } from "@/app/actions/appointments";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
-import { ActionButton } from "@/components/ui";
+import { ActionButton, ConfirmDialog, useToast } from "@/components/ui";
 
 export default function CancelButton({ appointmentId }: { appointmentId: number }) {
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const toast = useToast();
 
-  const handleSubmit = async () => {
+  const handleConfirm = async () => {
+    setOpen(false);
     if (pending) return;
-    if (window.confirm("Cancel this appointment?")) {
-      setPending(true);
-      try {
-        const result = await cancelAppointment(appointmentId);
-        if (result.error) {
-          window.alert(result.error);
-        }
-      } catch (error) {
-        logClientError("action:adminCancelAppointment", error);
-        window.alert(GENERIC_FORM_ERROR);
-      } finally {
-        setPending(false);
+    setPending(true);
+    try {
+      const result = await cancelAppointment(appointmentId);
+      if (result.ok) {
+        toast.success("Appointment cancelled.");
+      } else if (result.error) {
+        toast.error(result.error);
       }
+    } catch (error) {
+      logClientError("action:adminCancelAppointment", error);
+      toast.error(GENERIC_FORM_ERROR);
+    } finally {
+      setPending(false);
     }
   };
 
   return (
-    <form action={handleSubmit}>
-      <ActionButton type="submit" tone="danger" disabled={pending}>
+    <>
+      <ActionButton
+        type="button"
+        tone="danger"
+        disabled={pending}
+        onClick={() => setOpen(true)}
+      >
         {pending ? "Cancelling…" : "Cancel"}
       </ActionButton>
-    </form>
+      <ConfirmDialog
+        open={open}
+        title="Cancel this appointment?"
+        body="The customer will see it as cancelled. You can restore it later while the visit is still upcoming."
+        confirmLabel="Cancel appointment"
+        cancelLabel="Keep it"
+        tone="danger"
+        onConfirm={handleConfirm}
+        onClose={() => setOpen(false)}
+      />
+    </>
   );
 }

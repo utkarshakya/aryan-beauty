@@ -10,6 +10,7 @@ import {
   badgeTone,
   cardClassName,
   filterPillClasses,
+  useToast,
 } from "@/components/ui";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import CancelButton from "./CancelButton";
@@ -69,6 +70,7 @@ export default function AdminAppointmentsList({
   emptyMessage,
 }: AppointmentsListProps) {
   const term = searchTerm?.trim();
+  const toast = useToast();
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const handleConfirm = async (appointmentId: number) => {
@@ -77,6 +79,7 @@ export default function AdminAppointmentsList({
     setActionError(null);
     try {
       await confirmAppointment(appointmentId);
+      toast.success("Appointment confirmed.");
     } catch (error) {
       logClientError("action:confirmAppointment", error);
       setActionError(GENERIC_FORM_ERROR);

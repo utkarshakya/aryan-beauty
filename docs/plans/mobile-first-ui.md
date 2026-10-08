@@ -1,6 +1,6 @@
 # Mobile-first UI, UX, loading and error handling
 
-Status: Phase 1 complete (DoD passed). Next: Phase 2.
+Status: Phase 2 complete (DoD passed). Next: Phase 3.
 Scope: whole app (public site, booking flow, admin), phased so each phase ships independently.
 Decisions (locked): everything in one phased plan; restructure = multi-step booking wizard + admin sticky tab bar + dashboard reworked in place; custom lightweight toast (no new deps); ConfirmDialog = native `<dialog>` + `showModal()`; visual polish = token-driven pass with explicit DoD checklist; one dev-only a11y dep allowed in Phase 6; verify with Lighthouse mobile ≥90 plus a manual viewport checklist.
 
@@ -64,11 +64,13 @@ Decisions (locked): everything in one phased plan; restructure = multi-step book
 
 ## Phase 2 — Feedback layer (custom toast, no new deps)
 
-- [ ] `components/ui/Toast.tsx`: provider mounted in root layout, `useToast()` hook, `aria-live`, max 3 stacked, auto-dismiss, token-based success/danger styling, bottom-center mobile (with safe-area) / bottom-right desktop, `motion-reduce` respected.
-- [ ] **Stacking rule:** toasts layer above page content but below the wizard's sticky action bar; while the bar is present, the toast tray offsets above it (or moves top on mobile) — never cover the Confirm button. Document z-index tiers in `architecture.md`.
-- [ ] Replace `window.alert` errors (CancelButton, RestoreButton) with toasts; toast success for row actions (confirm/cancel/restore, staff invite/disable, settings saved).
-- [ ] Replace `window.confirm` (4 sites) with `components/ui/Dialog.tsx` built on **native `<dialog>` + `showModal()`** (focus trap, Escape, backdrop, top-layer — all free); mobile-friendly layout, `motion-reduce`-safe close.
-- [ ] Keep contextual inline `FormBanner` for form-level messages; unify BookingForm's hand-rolled dismissible banner on the same pattern.
+- [x] `components/ui/Toast.tsx`: provider mounted in root layout, `useToast()` hook, `aria-live`, max 3 stacked, auto-dismiss, token-based success/danger styling, bottom-center mobile (with safe-area) / bottom-right desktop, `motion-reduce` respected.
+- [x] **Stacking rule:** toasts layer above page content but below the wizard's sticky action bar; while the bar is present, the toast tray offsets above it (or moves top on mobile) — never cover the Confirm button. Document z-index tiers in `architecture.md`.
+- [x] Replace `window.alert` errors (CancelButton, RestoreButton) with toasts; toast success for row actions (confirm/cancel/restore, staff invite/disable, settings saved).
+- [x] Replace `window.confirm` (4 sites) with `components/ui/Dialog.tsx` built on **native `<dialog>` + `showModal()`** (focus trap, Escape, backdrop, top-layer — all free); mobile-friendly layout, `motion-reduce`-safe close.
+- [x] Keep contextual inline `FormBanner` for form-level messages; unify BookingForm's hand-rolled dismissible banner on the same pattern.
+
+**Phase 2 DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (55 tests) `build` ✓ + served smoke (`/` 200, `/services` 200, unknown route 404; compiled CSS contains toast/dialog keyframes + `z-index:60`); zero `window.confirm`/`window.alert` matches repo-wide.
 
 
 ## Phase 3 — Booking flow → multi-step wizard

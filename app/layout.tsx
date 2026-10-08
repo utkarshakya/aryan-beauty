@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ToastProvider } from "@/components/ui/Toast";
 import { fraunces } from "./fonts";
 import "./globals.css";
 
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       >
         <body className="min-h-full flex flex-col">
           <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </body>
       </html>
     </ClerkProvider>

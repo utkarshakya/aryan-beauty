@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   updateRoleAction,
   disableUserAction,
@@ -8,7 +9,14 @@ import {
 } from "@/app/actions/users";
 import AuthStatusBadge from "@/components/auth/AuthStatusBadge";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
-import { Button, EmptyState, FormBanner, Select } from "@/components/ui";
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  FormBanner,
+  Select,
+  useToast,
+} from "@/components/ui";
 import type { AppUserSummary } from "@/lib/db/users";
 import type { UserRole } from "@/lib/auth";
 
@@ -19,6 +27,9 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: "customer", label: "Customer" },
 ];
 
+const userLabel = (user: StaffUser) =>
+  user.name ?? user.email ?? "this user";
+
 export default function StaffTable({
   users,
   currentClerkUserId,
@@ -26,12 +37,16 @@ export default function StaffTable({
   users: StaffUser[];
   currentClerkUserId: string;
 }) {
+  const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingUser, setConfirmingUser] = useState<StaffUser | null>(null);
 
   const run = async (
     id: string,
-    action: () => Promise<{ ok: boolean; error?: string }>
+    action: () => Promise<{ ok: boolean; error?: string }>,
+    successMessage: string
   ) => {
     setBusy(id);
     setError(null);
@@ -43,7 +58,8 @@ export default function StaffTable({
         return;
       }
 
-      window.location.reload();
+      toast.success(successMessage);
+      router.refresh();
     } catch (err) {
       logClientError("action:staffMutation", err);
       setError(GENERIC_FORM_ERROR);
@@ -54,18 +70,34 @@ export default function StaffTable({
 
   const handleRoleChange = (user: StaffUser, role: UserRole) => {
     if (role === user.role) return;
-    run(user.clerkUserId, () => updateRoleAction(user.clerkUserId, role));
+    run(
+      user.clerkUserId,
+      () => updateRoleAction(user.clerkUserId, role),
+      `Role updated for ${userLabel(user)}.`
+    );
   };
 
   const handleDisable = (user: StaffUser) => {
-    if (!window.confirm(`Disable ${user.name ?? user.email ?? "this user"}? Their booking history stays intact, but they lose all access.`)) {
-      return;
-    }
-    run(user.clerkUserId, () => disableUserAction(user.clerkUserId));
+    setConfirmingUser(user);
   };
 
   const handleRestore = (user: StaffUser) => {
-    run(user.clerkUserId, () => restoreUserAction(user.clerkUserId));
+    run(
+      user.clerkUserId,
+      () => restoreUserAction(user.clerkUserId),
+      `Access restored for ${userLabel(user)}.`
+    );
+  };
+
+  const confirmDisable = () => {
+    const user = confirmingUser;
+    setConfirmingUser(null);
+    if (!user) return;
+    run(
+      user.clerkUserId,
+      () => disableUserAction(user.clerkUserId),
+      `Access disabled for ${userLabel(user)}.`
+    );
   };
 
   return (
@@ -153,6 +185,19 @@ export default function StaffTable({
           })}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={confirmingUser !== null}
+        title={
+          confirmingUser ? `Disable ${userLabel(confirmingUser)}?` : ""
+        }
+        body="Their booking history stays intact, but they lose all access."
+        confirmLabel="Disable access"
+        cancelLabel="Keep access"
+        tone="danger"
+        onConfirm={confirmDisable}
+        onClose={() => setConfirmingUser(null)}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   Select,
   Textarea,
   checkboxClass,
+  useToast,
 } from "@/components/ui";
 
 const WEEKDAYS = [
@@ -43,6 +44,7 @@ function isClosed(day: { key: string; label: string }, closedWeekdays: number[],
 }
 
 export default function BusinessSettingsForm({ settings }: { settings: BusinessSettings }) {
+  const toast = useToast();
   const [name, setName] = useState(settings.name);
   const [phone, setPhone] = useState(settings.phone ?? "");
   const [phoneDisplay, setPhoneDisplay] = useState(settings.phoneDisplay ?? "");
@@ -60,7 +62,6 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
   const [cancellationCutoffMin, setCancellationCutoffMin] = useState(settings.cancellationCutoffMin);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [success, setSuccess] = useState(false);
   const [closureDate, setClosureDate] = useState("");
   const [closureReason, setClosureReason] = useState("");
 
@@ -99,8 +100,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
       if (result.errors) {
         setErrors(result.errors);
       } else {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        toast.success("Business settings saved successfully");
       }
     } catch (error) {
       logClientError("action:updateBusinessSettings", error);
@@ -137,9 +137,6 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {success && (
-        <FormBanner>Business settings saved successfully</FormBanner>
-      )}
       {errors.form && <FormBanner tone="danger">{errors.form}</FormBanner>}
 
       <section aria-labelledby="basic-heading">

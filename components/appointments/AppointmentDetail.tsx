@@ -10,6 +10,7 @@ import {
   badgeTone,
   cardClassName,
   cardLabelHeadingClass,
+  useToast,
 } from "@/components/ui";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import CancelButton from "./CancelButton";
@@ -49,6 +50,7 @@ export default function AppointmentDetail({
 }: AppointmentDetailProps) {
   const displayStatus = appointment.displayStatus;
   const isCompleted = displayStatus === "completed";
+  const toast = useToast();
   const [confirming, setConfirming] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -58,6 +60,7 @@ export default function AppointmentDetail({
     setActionError(null);
     try {
       await confirmAppointment(appointment.id);
+      toast.success("Appointment confirmed.");
     } catch (error) {
       logClientError("action:confirmAppointment", error);
       setActionError(GENERIC_FORM_ERROR);

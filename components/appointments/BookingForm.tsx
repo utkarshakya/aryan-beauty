@@ -8,7 +8,7 @@ import {
   type BookingState,
   type TimeSlot,
 } from "@/app/actions/appointments";
-import { Button, ButtonLink, Field, Input, Select, cardClassName } from "@/components/ui";
+import { Button, ButtonLink, Field, FormBanner, Input, Select, cardClassName } from "@/components/ui";
 import { logClientError } from "@/lib/errors";
 
 const initialState: BookingState = { errors: {} };
@@ -206,31 +206,12 @@ export default function BookingForm({
       className={`space-y-4 sm:space-y-5 ${cardClassName("p-4 sm:p-8")}`}
     >
       {errors.form && errors.form !== dismissedError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-control bg-danger-soft px-3 py-2.5 text-xs text-danger sm:px-4 sm:py-3 sm:text-sm"
+        <FormBanner
+          tone="danger"
+          onDismiss={() => setDismissedError(errors.form ?? null)}
         >
-          <span>{errors.form}</span>
-          <button
-            type="button"
-            onClick={() => setDismissedError(errors.form ?? null)}
-            className="-my-2 flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full font-bold leading-none transition-colors hover:bg-danger/10 focus-ring"
-            aria-label="Dismiss error"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              className="h-4 w-4"
-              aria-hidden="true"
-            >
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+          {errors.form}
+        </FormBanner>
       )}
 
       <Field

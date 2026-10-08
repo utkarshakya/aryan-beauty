@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
 import { inviteStaffAction } from "@/app/actions/users";
-import { Button, Field, FormBanner, Input } from "@/components/ui";
+import { Button, Field, Input, useToast } from "@/components/ui";
 
 const initialState: { errors?: Record<string, string>; success?: string } = {};
 
@@ -11,6 +11,13 @@ export default function StaffInviteForm() {
     inviteStaffAction,
     initialState
   );
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.success);
+    }
+  }, [state, toast]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -35,8 +42,6 @@ export default function StaffInviteForm() {
           {pending ? "Sending…" : "Send invitation"}
         </Button>
       </div>
-
-      {state.success && <FormBanner>{state.success}</FormBanner>}
     </form>
   );
 }
