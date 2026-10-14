@@ -1,5 +1,6 @@
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import AdminTabBar from "@/components/admin/AdminTabBar";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default function AdminLayout({
   return (
     <>
       <Navbar />
+      <AdminTabBar />
       <main className="flex-1">{children}</main>
       <Footer />
     </>

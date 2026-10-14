@@ -252,7 +252,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                         type="time"
                         value={hours.open}
                         onChange={(e) => updateOpeningHour(day.key, "open", e.target.value)}
-                        style={{ width: "100px" }}
+                        className="w-full sm:w-[100px]"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -262,7 +262,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                         type="time"
                         value={hours.close}
                         onChange={(e) => updateOpeningHour(day.key, "close", e.target.value)}
-                        style={{ width: "100px" }}
+                        className="w-full sm:w-[100px]"
                       />
                     </div>
                   </>
@@ -286,14 +286,16 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
             value={closureDate}
             onChange={(e) => setClosureDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
-            style={{ width: "180px" }}
+            className="w-full sm:w-[180px]"
           />
           <Input
             type="text"
             value={closureReason}
             onChange={(e) => setClosureReason(e.target.value)}
             placeholder="Reason (e.g., Diwali, Annual leave)"
-            style={{ flex: "1", minWidth: "200px" }}
+            // min-w-0 is what actually lets this shrink; a flex item's
+            // min-width is a hard floor, so the 200px default overflowed.
+            className="min-w-0 flex-1 sm:min-w-[200px]"
           />
           <Button type="button" variant="secondary" onClick={addClosure} disabled={!closureDate || !closureReason.trim()}>
             Add

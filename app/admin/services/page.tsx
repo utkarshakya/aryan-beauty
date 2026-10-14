@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getServicesAction } from "@/app/actions/services";
 import { EmptyState, PageHeader, SectionHeading, cardClassName } from "@/components/ui";
+import Container from "@/components/ui/Container";
 import ServiceEditor from "@/components/services/ServiceEditor";
 import ServiceForm from "@/components/services/ServiceForm";
 
@@ -17,10 +18,8 @@ export default async function ManageServicesPage() {
   const services = await getServicesAction();
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
+    <Container className="py-4 sm:py-8">
       <PageHeader
-        backHref="/admin"
-        backLabel="Back to dashboard"
         title="Manage services"
         subtitle="Keep your public service menu and prices up to date."
       />
@@ -48,6 +47,6 @@ export default async function ManageServicesPage() {
           <ServiceForm />
         </section>
       </div>
-    </div>
+    </Container>
   );
 }

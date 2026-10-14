@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireOwnerAdmin } from "@/lib/auth";
 import { getStaffUsersAction } from "@/app/actions/users";
 import { PageHeader, SectionHeading, cardClassName } from "@/components/ui";
+import Container from "@/components/ui/Container";
 import StaffInviteForm from "@/components/staff/StaffInviteForm";
 import StaffTable from "@/components/staff/StaffTable";
 
@@ -17,10 +18,8 @@ export default async function ManageStaffPage() {
   const users = await getStaffUsersAction();
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
+    <Container className="py-4 sm:py-8">
       <PageHeader
-        backHref="/admin"
-        backLabel="Back to dashboard"
         title="Manage staff"
         subtitle="Invite workers and decide who can use the parlour workspace."
       />
@@ -43,6 +42,6 @@ export default async function ManageStaffPage() {
           <StaffInviteForm />
         </section>
       </div>
-    </div>
+    </Container>
   );
 }

@@ -12,6 +12,7 @@ import {
   cardLabelHeadingClass,
   useToast,
 } from "@/components/ui";
+import Container from "@/components/ui/Container";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
 import CancelButton from "./CancelButton";
 import RestoreButton from "./RestoreButton";
@@ -70,7 +71,7 @@ export default function AppointmentDetail({
   };
 
   return (
-    <div className="container mx-auto max-w-4xl px-3 py-4 sm:px-6 sm:py-8">
+    <Container size="wide" className="py-4 sm:py-8">
       <PageHeader
         backHref="/admin"
         backLabel="Back to dashboard"
@@ -229,6 +230,6 @@ export default function AppointmentDetail({
             <RestoreButton appointmentId={appointment.id} />
           </div>
         )}
-    </div>
+    </Container>
   );
 }

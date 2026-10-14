@@ -1,6 +1,6 @@
 # Mobile-first UI, UX, loading and error handling
 
-Status: Phase 3 complete (3a + 3b, DoD passed; manual verification pending). Next: Phase 4.
+Status: Phase 4 complete (DoD passed; manual verification pending). Next: Phase 5.
 Scope: whole app (public site, booking flow, admin), phased so each phase ships independently.
 Decisions (locked): everything in one phased plan; restructure = multi-step booking wizard + admin sticky tab bar + dashboard reworked in place; custom lightweight toast (no new deps); ConfirmDialog = native `<dialog>` + `showModal()`; visual polish = token-driven pass with explicit DoD checklist; one dev-only a11y dep allowed in Phase 6; verify with Lighthouse mobile ≥90 plus a manual viewport checklist.
 
@@ -98,15 +98,21 @@ Split for reviewability: **3a** restructure with behavior unchanged, **3b** new 
 - **Test finding:** the first `sanitizeReturnTo` test run caught `/%2fevil.example.com` passing validation — a percent-encoded slash in the first segment decodes to a protocol-relative URL once anything normalises it. Fixed and covered. 24 tests in `tests/auth/redirect.test.ts`.
 - **Phase 3b DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (88 tests) `build` ✓. Manual checks still owed on cards/chips/sticky bar and a real sign-in redirect.
 
-## Phase 4 — Admin: sticky tab bar + dashboard rework in place
+## Phase 4 — Admin: sticky tab bar + dashboard rework in place — DONE
 
-- [ ] New `AdminTabBar` rendered from `app/admin/layout.tsx`: sticky under header (`top-14 sm:top-16`), horizontally scrollable row (Appointments / Services / Staff / Settings), active state via `usePathname` + `aria-current="page"`; at 320px: scroll, never wrap; scroll affordance (edge fade or hidden scrollbar with padding); ≥44px px-based targets.
-- [ ] Remove the 3 duplicated nav `ButtonLink`s from every admin PageHeader (app/admin/page.tsx:142-154 and equivalents); keep page-specific actions (e.g. "New service").
-- [ ] Dashboard rework in place (app/admin/page.tsx): search/date/status filters collapse into an accessible "Filters" disclosure on mobile (button + `aria-expanded`/`aria-controls`); summary cards keep 2×2; existing card-view (`md:hidden`, AdminAppointmentsList.tsx:167) / table (`md:block`, :272) swap stays; density/spacing pass.
-- [ ] `ServiceForm.tsx:73` `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`.
-- [ ] `BusinessSettingsForm` fixed px widths (100px/180px/200px) → responsive classes.
-- [ ] `StaffTable.tsx:94` control cluster: allow wrapping at narrow widths.
-- [ ] Unify admin hand-rolled containers (`container mx-auto max-w-6xl px-3 sm:px-6`) onto shared `Container`.
+- [x] New `AdminTabBar` (`components/admin/AdminTabBar.tsx`) rendered from `app/admin/layout.tsx`: sticky under header (`top-14 sm:top-16` — both rem, so they track the reduced mobile root font exactly like `h-14`/`h-16`), horizontally scrollable row (Appointments / Services / Staff / Settings), active state via `usePathname` + `aria-current="page"`; at 320px: scroll, never wrap; hidden scrollbar with `px-1 py-1.5` so `overflow` cannot clip the 2px focus ring + 2px offset; ≥44px targets.
+  - **Not** a plain prefix match: `startsWith("/admin")` would light the Appointments tab on every admin page, so that tab claims `/admin` and `/admin/appointments/*` explicitly. `isActivePath` was therefore *not* extracted from `NavbarClient.tsx` (it is wrong for this case).
+  - `z-30` sits below the header's `z-40`, so an expanded mobile menu correctly covers the bar.
+- [x] Remove the 3 duplicated nav `ButtonLink`s from the dashboard `PageHeader` (`app/admin/page.tsx:145-157` — the only site; the other admin pages used `backHref`, not nav buttons). Also dropped `backHref`/`backLabel` from services/staff/settings, which the tab bar now covers. `/admin/appointments/[id]` keeps its back link — it is a detail view below the dashboard, not a sibling section.
+- [x] Dashboard filters collapse into an accessible "Filters" disclosure on mobile (`components/admin/AdminFilters.tsx`, button + `aria-expanded`/`aria-controls`, with a count of non-default filters so a hidden-but-active filter is visible). Always open from 640px up. Summary cards keep 2×2; card-view (`md:hidden`) / table (`md:block`) swap untouched.
+  - **Caught in the compiled CSS before shipping:** the first version used `hidden={!open}` + `sm:block`, but Tailwind v4 preflight emits `[hidden]:where(:not([hidden=until-found])){display:none!important}` — `!important` beats any `sm:block`, so filters would have been *unreachable on every screen ≥640px* (the toggle is `sm:hidden`). Rewritten to `open ? "block" : "max-sm:hidden"` — mutually exclusive classes, no reliance on stylesheet order.
+  - **Status pill nav lifted out of `AdminAppointmentsList` into `app/admin/page.tsx`** — it is pure links derived from URL params, so it renders fine server-side, and living in the client component is what made it impossible to group with the search/date filters under one disclosure. All filter values stay URL-driven; the disclosure owns only open state.
+- [x] `ServiceForm.tsx:91` `grid-cols-2` → `grid-cols-1 sm:grid-cols-2` (plan's `:73` had drifted).
+- [x] `BusinessSettingsForm` fixed px widths → responsive classes. `:296`'s `minWidth: "200px"` was the real overflow — a flex item's `min-width` is a hard floor, so it needs `min-w-0` to shrink at all; the row needed 380px in a 264px box.
+- [x] `StaffTable` control cluster (plan's `:94`, actually `:133`): wraps at narrow widths, and the `Select` gets `w-full sm:w-32`. Root cause across the repo is `controls.tsx:8` baking `w-full` into every control. Same bug fixed in `AdminAppointmentsList`'s table action cluster (`:358`) — not in the plan, found during the audit.
+- [x] Unify all 5 admin hand-rolled containers (`container mx-auto max-w-6xl px-3 sm:px-6`) onto shared `Container`; added `size="wide"` (`max-w-4xl`) for settings + appointment detail. Decision: adopt `Container`'s existing `sm:px-4`, which tightens admin's tablet+ gutter from 24px to 16px. Phase 5 settles the final rhythm.
+
+**Phase 4 DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (90 tests) `build` ✓. Manual checks owed: tab bar scroll + active states at 320px across all five admin routes, and the Filters disclosure on mobile.
 
 ## Phase 5 — Public-site visual polish (token-driven, explicit DoD)
 

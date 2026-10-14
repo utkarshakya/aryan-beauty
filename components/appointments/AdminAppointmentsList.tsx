@@ -9,7 +9,6 @@ import {
   FormBanner,
   badgeTone,
   cardClassName,
-  filterPillClasses,
   useToast,
 } from "@/components/ui";
 import { GENERIC_FORM_ERROR, logClientError } from "@/lib/errors";
@@ -48,17 +47,6 @@ type AppointmentsListProps = {
   showScope?: boolean;
   emptyMessage?: string;
 };
-
-const statusTabs: {
-  value: "all" | "pending" | "confirmed" | "completed" | "cancelled";
-  label: string;
-}[] = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirmed" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
 
 export default function AdminAppointmentsList({
   appointments,
@@ -100,37 +88,10 @@ export default function AdminAppointmentsList({
     const qs = params.toString();
     return qs ? `/admin?${qs}` : "/admin";
   };
-  const hrefForTab = (value: string) => {
-    const params = new URLSearchParams();
-    params.set("status", value);
-    if (term) params.set("search", term);
-    if (dateFilter) params.set("date", dateFilter);
-    return `/admin?${params.toString()}`;
-  };
 
   return (
     <div className="space-y-5 rounded-card border border-border bg-muted-soft/40 p-3 sm:space-y-6 sm:p-5">
       {actionError && <FormBanner tone="danger">{actionError}</FormBanner>}
-      <nav
-        className="flex flex-wrap gap-2 border-b border-border pb-3 sm:gap-3 sm:pb-4"
-        aria-label="Appointment status filters"
-      >
-        {statusTabs.map((tab) => {
-          const active =
-            currentStatus === tab.value ||
-            (currentStatus === "default" && tab.value === "pending");
-          return (
-            <Link
-              key={tab.value}
-              href={hrefForTab(tab.value)}
-              aria-current={active ? "page" : undefined}
-              className={filterPillClasses(active)}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
-      </nav>
 
       {appointments.length === 0 ? (
         term ? (
@@ -355,7 +316,7 @@ export default function AdminAppointmentsList({
                       </Badge>
                     </td>
                     <td className="px-3 py-4 text-right">
-                      <div className="flex items-center justify-end gap-3">
+                      <div className="flex flex-wrap items-center justify-end gap-3">
                         {!isCompleted && displayStatus === "pending" && (
                           <form action={() => handleConfirm(appointment.id)}>
                             <ActionButton

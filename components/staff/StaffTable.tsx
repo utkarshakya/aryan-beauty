@@ -117,7 +117,7 @@ export default function StaffTable({
                 key={user.clerkUserId}
                 className="flex flex-wrap items-center gap-3 rounded-card border border-border bg-background p-4"
               >
-                <div className="min-w-[200px] flex-1">
+                <div className="min-w-0 flex-1 sm:min-w-[200px]">
                   <p className="font-medium text-foreground">
                     {user.name ?? "Unnamed account"}
                     {isSelf && <span className="ml-2 text-xs text-muted">(you)</span>}
@@ -130,7 +130,7 @@ export default function StaffTable({
 
                 <AuthStatusBadge role={user.role} status={user.status} size="sm" />
 
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   {isProtected ? (
                     <span className="text-sm text-muted">Managed outside the app</span>
                   ) : isSelf ? (
@@ -145,7 +145,9 @@ export default function StaffTable({
                         value={user.role === "admin" ? "admin" : user.role}
                         disabled={busy === user.clerkUserId || user.role === "admin"}
                         onChange={(e) => handleRoleChange(user, e.target.value as UserRole)}
-                        className="disabled:opacity-60"
+                        // Controls ship with w-full, which would otherwise force
+                        // the button out of the row at narrow widths.
+                        className="w-full disabled:opacity-60 sm:w-32"
                       >
                         {user.role === "admin" ? (
                           <option value="admin">Admin</option>

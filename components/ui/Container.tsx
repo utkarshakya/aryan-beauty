@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 const widthClasses = {
   default: "max-w-6xl",
+  wide: "max-w-4xl",
   narrow: "max-w-xl",
 } as const;
 

@@ -3,14 +3,16 @@ import Link from "next/link";
 import type { AppointmentStatus } from "@prisma/client";
 import {
   Button,
-  ButtonLink,
   Input,
   PageHeader,
   SummaryCard,
   cardClassName,
   filterPillClasses,
+  filterSegmentClasses,
 } from "@/components/ui";
+import Container from "@/components/ui/Container";
 import AdminAppointmentsList from "@/components/appointments/AdminAppointmentsList";
+import AdminFilters from "@/components/admin/AdminFilters";
 import {
   getAdminAppointments,
   getAdminAppointmentCounts,
@@ -34,6 +36,14 @@ const STATUS_FILTER_MAP: Record<StatusFilter, AppointmentStatus[] | undefined> =
     cancelled: ["cancelled"],
     completed: undefined,
   };
+
+const STATUS_TABS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+];
 
 const startOfToday = () => {
   const d = new Date();
@@ -114,6 +124,17 @@ export default async function AdminPage({
     const qs = p.toString();
     return qs ? `/admin?${qs}` : "/admin";
   };
+  const statusHref = (value: StatusFilter) => {
+    const p = new URLSearchParams();
+    p.set("status", value);
+    if (searchParam) p.set("search", searchParam);
+    if (dateFilter) p.set("date", dateFilter);
+    return `/admin?${p.toString()}`;
+  };
+  const activeFilterCount =
+    (hasExplicitStatus ? 1 : 0) +
+    (dateMode === "today" ? 0 : 1) +
+    (searchParam ? 1 : 0);
 
   const [
     appointments,
@@ -137,24 +158,11 @@ export default async function AdminPage({
   ]);
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 py-5 sm:px-6 sm:py-8">
+    <Container className="py-4 sm:py-8">
       <PageHeader
         eyebrow="Admin"
         title="Today's workspace"
         subtitle="A quick view of the parlour and its appointments."
-        actions={
-          <>
-            <ButtonLink href="/admin/services" variant="primary">
-              Manage services
-            </ButtonLink>
-            <ButtonLink href="/admin/settings" variant="outline">
-              Business settings
-            </ButtonLink>
-            <ButtonLink href="/admin/staff" variant="outline">
-              Manage staff
-            </ButtonLink>
-          </>
-        }
       />
       <section
         className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-4 sm:gap-4"
@@ -229,92 +237,128 @@ export default async function AdminPage({
       <h2 className="mb-5 mt-8 text-xl font-bold text-foreground sm:mt-10 sm:text-2xl">
         Appointments
       </h2>
-      <form
-        action="/admin"
-        method="GET"
-        className="mb-4 flex flex-wrap items-end gap-3"
-      >
-        <div className="min-w-56 flex-1 sm:max-w-md">
-          <label
-            htmlFor="appointment-search"
-            className="mb-1 block text-sm font-medium text-foreground"
+
+      <AdminFilters activeCount={activeFilterCount}>
+        <div className="space-y-3 sm:space-y-4">
+          <nav
+            className="flex flex-wrap gap-2"
+            aria-label="Appointment status filters"
           >
-            Search
-          </label>
-          <Input
-            id="appointment-search"
-            name="search"
-            defaultValue={searchParam}
-            placeholder="Customer name or phone"
-            autoComplete="off"
-          />
-        </div>
-        {hasExplicitStatus ? (
-          <input type="hidden" name="status" value={statusParam} />
-        ) : null}
-        {dateFilter && <input type="hidden" name="date" value={dateFilter} />}
-        <Button type="submit">Search</Button>
-      </form>
-      <div className="mb-4 flex flex-wrap items-end gap-2">
-        <Link
-          href={makeAdminHref()}
-          aria-current={dateMode === "today" ? "page" : undefined}
-          className={filterPillClasses(dateMode === "today")}
-        >
-          Today
-        </Link>
-        <Link
-          href={makeAdminHref("all")}
-          aria-current={dateMode === "all" ? "page" : undefined}
-          className={filterPillClasses(dateMode === "all")}
-        >
-          All dates
-        </Link>
-        <form
-          action="/admin"
-          method="GET"
-          className="flex items-end gap-2"
-        >
-          <div>
-            <label
-              htmlFor="appointment-date"
-              className="mb-1 block text-sm font-medium text-foreground"
+            {STATUS_TABS.map((tab) => {
+              const active =
+                statusParam === tab.value ||
+                (!hasExplicitStatus && tab.value === "pending");
+              return (
+                <Link
+                  key={tab.value}
+                  href={statusHref(tab.value)}
+                  aria-current={active ? "page" : undefined}
+                  className={filterPillClasses(active)}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <form
+            action="/admin"
+            method="GET"
+            className="flex flex-wrap items-end gap-3"
+          >
+            <div className="w-full min-w-0 flex-1 sm:max-w-md">
+              <label
+                htmlFor="appointment-search"
+                className="mb-1 block text-sm font-medium text-foreground"
+              >
+                Search
+              </label>
+              <Input
+                id="appointment-search"
+                name="search"
+                defaultValue={searchParam}
+                placeholder="Customer name or phone"
+                autoComplete="off"
+              />
+            </div>
+            {hasExplicitStatus ? (
+              <input type="hidden" name="status" value={statusParam} />
+            ) : null}
+            {dateFilter && <input type="hidden" name="date" value={dateFilter} />}
+            <Button type="submit">Search</Button>
+          </form>
+
+          <div className="space-y-2">
+            <div className="flex overflow-hidden rounded-control border border-border">
+              <Link
+                href={makeAdminHref()}
+                aria-current={dateMode === "today" ? "page" : undefined}
+                className={filterSegmentClasses(dateMode === "today")}
+              >
+                Today
+              </Link>
+              <Link
+                href={makeAdminHref("all")}
+                aria-current={dateMode === "all" ? "page" : undefined}
+                className={`border-l border-border ${filterSegmentClasses(dateMode === "all")}`}
+              >
+                All dates
+              </Link>
+            </div>
+
+            <form
+              action="/admin"
+              method="GET"
+              className="flex items-end gap-2"
             >
-              Date
-            </label>
-          <Input
-            id="appointment-date"
-            name="date"
-            type="date"
-            autoComplete="off"
-            defaultValue={dateFilter && dateFilter !== "all" ? dateFilter : todayInputValue}
-            className="sm:w-auto"
-          />
+              <div className="min-w-0 flex-1 sm:w-44 sm:flex-none">
+                <label
+                  htmlFor="appointment-date"
+                  className="mb-1 block text-sm font-medium text-foreground"
+                >
+                  Date
+                </label>
+                <Input
+                  id="appointment-date"
+                  name="date"
+                  type="date"
+                  autoComplete="off"
+                  defaultValue={
+                    dateFilter && dateFilter !== "all"
+                      ? dateFilter
+                      : todayInputValue
+                  }
+                />
+              </div>
+              {hasExplicitStatus && (
+                <input type="hidden" name="status" value={statusParam} />
+              )}
+              {searchParam && (
+                <input type="hidden" name="search" value={searchParam} />
+              )}
+              <Button type="submit" variant="outline">
+                View date
+              </Button>
+            </form>
           </div>
-          {hasExplicitStatus && (
-            <input type="hidden" name="status" value={statusParam} />
-          )}
-          {searchParam && (
-            <input type="hidden" name="search" value={searchParam} />
-          )}
-          <Button type="submit" variant="outline">
-            View date
-          </Button>
-        </form>
+        </div>
+      </AdminFilters>
+
+      <div className="mt-4">
+        <AdminAppointmentsList
+          appointments={appointments}
+          currentStatus={statusParam}
+          searchTerm={searchParam}
+          dateFilter={dateFilter}
+          scopeLabel={scopeLabel}
+          showScope={dateMode !== "today"}
+          emptyMessage={
+            statusParam === "all"
+              ? `No appointments ${scopeLabel}.`
+              : `No ${statusText.toLowerCase()} appointments ${scopeLabel}.`
+          }
+        />
       </div>
-      <AdminAppointmentsList
-        appointments={appointments}
-        currentStatus={statusParam}
-        searchTerm={searchParam}
-        dateFilter={dateFilter}
-        scopeLabel={scopeLabel}
-        showScope={dateMode !== "today"}
-        emptyMessage={
-          statusParam === "all"
-            ? `No appointments ${scopeLabel}.`
-            : `No ${statusText.toLowerCase()} appointments ${scopeLabel}.`
-        }
-      />
-    </div>
+    </Container>
   );
 }
