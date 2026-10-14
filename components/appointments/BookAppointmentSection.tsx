@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Service } from "@prisma/client";
 import { Button, cardClassName } from "@/components/ui";
-import BookingForm from "./BookingForm";
+import BookingWizard from "./BookingWizard";
 
 export default function BookAppointmentSection({
   services,
@@ -12,6 +12,7 @@ export default function BookAppointmentSection({
   phoneHref,
   hoursDays,
   hoursTime,
+  timeZone,
 }: {
   services: Service[];
   preselectedServiceId?: number;
@@ -19,20 +20,26 @@ export default function BookAppointmentSection({
   phoneHref: string;
   hoursDays: string;
   hoursTime: string;
+  timeZone: string;
 }) {
   const [open, setOpen] = useState(Boolean(preselectedServiceId));
   const formRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (open) formRef.current?.scrollIntoView({ block: "nearest" });
+  }, [open]);
+
   if (open) {
     return (
       <div ref={formRef}>
-        <BookingForm
+        <BookingWizard
           services={services}
           preselectedServiceId={preselectedServiceId}
           phoneDisplay={phoneDisplay}
           phoneHref={phoneHref}
           hoursDays={hoursDays}
           hoursTime={hoursTime}
+          timeZone={timeZone}
         />
       </div>
     );

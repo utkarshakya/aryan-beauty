@@ -2,6 +2,7 @@ export * from "./ActionButton";
 export * from "./Badge";
 export * from "./Button";
 export * from "./Card";
+export * from "./ChoiceCard";
 export * from "./Container";
 export * from "./Dialog";
 export * from "./EmptyState";

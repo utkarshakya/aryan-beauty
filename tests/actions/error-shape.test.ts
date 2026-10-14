@@ -32,6 +32,7 @@ vi.mock("@/lib/db/services", () => dbServicesMock);
 
 const dbBusinessMock = vi.hoisted(() => ({
   getBusinessSettingsOrCreate: vi.fn(),
+  getBusinessSettingsForAvailability: vi.fn(),
   updateBusinessSettings: vi.fn(),
 }));
 vi.mock("@/lib/db/business", () => dbBusinessMock);
@@ -71,6 +72,7 @@ import {
 } from "@/app/actions/customers";
 import {
   adminCancelAppointment,
+  createAppointment,
   restoreAppointmentAction,
   confirmAppointment,
 } from "@/app/actions/appointments";
@@ -130,6 +132,50 @@ async function seedCustomerRow(clerkUserId = "u-customer") {
     data: { userId: user.id, name: "Alice" },
   });
   return { user, customer };
+}
+
+function futureIso(days: number) {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+const BOOKING_START = futureIso(3);
+
+function bookingFormData(overrides: Record<string, string> = {}) {
+  const formData = new FormData();
+  formData.set("serviceId", "1");
+  formData.set("phone", "");
+  formData.set("startTime", BOOKING_START);
+  for (const [key, value] of Object.entries(overrides)) {
+    formData.set(key, value);
+  }
+  return formData;
+}
+
+async function seedBookableService(active = true) {
+  return prisma.service.create({
+    data: {
+      name: "Haircut",
+      price: 500,
+      durationMin: 30,
+      category: "Hair",
+      active,
+    },
+  });
+}
+
+/** Pin availability so the action's re-validation of `startTime` passes. */
+function stubAvailability(value = BOOKING_START) {
+  dbBusinessMock.getBusinessSettingsForAvailability.mockResolvedValue({
+    timeZone: "Asia/Kolkata",
+  });
+  dbAppointmentsMock.getAvailableSlots.mockResolvedValue([
+    { value, label: "10:00 AM" },
+  ]);
+  dbAppointmentsMock.createAppointmentTx.mockResolvedValue(undefined);
+}
+
+function errorsOf(result: unknown): Record<string, string> {
+  return (result as { errors?: Record<string, string> }).errors ?? {};
 }
 
 describe("server-action error shape: services", () => {
@@ -307,6 +353,137 @@ describe("server-action error shape: appointment mutations", () => {
     await expect(confirmAppointment(1)).rejects.toThrow(SENTINEL);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "[server:confirmAppointment]",
+      expect.any(Error),
+    );
+  });
+});
+
+describe("server-action error shape: createAppointment", () => {
+  it("returns { success } on the happy path", async () => {
+    const service = await seedBookableService();
+    await seedCustomerRow();
+    stubAvailability();
+
+    const result = await createAppointment(
+      { errors: {} },
+      bookingFormData({ serviceId: String(service.id), phone: "9876543210" }),
+    );
+
+    expect(result).toEqual({
+      success: {
+        serviceName: "Haircut",
+        startTime: BOOKING_START,
+        name: "Customer",
+        phone: "9876543210",
+      },
+    });
+    expect(dbAppointmentsMock.createAppointmentTx).toHaveBeenCalledOnce();
+  });
+
+  it("treats __reset as a no-op that never touches the db", async () => {
+    const formData = new FormData();
+    formData.set("__reset", "1");
+
+    const result = await createAppointment({ errors: {} }, formData);
+
+    expect(result).toEqual({ errors: {} });
+    expect(dbAppointmentsMock.getAvailableSlots).not.toHaveBeenCalled();
+    expect(dbAppointmentsMock.createAppointmentTx).not.toHaveBeenCalled();
+  });
+
+  const rejections: Array<[string, Record<string, string>, string]> = [
+    ["an invalid phone", { phone: "12345" }, "phone"],
+    ["a missing service", { serviceId: "" }, "serviceId"],
+    ["a missing start time", { startTime: "" }, "startTime"],
+    ["an unparsable start time", { startTime: "not-a-date" }, "startTime"],
+    ["a start time in the past", { startTime: futureIso(-1) }, "startTime"],
+  ];
+
+  it.each(rejections)(
+    "rejects %s without touching the db",
+    async (_label, overrides, field) => {
+      const result = await createAppointment(
+        { errors: {} },
+        bookingFormData(overrides),
+      );
+
+      expect(errorsOf(result)[field]).toBeTruthy();
+      expect(errorsOf(result).form).toBeUndefined();
+      expect(dbAppointmentsMock.createAppointmentTx).not.toHaveBeenCalled();
+    },
+  );
+
+  it("reports the slot as gone when availability no longer lists it", async () => {
+    const service = await seedBookableService();
+    await seedCustomerRow();
+    stubAvailability("2099-01-01T00:00:00.000Z");
+
+    const result = await createAppointment(
+      { errors: {} },
+      bookingFormData({ serviceId: String(service.id) }),
+    );
+
+    expect(errorsOf(result).startTime).toContain("no longer available");
+    expect(errorsOf(result).form).toBeUndefined();
+    expect(dbAppointmentsMock.createAppointmentTx).not.toHaveBeenCalled();
+  });
+
+  it("reports the domain message when the slot was taken", async () => {
+    const service = await seedBookableService();
+    const { customer } = await seedCustomerRow();
+    await prisma.appointment.create({
+      data: {
+        customerId: customer.id,
+        serviceId: service.id,
+        serviceName: service.name,
+        servicePrice: service.price,
+        serviceDurationMin: service.durationMin,
+        startTime: new Date(BOOKING_START),
+        endTime: new Date(new Date(BOOKING_START).getTime() + 30 * 60_000),
+        status: "confirmed",
+      },
+    });
+    stubAvailability();
+
+    const result = await createAppointment(
+      { errors: {} },
+      bookingFormData({ serviceId: String(service.id) }),
+    );
+
+    expect(errorsOf(result).startTime).toContain("already booked");
+    expect(errorsOf(result).form).toBeUndefined();
+    expect(dbAppointmentsMock.createAppointmentTx).not.toHaveBeenCalled();
+  });
+
+  it("reports the domain message for a deactivated service", async () => {
+    const service = await seedBookableService(false);
+    await seedCustomerRow();
+    stubAvailability();
+
+    const result = await createAppointment(
+      { errors: {} },
+      bookingFormData({ serviceId: String(service.id) }),
+    );
+
+    expect(errorsOf(result).serviceId).toContain("no longer available");
+    expect(errorsOf(result).form).toBeUndefined();
+    expect(dbAppointmentsMock.createAppointmentTx).not.toHaveBeenCalled();
+  });
+
+  it("returns the generic form error when the write fails", async () => {
+    const service = await seedBookableService();
+    await seedCustomerRow();
+    stubAvailability();
+    dbAppointmentsMock.createAppointmentTx.mockRejectedValue(dbFailure());
+
+    const result = await createAppointment(
+      { errors: {} },
+      bookingFormData({ serviceId: String(service.id) }),
+    );
+
+    expectGenericFormError(result);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "[server:createAppointment]",
       expect.any(Error),
     );
   });

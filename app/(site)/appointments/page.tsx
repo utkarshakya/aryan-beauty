@@ -47,7 +47,7 @@ export default async function AppointmentsPage({
   searchParams: Promise<{ serviceId?: string }>;
 }) {
   const { serviceId } = await searchParams;
-  const preselectedServiceId = serviceId ? Number(serviceId) : undefined;
+  const requestedServiceId = Number(serviceId);
   const userId = await requireActiveUser();
 
   const appUser = await prisma.user.findUnique({
@@ -70,6 +70,16 @@ export default async function AppointmentsPage({
   ]);
 
   const now = new Date();
+
+  // Only honour a `?serviceId=` that names an active service. Number("abc") is
+  // NaN, which is truthy — without this the wizard would open on a service that
+  // does not exist.
+  const preselectedServiceId = services.some(
+    (service) => service.id === requestedServiceId,
+  )
+    ? requestedServiceId
+    : undefined;
+
   const upcoming =
     customer?.appointments.filter(
       (a) => a && a.startTime && new Date(a.startTime) >= now && a.status !== "cancelled",
@@ -103,6 +113,7 @@ export default async function AppointmentsPage({
               phoneHref={business.phoneHref}
               hoursDays={formatHoursDays(business.closedWeekdays)}
               hoursTime={formatHoursTime(business.openingHours)}
+              timeZone={business.timeZone}
             />
           )}
         </section>

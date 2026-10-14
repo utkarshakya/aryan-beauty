@@ -21,7 +21,6 @@ import {
 
 // ─── Re-exports ─────────────────────────────────────────────────────────────
 
-export { getAvailableSlots };
 export type {
   BookingState,
   CancellationState,

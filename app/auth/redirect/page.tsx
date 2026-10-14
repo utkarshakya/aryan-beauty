@@ -1,9 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { hasAdminAccess, getOrCreateUser } from "@/lib/auth";
+import { DEFAULT_RETURN_PATH, sanitizeReturnTo } from "@/lib/auth/redirect";
 
-export default async function AuthRedirectPage() {
-  const { userId } = await auth();
+export default async function AuthRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
+  const [{ returnTo }, { userId }] = await Promise.all([searchParams, auth()]);
 
   if (userId) {
     // Sync name/email from Clerk so we don't depend on the webhook
@@ -14,5 +19,5 @@ export default async function AuthRedirectPage() {
     redirect("/admin");
   }
 
-  redirect("/appointments");
+  redirect(sanitizeReturnTo(returnTo) ?? DEFAULT_RETURN_PATH);
 }

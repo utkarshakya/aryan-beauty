@@ -1,6 +1,6 @@
 # Mobile-first UI, UX, loading and error handling
 
-Status: Phase 2 complete (DoD passed). Next: Phase 3.
+Status: Phase 3 complete (3a + 3b, DoD passed; manual verification pending). Next: Phase 4.
 Scope: whole app (public site, booking flow, admin), phased so each phase ships independently.
 Decisions (locked): everything in one phased plan; restructure = multi-step booking wizard + admin sticky tab bar + dashboard reworked in place; custom lightweight toast (no new deps); ConfirmDialog = native `<dialog>` + `showModal()`; visual polish = token-driven pass with explicit DoD checklist; one dev-only a11y dep allowed in Phase 6; verify with Lighthouse mobile ≥90 plus a manual viewport checklist.
 
@@ -77,16 +77,26 @@ Decisions (locked): everything in one phased plan; restructure = multi-step book
 
 Split for reviewability: **3a** restructure with behavior unchanged, **3b** new interaction. Server contract unchanged throughout: `createAppointment` + `useActionState`; final step submits the same FormData.
 
-**Phase 3a — Extract step shell (no behavior change)**
-- [ ] Split `components/appointments/BookingForm.tsx` (313 lines) into step components + a stepper/progress header shell; Back preserves state across steps; all existing fields/validation/success panel reachable exactly as today.
-- [ ] Success panel: `dl` rows stack on narrow screens (BookingForm.tsx:114-129 currently fights label vs long date string at 320–360px).
-- [ ] `BookAppointmentSection.tsx` becomes the expandable wizard shell.
+**Phase 3a — Extract step shell (no behavior change) — DONE**
+- [x] Split `components/appointments/BookingForm.tsx` (346 lines, not the 313 the first audit counted) into step components + a stepper/progress header shell; Back preserves state across steps; all existing fields/validation/success panel reachable exactly as today. Now: `BookingWizard.tsx` (shell — `useActionState`, all state, the single `<form>`, success branch) + `booking/{Stepper,StepService,StepSchedule,StepDetails,BookingSuccess}.tsx`.
+- [x] Success panel: `dl` rows stack on narrow screens (was `flex justify-between gap-4`, now `flex flex-col sm:flex-row sm:justify-between`; desktop unchanged).
+- [x] `BookAppointmentSection.tsx` becomes the expandable wizard shell; its dead `formRef` (attached, never read) is now wired to `scrollIntoView({ block: "nearest" })` on expand.
+- **Forced deviation — native `required` is gone.** Steps unmount when inactive, so a `required` control on step 1 validates nothing at step 3. Replaced with an explicit `canAdvance` gate on Continue plus a `STEP_FOR_ERROR` map that routes a returned `serviceId`/`startTime`/`phone` error back to its owning step. The server remains the backstop; behaviour for a customer who fills the form in order is identical.
+- **FormData contract unchanged:** a step's visible control carries no `name`; the shell mirrors `serviceId`/`startTime` as hidden inputs. `phone` keeps its real `name` (only autofillable field on the submit step). The date input's `name="date"` was never read server-side and is dropped.
+- **Also in 3a (from the audit):** `app/actions/appointments.ts:24` re-exported the raw `getAvailableSlots` DB function and the UI imported *that* instead of the guarded `getAvailableSlotsAction` — the slot fetch ran with no auth check and the guard was dead code. Raw re-export deleted, wizard now calls the guarded action. Noted so 3b doesn't re-litigate it.
+- **Deferred to 3b:** the date input's `min` is UTC-derived (`new Date().toISOString().split("T")[0]`), an off-by-one for IST. Fixing it needs the business `timeZone` threaded from the server page as a prop.
+- **Bugs found in manual verification (both fixed):** (1) entering step 3 auto-submitted — `Continue` and `Confirm` occupied the same slot in the nav row, so React patched Continue's DOM node's `type` from `"button"` to `"submit"` mid-click and the browser ran the activation behaviour; fixed with distinct `key`s. (2) "Book another appointment" threw *"An async function with useActionState was called outside of a transition"* — the `useActionState` dispatch was called straight from `onClick`; fixed with `startTransition`. **Lesson for 3b:** never let two buttons share a nav slot across differing `type`s, and always wrap a direct `formAction` dispatch in `startTransition`.
+- **Phase 3a DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (66 tests, +11 for `createAppointment` in `tests/actions/error-shape.test.ts`) `build` ✓. Note: `build` fails while `npm run dev` is running — the dev server writes `.next/dev/types/validator.ts` and the build's TS pass type-checks it. Stop the dev server first.
 
-**Phase 3b — New interaction**
-- [ ] Step 1 **Service**: tappable card list instead of `<Select>`; `?serviceId` preselects and skips to step 2.
-- [ ] Step 2 **Date & time**: date input, then available slots as a tappable chip grid (≥44px px-based targets); skeleton chips while loading; empty state ("no times available" → suggest another date) and error state with Retry.
-- [ ] Step 3 **Details & review**: phone field + sticky summary (service/price/date/time) + sticky bottom Back/Confirm bar with safe-area padding (z-index per Phase 2 stacking rule).
-- [ ] Preserve redirect across sign-in: generalize to full `path + query` (`returnTo` pattern) captured as Clerk's return target and forwarded in `app/auth/redirect/page.tsx`. **Prerequisite:** add the callback URL to Clerk's allowed-redirect-urls dashboard config; verify on a real sign-in.
+**Phase 3b — New interaction — DONE**
+- [x] Step 1 **Service**: tappable card list instead of `<Select>` (single column, name left / price+duration right); `?serviceId` preselects and skips to step 2.
+- [x] Step 2 **Date & time**: date input, then available slots as a tappable chip grid (`grid-cols-2 sm:grid-cols-3`, `min-h-[44px]` px-based targets); `SkeletonGroup` chips while loading; `EmptyState` ("No times available" → "Choose another date") and the existing error row with Retry.
+- [x] Step 3 **Details & review**: phone field + `BookingSummary` (service/price/date/time) + sticky bottom Back/Confirm bar with safe-area padding on **all three steps** (deviation from "step 3 only", so the primary action never moves). Bar sets `--toast-inset-bottom` via `ResizeObserver`.
+- [x] Shared picker primitive `components/ui/ChoiceCard.tsx` + new `focus-within-ring` utility: real `<input type="radio">` visually hidden inside its own `<label>`, selection/focus expressed on the card with `has-[:checked]:` + `focus-within-ring`. Native arrow-key navigation, no roving-tabindex code.
+- [x] Preserve redirect across sign-in: `lib/auth/redirect.ts` (`sanitizeReturnTo`, `authFallbackRedirectUrl`) + `/auth/redirect` honours `returnTo`; sign-in/sign-up forward Clerk's `redirect_url` then `returnTo`. **The Clerk-dashboard prerequisite turned out to be unnecessary** — the allow-list is only consulted for URLs handed to the Clerk components, and the final hop is a server-side `redirect()` to a locally-validated path. Verified by reading the flow, not by a live sign-in.
+- [x] Hardening: `?serviceId=abc` no longer auto-opens the wizard (`Number("abc")` is truthy `NaN`) — the id must now match an active service. Date `min` derives from the business `timeZone` instead of UTC (was an off-by-one for IST).
+- **Test finding:** the first `sanitizeReturnTo` test run caught `/%2fevil.example.com` passing validation — a percent-encoded slash in the first segment decodes to a protocol-relative URL once anything normalises it. Fixed and covered. 24 tests in `tests/auth/redirect.test.ts`.
+- **Phase 3b DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ (88 tests) `build` ✓. Manual checks still owed on cards/chips/sticky bar and a real sign-in redirect.
 
 ## Phase 4 — Admin: sticky tab bar + dashboard rework in place
 
@@ -129,5 +139,5 @@ Each item is a checkbox with a checkable criterion — no "pass"-style entries.
 
 - Phase order is ship-as-you-go: 0 → 1 → 2 are safe refactors; 3a → 3b and 4 are the restructures; 5 is polish. Run the standing-rules DoD after each.
 - No overlap with `docs/plans/schema-review-followups.md` (except the blocked Phase 5 price-render cleanup).
-- New primitives + tokens to document in `docs/architecture.md`: `Skeleton`, `Toast`, `Dialog`, `AdminTabBar`, motion tokens, toast z-index tiers; fix existing `prisma:studio` → `db:studio` drift while there.
+- New primitives + tokens to document in `docs/architecture.md`: `Skeleton`, `Toast`, `Dialog`, the multi-step-form pattern, `AdminTabBar`, motion tokens, toast z-index tiers; fix existing `prisma:studio` → `db:studio` drift while there.
 - No new runtime npm dependencies; one dev-only a11y dependency allowed in Phase 6.

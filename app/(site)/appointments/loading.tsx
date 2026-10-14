@@ -37,13 +37,15 @@ export default function Loading() {
           className="mt-3 rounded-card border border-border bg-background p-4 shadow-card sm:p-6"
           aria-hidden="true"
         >
-          <Skeleton className="h-11 w-full" rounded="control" />
-          <div className="mt-3 flex gap-3">
-            <Skeleton className="h-11 w-32" rounded="control" />
-            <Skeleton className="h-11 w-32" rounded="control" />
-            <Skeleton className="h-11 w-32" rounded="control" />
+          <Skeleton className="h-3 w-24" />
+          <div className="mt-2 flex gap-1.5">
+            <Skeleton className="h-1.5 flex-1" rounded="control" />
+            <Skeleton className="h-1.5 flex-1" rounded="control" />
+            <Skeleton className="h-1.5 flex-1" rounded="control" />
           </div>
-          <Skeleton className="mt-4 h-4 w-40" />
+          <Skeleton className="mt-3 h-3 w-32" />
+          <Skeleton className="mt-2 h-11 w-full" rounded="control" />
+          <Skeleton className="mt-4 h-11 w-full" rounded="control" />
         </div>
 
         <Skeleton className="mt-7 h-6 w-32 sm:mt-10" />

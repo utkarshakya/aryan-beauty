@@ -68,6 +68,15 @@
   }
 }
 
+/* For wrappers around a visually-hidden control (ChoiceCard): the ring lands
+   on the whole card instead of a 1px input. */
+@utility focus-within-ring {
+  &:has(:focus-visible) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
