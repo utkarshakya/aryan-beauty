@@ -109,8 +109,6 @@ export default async function AppointmentsPage({
             <BookAppointmentSection
               services={services}
               preselectedServiceId={preselectedServiceId}
-              phoneDisplay={business.phoneDisplay}
-              phoneHref={business.phoneHref}
               hoursDays={formatHoursDays(business.closedWeekdays)}
               hoursTime={formatHoursTime(business.openingHours)}
               timeZone={business.timeZone}

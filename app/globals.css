@@ -124,6 +124,20 @@
   }
 }
 
+@media (max-width: 359px) {
+  html {
+    font-size: 90%;
+  }
+
+  :root {
+    --text-display: clamp(1.75rem, 8vw, 2.25rem);
+    --text-title: 1.35rem;
+    --text-section: 1.65rem;
+    --text-stat: 1.65rem;
+    --spacing-section: 2.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

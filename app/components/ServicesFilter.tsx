@@ -67,6 +67,7 @@ export default function ServicesFilter({
             {filteredServices.length === 1 ? "service" : "services"}
           </p>
 
+          <h2 className="sr-only">Available services</h2>
           <div className={serviceGridClasses}>
             {filteredServices.map((service) => (
               <ServiceCard key={service.id} service={service} />
