@@ -1,8 +1,8 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 const sizeClasses = {
-  md: "text-lg font-semibold text-foreground sm:text-xl",
-  lg: "text-xl font-bold tracking-tight sm:text-3xl",
+  md: "text-title font-semibold text-foreground",
+  lg: "text-section font-bold tracking-tight",
 } as const;
 
 const gapClasses = {
@@ -38,7 +38,7 @@ export function SectionHeading({
         {title}
       </h2>
       {description && (
-        <p className="mt-1 text-sm text-muted sm:mt-2 sm:text-base">
+        <p className="mt-1 text-body text-muted sm:mt-2 sm:text-body-lg">
           {description}
         </p>
       )}

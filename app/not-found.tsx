@@ -13,7 +13,7 @@ export default async function NotFound() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-3 py-16 text-center sm:px-4 sm:py-24">
-      <p className="text-sm font-medium uppercase tracking-wide text-primary">
+      <p className="text-body font-medium uppercase tracking-wide text-primary">
         {businessName}
       </p>
       <h1 className="mt-2 text-display font-bold text-foreground">
@@ -28,7 +28,7 @@ export default async function NotFound() {
           View services
         </ButtonLink>
       </div>
-      <p className="mt-8 text-sm text-muted">
+      <p className="mt-8 text-body text-muted">
         Looking for something?{" "}
         <Link
           href="/appointments"

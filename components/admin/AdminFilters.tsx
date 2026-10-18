@@ -33,7 +33,7 @@ export default function AdminFilters({
       >
         {open ? "Hide filters" : "Filters"}
         {activeCount > 0 && (
-          <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-strong">
+          <span className="rounded-full bg-primary-soft px-2 py-0.5 text-meta font-medium text-primary-strong">
             {activeCount}
           </span>
         )}

@@ -1,9 +1,9 @@
 import { cloneElement, isValidElement, useId } from "react";
 import type { ReactElement, ReactNode } from "react";
 
-const labelClasses = "mb-1.5 block text-sm font-medium text-foreground";
-const hintClasses = "mt-1.5 text-sm text-muted";
-const errorClasses = "mt-1.5 text-sm text-danger";
+const labelClasses = "mb-1.5 block text-body font-medium text-foreground";
+const hintClasses = "mt-1.5 text-body text-muted";
+const errorClasses = "mt-1.5 text-body text-danger";
 
 type ControlChildProps = {
   id?: string;

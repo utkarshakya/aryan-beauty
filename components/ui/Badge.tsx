@@ -16,7 +16,7 @@ const toneClasses: Record<BadgeTone, string> = {
 };
 
 const baseClasses =
-  "inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-medium";
+  "inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-meta font-medium";
 
 const tones = Object.keys(toneClasses) as BadgeTone[];
 

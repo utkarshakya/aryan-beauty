@@ -54,13 +54,13 @@ export default function BookingSuccess({
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-success text-background sm:h-12 sm:w-12">
           <CheckIcon />
         </span>
-        <h2 className="mt-3 text-xl font-bold tracking-tight sm:mt-4 sm:text-2xl">
+        <h2 className="mt-3 text-section font-bold tracking-tight sm:mt-4 sm:text-stat">
           Booking request sent
         </h2>
         <p className="mt-2 text-muted">Thank you, {name}!</p>
       </div>
 
-      <dl className="mt-5 space-y-2 rounded-control border border-border bg-background p-3 text-xs sm:mt-6 sm:p-4 sm:text-sm">
+      <dl className="mt-5 space-y-2 rounded-control border border-border bg-background p-3 text-meta sm:mt-6 sm:p-4 sm:text-body">
         <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
           <dt className="font-medium text-foreground">Service</dt>
           <dd className="text-muted sm:text-right">{serviceName}</dd>
@@ -77,7 +77,7 @@ export default function BookingSuccess({
         )}
       </dl>
 
-      <div className="mt-5 rounded-control bg-success-soft p-3 text-xs sm:mt-6 sm:p-4 sm:text-sm">
+      <div className="mt-5 rounded-control bg-success-soft p-3 text-meta sm:mt-6 sm:p-4 sm:text-body">
         <p className="font-medium text-foreground">What happens next?</p>
         <p className="mt-1 text-muted">
           We&apos;ll contact you using your account details to confirm your
@@ -86,7 +86,7 @@ export default function BookingSuccess({
         </p>
       </div>
 
-      <p className="mt-5 text-center text-xs text-muted sm:mt-6 sm:text-sm">
+      <p className="mt-5 text-center text-meta text-muted sm:mt-6 sm:text-body">
         Questions?{" "}
         <a
           href={phoneHref}

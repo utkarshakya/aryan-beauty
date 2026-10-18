@@ -95,12 +95,12 @@ export default function WalkInCustomerLinker() {
             >
               <div className="flex-1 min-w-[200px]">
                 <p className="font-medium text-foreground">{customer.name}</p>
-                <p className="text-sm text-muted">
+                <p className="text-body text-muted">
                   {customer.phone} · {customer.email}
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor={`clerk-${customer.id}`} className="text-sm text-muted">
+                <label htmlFor={`clerk-${customer.id}`} className="text-body text-muted">
                   Clerk User ID:
                 </label>
                 <div className="w-[200px]">

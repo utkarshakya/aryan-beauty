@@ -67,7 +67,7 @@ export default function ThemeToggle({
       <button
         type="button"
         onClick={toggleTheme}
-        className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
+        className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2.5 text-left text-body font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
       >
         <span className="flex items-center gap-2.5">
           {icon}

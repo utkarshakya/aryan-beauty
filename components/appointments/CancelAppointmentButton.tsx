@@ -39,7 +39,7 @@ export default function CancelAppointmentButton({
           {pending ? "Cancelling…" : "Cancel appointment"}
         </ActionButton>
         {state.error && (
-          <p className="mt-2 text-sm text-danger" role="alert">
+          <p className="mt-2 text-body text-danger" role="alert">
             {state.error}
           </p>
         )}

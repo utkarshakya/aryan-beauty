@@ -14,7 +14,7 @@ export default function StepService({
 }) {
   return (
     <fieldset>
-      <legend className="mb-1.5 block text-sm font-medium text-foreground">
+      <legend className="mb-1.5 block text-body font-medium text-foreground">
         Service
       </legend>
 
@@ -30,7 +30,7 @@ export default function StepService({
             <span className="min-w-0 flex-1">
               <span className="block font-medium">{service.name}</span>
               {service.description && (
-                <span className="mt-0.5 block text-xs text-muted line-clamp-1">
+                <span className="mt-0.5 block text-meta text-muted line-clamp-1">
                   {service.description}
                 </span>
               )}
@@ -39,7 +39,7 @@ export default function StepService({
               <span className="block font-bold text-primary">
                 ₹{service.price}
               </span>
-              <span className="block text-xs text-muted">
+              <span className="block text-meta text-muted">
                 {service.durationMin} min
               </span>
             </span>
@@ -48,7 +48,7 @@ export default function StepService({
       </div>
 
       {error && (
-        <p role="alert" className="mt-1.5 text-sm text-danger">
+        <p role="alert" className="mt-1.5 text-body text-danger">
           {error}
         </p>
       )}

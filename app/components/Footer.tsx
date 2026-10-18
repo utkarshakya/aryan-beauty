@@ -33,20 +33,20 @@ export default async function Footer() {
 
   return (
     <footer className="border-t border-border bg-muted-soft pb-safe">
-      <Container className="py-8 sm:py-10">
+      <Container className="py-section sm:py-section-lg">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
-            <p className="text-base font-bold tracking-tight sm:text-lg">
+            <p className="text-body-lg font-bold tracking-tight sm:text-title">
               Unknown <span className="text-primary">Beauty</span>
             </p>
-            <p className="mt-1 text-sm text-muted sm:mt-2">{business.tagline}</p>
+            <p className="mt-1 text-body text-muted sm:mt-2">{business.tagline}</p>
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+            <h2 className="text-body font-semibold uppercase tracking-wide text-foreground">
               Visit
             </h2>
-            <address className="mt-2 space-y-1 text-sm not-italic text-muted">
+            <address className="mt-2 space-y-1 text-body not-italic text-muted">
               <p>
                 {business.address}
                 {business.addressLine2 ? `, ${business.addressLine2}` : ""}
@@ -56,14 +56,14 @@ export default async function Footer() {
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+            <h2 className="text-body font-semibold uppercase tracking-wide text-foreground">
               Contact
             </h2>
-            <ul className="mt-1 space-y-0.5 text-sm text-muted">
+            <ul className="mt-1 space-y-0.5 text-body text-muted">
               <li>
                 <a
                   href={business.phoneHref}
-                  className="inline-flex min-h-[44px] items-center font-medium text-primary transition-colors hover:text-primary-strong"
+                  className="inline-flex min-h-[44px] items-center font-medium text-primary transition-colors hover:text-primary-strong focus-ring"
                 >
                   {business.phoneDisplay}
                 </a>
@@ -71,7 +71,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/services"
-                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground focus-ring"
                 >
                   Services
                 </Link>
@@ -79,7 +79,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/appointments"
-                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center transition-colors hover:text-foreground focus-ring"
                 >
                   Book an appointment
                 </Link>
@@ -88,7 +88,7 @@ export default async function Footer() {
           </div>
         </div>
 
-        <p className="mt-8 border-t border-border pt-5 text-xs text-muted">
+        <p className="mt-8 border-t border-border pt-5 text-meta text-muted">
           © {new Date().getFullYear()} {business.name}. All rights reserved.
         </p>
       </Container>

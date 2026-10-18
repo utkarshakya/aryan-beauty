@@ -37,12 +37,12 @@ export default async function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 -top-40 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl dark:bg-primary/10"
       />
-      <Container className="relative py-14 text-center sm:py-24">
+      <Container className="relative py-section text-center sm:py-section-lg">
         <div className="mx-auto max-w-2xl">
           <h1 className="text-display font-bold text-foreground">
             Discover Your Natural Beauty
           </h1>
-          <p className="mt-4 text-base text-muted sm:mt-5 sm:text-xl">
+          <p className="mt-4 text-body-lg text-muted sm:mt-5 sm:text-title">
             {business.description}
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:mt-9 sm:flex-row sm:gap-3">
@@ -62,7 +62,7 @@ export default async function Hero() {
               View Services
             </ButtonLink>
           </div>
-          <p className="mt-7 text-xs text-muted sm:mt-9 sm:text-sm">
+          <p className="mt-7 text-meta text-muted sm:mt-9 sm:text-body">
             {hoursTime ? `Open ${hoursDays}, ${hoursTime}` : hoursDays}
             {business.address ? ` · ${business.address}` : ""}
           </p>

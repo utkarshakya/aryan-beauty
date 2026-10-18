@@ -1,5 +1,5 @@
 import { ButtonLink } from "@/components/ui/Button";
-import { SectionHeading } from "@/components/ui";
+import { EmptyState } from "@/components/ui";
 
 export default function EmptyServices({
   phoneDisplay,
@@ -9,20 +9,25 @@ export default function EmptyServices({
   phoneHref: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-muted-soft p-5 text-center sm:p-12">
-      <SectionHeading title="Our service menu is being updated" />
-      <p className="mx-auto mt-3 max-w-sm text-sm text-muted">
-        We haven&apos;t published our services yet. Please call us and we&apos;ll
-        be happy to help you book your visit.
-      </p>
-      <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <ButtonLink href={phoneHref} variant="secondary">
-          Call {phoneDisplay}
-        </ButtonLink>
-        <ButtonLink href="/" variant="ghost">
-          Back to home
-        </ButtonLink>
-      </div>
-    </div>
+    <EmptyState
+      className="p-6 sm:p-12"
+      title="Our service menu is being updated"
+      body={
+        <>
+          We haven&apos;t published our services yet. Please call us and we&apos;ll
+          be happy to help you book your visit.
+        </>
+      }
+      actions={
+        <>
+          <ButtonLink href={phoneHref} variant="secondary">
+            Call {phoneDisplay}
+          </ButtonLink>
+          <ButtonLink href="/" variant="ghost">
+            Back to home
+          </ButtonLink>
+        </>
+      }
+    />
   );
 }

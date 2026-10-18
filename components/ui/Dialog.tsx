@@ -52,10 +52,10 @@ export function ConfirmDialog({
       className="m-auto max-h-[calc(100dvh_-_2rem)] w-[calc(100vw_-_2rem)] max-w-[28rem] overflow-y-auto rounded-card border border-border bg-background p-0 text-foreground shadow-card"
     >
       <div className="p-5 sm:p-6">
-        <h2 id={titleId} className="text-lg font-bold tracking-tight">
+        <h2 id={titleId} className="text-title font-bold tracking-tight">
           {title}
         </h2>
-        {body && <p className="mt-2 text-sm text-muted">{body}</p>}
+        {body && <p className="mt-2 text-body text-muted">{body}</p>}
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
             type="button"

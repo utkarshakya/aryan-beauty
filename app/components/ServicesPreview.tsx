@@ -9,7 +9,7 @@ export default function ServicesPreview({ services }: { services: Service[] }) {
   if (services.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-20">
+    <section className="py-section sm:py-section-lg">
       <Container>
         <SectionHeading
           size="lg"

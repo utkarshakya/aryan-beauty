@@ -18,12 +18,12 @@ export default function ServiceEditor({ service }: { service: Service }) {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">{service.name}</h3>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${service.active ? "bg-success-soft text-success" : "bg-neutral-soft text-neutral"}`}>
+              <span className={`rounded-full px-2.5 py-1 text-meta font-medium ${service.active ? "bg-success-soft text-success" : "bg-neutral-soft text-neutral"}`}>
                 {service.active ? "Active" : "Inactive"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-muted">{service.category} · ₹{service.price} · {service.durationMin} minutes</p>
-            {service.description && <p className="mt-3 text-sm text-foreground">{service.description}</p>}
+            <p className="mt-1 text-body text-muted">{service.category} · ₹{service.price} · {service.durationMin} minutes</p>
+            {service.description && <p className="mt-3 text-body text-foreground">{service.description}</p>}
           </div>
           <Button type="button" variant="secondary" size="md" onClick={() => setEditing(true)}>
             Edit
@@ -163,7 +163,7 @@ function ServiceEditForm({ service, onCancel }: { service: Service; onCancel: ()
           />
         </Field>
         <div className="sm:col-span-2 flex items-center gap-2">
-          <label className="flex min-h-[44px] items-center gap-2 text-sm font-medium text-foreground">
+          <label className="flex min-h-[44px] items-center gap-2 text-body font-medium text-foreground">
             <input
               type="checkbox"
               checked={active}

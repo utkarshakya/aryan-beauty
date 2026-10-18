@@ -9,7 +9,7 @@ const toneClasses: Record<ActionButtonTone, string> = {
 };
 
 const baseClasses =
-  "inline-flex min-h-[44px] items-center px-1 py-1 text-sm font-medium underline transition-colors focus-ring disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex min-h-[44px] items-center px-1 py-1 text-body font-medium underline transition-[color,transform] duration-fast ease-out active:scale-[0.98] focus-ring disabled:pointer-events-none disabled:opacity-60";
 
 export type ActionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   tone?: ActionButtonTone;

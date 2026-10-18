@@ -122,7 +122,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             role={toast.tone === "danger" ? "alert" : "status"}
-            className={`toast-item pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-control border px-4 py-3 text-sm shadow-card ${toneClasses[toast.tone]}`}
+            className={`toast-item pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-control border px-4 py-3 text-body shadow-card ${toneClasses[toast.tone]}`}
           >
             <ToneIcon tone={toast.tone} />
             <span className="flex-1">{toast.message}</span>

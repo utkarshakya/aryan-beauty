@@ -23,7 +23,7 @@ export function FormBanner({
   return (
     <div
       role={tone === "danger" ? "alert" : "status"}
-      className={`rounded-control px-4 py-3 text-sm ${toneClasses[tone]}${className ? ` ${className}` : ""}`}
+      className={`rounded-control px-4 py-3 text-body ${toneClasses[tone]}${className ? ` ${className}` : ""}`}
     >
       {onDismiss ? (
         <div className="flex items-center justify-between gap-3">

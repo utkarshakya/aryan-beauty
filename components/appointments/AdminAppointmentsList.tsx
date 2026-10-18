@@ -116,7 +116,7 @@ export default function AdminAppointmentsList({
       ) : (
         <>
           {term ? (
-            <p className="text-sm text-muted">
+            <p className="text-body text-muted">
               {appointments.length}{" "}
               {appointments.length === 1 ? "appointment" : "appointments"} for
               “{term}” ·{" "}
@@ -128,7 +128,7 @@ export default function AdminAppointmentsList({
               </Link>
             </p>
           ) : showScope && scopeLabel ? (
-            <p className="text-sm text-muted">
+            <p className="text-body text-muted">
               Showing{" "}
               {statusWord
                 ? `${statusWord} appointments ${scopeLabel}`
@@ -155,7 +155,7 @@ export default function AdminAppointmentsList({
                       {appointment.customer.name}
                     </Link>
                     {appointment.customer.phone && (
-                      <p className="mt-1 text-sm text-muted">
+                      <p className="mt-1 text-body text-muted">
                         {appointment.customer.phone}
                       </p>
                     )}
@@ -165,7 +165,7 @@ export default function AdminAppointmentsList({
                   </Badge>
                 </div>
 
-                <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs sm:gap-4 sm:text-sm">
+                <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-meta sm:gap-4 sm:text-body">
                   <div>
                     <dt className="text-muted">Service</dt>
                     <dd className="mt-1 font-medium text-foreground">
@@ -242,7 +242,7 @@ export default function AdminAppointmentsList({
           </div>
 
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-175 text-sm">
+            <table className="w-full min-w-175 text-body">
               <thead>
                 <tr className="border-b border-border text-left text-muted">
                   <th className="px-3 py-3 font-medium">Customer</th>

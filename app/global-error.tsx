@@ -30,7 +30,7 @@ export default function GlobalError({
         <title>Something went wrong</title>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <main className="w-full max-w-xl text-center">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="text-stat font-bold tracking-tight sm:text-stat">
             Something went wrong
           </h1>
           <p className="mx-auto mt-3 max-w-md text-muted">
@@ -38,17 +38,17 @@ export default function GlobalError({
             Please reload the page.
           </p>
           {process.env.NODE_ENV === "development" && error?.message && (
-            <p className="mx-auto mt-4 max-w-md break-words rounded-control bg-danger-soft p-2 text-xs font-mono text-danger">
+            <p className="mx-auto mt-4 max-w-md break-words rounded-control bg-danger-soft p-2 text-meta font-mono text-danger">
               {error.message}
             </p>
           )}
           {error?.digest && (
-            <p className="mt-4 text-xs text-muted">Reference: {error.digest}</p>
+            <p className="mt-4 text-meta text-muted">Reference: {error.digest}</p>
           )}
           <button
             type="button"
             onClick={handleRetry}
-            className="mt-8 inline-flex min-h-[44px] items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-primary-strong focus-ring"
+            className="mt-8 inline-flex min-h-[44px] items-center justify-center rounded-full bg-primary px-6 py-3 text-body font-medium text-background transition-colors hover:bg-primary-strong focus-ring"
           >
             Reload
           </button>

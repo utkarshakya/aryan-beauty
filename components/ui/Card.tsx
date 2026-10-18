@@ -4,7 +4,7 @@ export const cardClasses =
   "rounded-card border border-border bg-background shadow-card";
 
 export const cardLabelHeadingClass =
-  "text-sm font-semibold uppercase tracking-wide text-muted";
+  "text-body font-semibold uppercase tracking-wide text-muted";
 
 type CommonProps = {
   className?: string;

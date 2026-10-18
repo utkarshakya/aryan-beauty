@@ -120,10 +120,10 @@ export default function StaffTable({
                 <div className="min-w-0 flex-1 sm:min-w-[200px]">
                   <p className="font-medium text-foreground">
                     {user.name ?? "Unnamed account"}
-                    {isSelf && <span className="ml-2 text-xs text-muted">(you)</span>}
+                    {isSelf && <span className="ml-2 text-meta text-muted">(you)</span>}
                   </p>
-                  <p className="text-sm text-muted">{user.email ?? "No email on file"}</p>
-                  <p className="mt-1 text-xs text-muted">
+                  <p className="text-body text-muted">{user.email ?? "No email on file"}</p>
+                  <p className="mt-1 text-meta text-muted">
                     Joined {new Date(user.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -132,9 +132,9 @@ export default function StaffTable({
 
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   {isProtected ? (
-                    <span className="text-sm text-muted">Managed outside the app</span>
+                    <span className="text-body text-muted">Managed outside the app</span>
                   ) : isSelf ? (
-                    <span className="text-sm text-muted">Cannot change your own access</span>
+                    <span className="text-body text-muted">Cannot change your own access</span>
                   ) : (
                     <>
                       <label htmlFor={`role-${user.clerkUserId}`} className="sr-only">

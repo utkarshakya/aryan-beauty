@@ -14,13 +14,13 @@ export function SummaryCard({
   className,
 }: SummaryCardProps) {
   return (
-    <Card className={className ? `p-3 sm:p-5 ${className}` : "p-3 sm:p-5"}>
-      <p className="text-xs font-medium text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-foreground sm:text-3xl">
+    <Card className={className ? `p-4 sm:p-5 ${className}` : "p-4 sm:p-5"}>
+      <p className="text-meta font-medium text-muted">{label}</p>
+      <p className="mt-1 text-stat font-bold text-foreground sm:text-stat">
         {value}
       </p>
       {detail ? (
-        <p className="mt-1 text-[11px] text-muted sm:text-xs">{detail}</p>
+        <p className="mt-1 text-meta text-muted">{detail}</p>
       ) : null}
     </Card>
   );

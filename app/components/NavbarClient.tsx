@@ -20,7 +20,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function desktopLinkClass(active: boolean) {
-  return `inline-flex min-h-[44px] items-center rounded-full px-3.5 py-2 text-sm transition-colors focus-ring ${
+  return `inline-flex min-h-[44px] items-center rounded-full px-3.5 py-2 text-body transition-colors focus-ring ${
     active
       ? "bg-primary-soft font-medium text-primary-strong"
       : "text-muted hover:bg-neutral-soft hover:text-foreground"
@@ -28,7 +28,7 @@ function desktopLinkClass(active: boolean) {
 }
 
 function mobileLinkClass(active: boolean) {
-  return `flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-ring ${
+  return `flex min-h-[44px] items-center rounded-lg px-3 py-2.5 text-body font-medium transition-colors focus-ring ${
     active
       ? "bg-primary-soft text-primary-strong"
       : "text-foreground hover:bg-neutral-soft"
@@ -117,7 +117,7 @@ export default function NavbarClient({
             </button>
             <Link
               href="/"
-              className="text-lg font-bold tracking-tight text-foreground focus-ring sm:text-xl"
+              className="text-title font-bold tracking-tight text-foreground focus-ring sm:text-section"
             >
               Unknown <span className="text-primary">Beauty</span>
             </Link>

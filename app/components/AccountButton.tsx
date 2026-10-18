@@ -66,7 +66,7 @@ export default function AccountButton() {
       <div className="flex h-full items-center">
         <Link
           href="/sign-in"
-          className="inline-flex min-h-[44px] items-center rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:px-4"
+          className="inline-flex min-h-[44px] items-center rounded-full px-3 py-2 text-body text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring sm:px-4"
         >
           Login
         </Link>
@@ -107,7 +107,7 @@ export default function AccountButton() {
             className="h-8 w-8 rounded-full object-cover ring-1 ring-border"
           />
         ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary-strong ring-1 ring-border">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-meta font-semibold text-primary-strong ring-1 ring-border">
             {initials || "U"}
           </span>
         )}
@@ -127,7 +127,7 @@ export default function AccountButton() {
               setOpen(false);
               clerk.openUserProfile();
             }}
-            className="flex min-h-[44px] w-full items-center rounded-control px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
+            className="flex min-h-[44px] w-full items-center rounded-control px-3 py-2.5 text-left text-body font-medium text-foreground transition-colors hover:bg-neutral-soft focus-ring"
           >
             Manage account
           </button>
@@ -138,7 +138,7 @@ export default function AccountButton() {
               setOpen(false);
               void clerk.signOut();
             }}
-            className="flex min-h-[44px] w-full items-center rounded-control px-3 py-2.5 text-left text-sm font-medium text-danger transition-colors hover:bg-danger-soft focus-ring"
+            className="flex min-h-[44px] w-full items-center rounded-control px-3 py-2.5 text-left text-body font-medium text-danger transition-colors hover:bg-danger-soft focus-ring"
           >
             Sign out
           </button>

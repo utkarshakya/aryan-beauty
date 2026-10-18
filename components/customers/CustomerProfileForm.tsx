@@ -42,7 +42,7 @@ export default function CustomerProfileForm({ initialData }: { initialData: { na
   return (
     <form action={handleSubmit} className="space-y-4">
       {errors.form && (
-        <div className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger" role="alert">
+        <div className="rounded-lg bg-danger-soft px-4 py-3 text-body text-danger" role="alert">
           {errors.form}
         </div>
       )}

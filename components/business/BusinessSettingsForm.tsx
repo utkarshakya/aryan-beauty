@@ -241,12 +241,12 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                     onChange={() => toggleClosedWeekday(WEEKDAYS.findIndex(d => d.key === day.key))}
                     className={checkboxClass}
                   />
-                  <span className="text-sm font-medium text-foreground">{day.label}</span>
+                  <span className="text-body font-medium text-foreground">{day.label}</span>
                 </label>
                 {!closed && (
                   <>
                     <div className="flex items-center gap-2">
-                      <label htmlFor={`open-${day.key}`} className="text-sm text-muted">Open</label>
+                      <label htmlFor={`open-${day.key}`} className="text-body text-muted">Open</label>
                       <Input
                         id={`open-${day.key}`}
                         type="time"
@@ -256,7 +256,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label htmlFor={`close-${day.key}`} className="text-sm text-muted">Close</label>
+                      <label htmlFor={`close-${day.key}`} className="text-body text-muted">Close</label>
                       <Input
                         id={`close-${day.key}`}
                         type="time"
@@ -306,8 +306,8 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
             {closures.map((closure, index) => (
               <li key={`${closure.date}-${index}`} className="flex items-center justify-between py-2">
                 <div>
-                  <p className="text-sm font-medium text-foreground">{new Date(closure.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</p>
-                  <p className="text-xs text-muted">{closure.reason}</p>
+                  <p className="text-body font-medium text-foreground">{new Date(closure.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</p>
+                  <p className="text-meta text-muted">{closure.reason}</p>
                 </div>
                 <Button type="button" variant="ghost" size="md" onClick={() => removeClosure(index)}>Remove</Button>
               </li>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { AppointmentStatus } from "@prisma/client";
 import {
   Button,
+  EmptyState,
   Input,
   PageHeader,
   SummaryCard,
@@ -195,14 +196,16 @@ export default async function AdminPage({
       >
         <h2
           id="upcoming-heading"
-          className="text-lg font-semibold text-foreground"
+          className="text-title font-semibold text-foreground"
         >
           Upcoming today
         </h2>
         {upcomingAppointments.length === 0 ? (
-          <p className="mt-4 rounded-lg bg-muted-soft p-4 text-sm text-muted">
-            No appointments scheduled for today.
-          </p>
+          <EmptyState
+            className="mt-4"
+            title="No appointments scheduled for today."
+            body="Your upcoming appointments will appear here."
+          />
         ) : (
           <div className="mt-4 divide-y divide-border">
             {upcomingAppointments.map((appointment) => (
@@ -211,21 +214,21 @@ export default async function AdminPage({
                 className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
+                  <p className="truncate text-body font-medium text-foreground">
                     {appointment.customer.name}
                   </p>
-                  <p className="truncate text-xs text-muted">
+                  <p className="truncate text-meta text-muted">
                     {appointment.serviceName}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-body font-medium text-foreground">
                     {appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString("en-IN", {
                       hour: "numeric",
                       minute: "2-digit",
                     }) : ""}
                   </p>
-                  <p className="text-xs capitalize text-muted">
+                  <p className="text-meta capitalize text-muted">
                     {appointment.status}
                   </p>
                 </div>
@@ -234,7 +237,7 @@ export default async function AdminPage({
           </div>
         )}
       </section>
-      <h2 className="mb-5 mt-8 text-xl font-bold text-foreground sm:mt-10 sm:text-2xl">
+      <h2 className="mb-5 mt-8 text-section font-bold text-foreground sm:mt-10 sm:text-stat">
         Appointments
       </h2>
 
@@ -269,7 +272,7 @@ export default async function AdminPage({
             <div className="w-full min-w-0 flex-1 sm:max-w-md">
               <label
                 htmlFor="appointment-search"
-                className="mb-1 block text-sm font-medium text-foreground"
+                className="mb-1 block text-body font-medium text-foreground"
               >
                 Search
               </label>
@@ -314,7 +317,7 @@ export default async function AdminPage({
               <div className="min-w-0 flex-1 sm:w-44 sm:flex-none">
                 <label
                   htmlFor="appointment-date"
-                  className="mb-1 block text-sm font-medium text-foreground"
+                  className="mb-1 block text-body font-medium text-foreground"
                 >
                   Date
                 </label>

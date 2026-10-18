@@ -20,17 +20,17 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <Container size="narrow" className={`py-16 text-center sm:py-24${className ? ` ${className}` : ""}`}>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+      <h1 className="text-title font-bold tracking-tight text-foreground sm:text-section">
         {title}
       </h1>
       <p className="mx-auto mt-3 max-w-md text-muted">{body}</p>
       {process.env.NODE_ENV === "development" && error?.message && (
-        <p className="mx-auto mt-4 max-w-md break-words rounded-control bg-danger-soft p-2 text-xs font-mono text-danger">
+        <p className="mx-auto mt-4 max-w-md break-words rounded-control bg-danger-soft p-2 text-meta font-mono text-danger">
           {error.message}
         </p>
       )}
       {error?.digest && (
-        <p className="mt-4 text-xs text-muted">Reference: {error.digest}</p>
+        <p className="mt-4 text-meta text-muted">Reference: {error.digest}</p>
       )}
       {onRetry && (
         <div className="mt-8 flex justify-center">

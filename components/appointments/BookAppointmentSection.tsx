@@ -47,7 +47,7 @@ export default function BookAppointmentSection({
 
   return (
     <div className={cardClassName("p-4 text-center sm:p-6")}>
-      <p className="text-sm text-muted">
+      <p className="text-body text-muted">
         Choose a service, pick a date and time, and confirm your booking.
       </p>
       <Button type="button" className="mt-4" onClick={() => setOpen(true)}>

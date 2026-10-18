@@ -43,13 +43,16 @@ export default function AppointmentGroup({
       ) : (
         <div className="space-y-3">
           {appointments.map((appointment) => (
-            <article key={appointment.id} className={cardClassName("p-3 sm:p-5")}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold text-foreground">
+            <article
+              key={appointment.id}
+              className={cardClassName("interactive-surface p-4 sm:p-5")}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <h3 className="text-body-lg font-semibold text-foreground">
                     {appointment.serviceName}
                   </h3>
-                  <p className="mt-1 text-sm text-muted">
+                  <p className="mt-1 text-body text-muted">
                     {appointment.serviceDurationMin} minutes · ₹
                     {appointment.servicePrice}
                   </p>
@@ -62,7 +65,7 @@ export default function AppointmentGroup({
                 </Badge>
               </div>
 
-              <div className="mt-4 border-t border-border pt-3 text-sm text-foreground">
+              <div className="mt-5 border-t border-border pt-4 text-body text-foreground">
                 <p>{appointment.startTime ? formatDate(appointment.startTime) : ""}</p>
                 <p className="mt-1 text-muted">
                   {appointment.startTime ? formatTime(appointment.startTime) : ""} –{" "}
@@ -73,7 +76,7 @@ export default function AppointmentGroup({
               {appointment.status !== "cancelled" &&
                 appointment.startTime &&
                 new Date(appointment.startTime) > new Date() && (
-                  <div className="mt-4 border-t border-border pt-3">
+                  <div className="mt-5 border-t border-border pt-4">
                     <CancelAppointmentButton appointmentId={appointment.id} />
                   </div>
                 )}

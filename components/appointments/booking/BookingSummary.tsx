@@ -31,10 +31,10 @@ export default function BookingSummary({
 
   return (
     <div className="rounded-control border border-border bg-background p-3 sm:p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <p className="text-meta font-semibold uppercase tracking-wide text-muted">
         Your booking
       </p>
-      <dl className="mt-2 space-y-1.5 text-sm">
+      <dl className="mt-2 space-y-1.5 text-body">
         {rows.map((row) => (
           <div key={row.label} className="flex justify-between gap-4">
             <dt className="shrink-0 text-muted">{row.label}</dt>

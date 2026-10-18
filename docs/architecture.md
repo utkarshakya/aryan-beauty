@@ -67,6 +67,13 @@ Design tokens live in `app/globals.css` under `@theme`; dark-mode overrides are 
 
 Unused tokens are pruned from the built CSS until a component uses them — that is expected.
 
+### Visual polish conventions
+
+- Use the token-backed `text-meta`, `text-body`, `text-body-lg`, `text-title`, `text-section`, and `text-display` utilities for interface copy. Avoid arbitrary text sizes except the 16px mobile form-control override in `controls.tsx`.
+- Use `py-section sm:py-section-lg` for full-width public sections so mobile and desktop vertical rhythm stays consistent.
+- Use `primary` for the one main action in a group, `secondary` for a related positive alternative, `outline` for a neutral choice, and `ghost` for low-emphasis navigation or dismissal. Keep destructive actions in `danger` or the `ActionButton` danger tone.
+- Interactive surfaces use the shared motion tokens and reduced-motion kill-switch. Buttons and pills provide hover, active, and visible-focus states; cards use `interactive-surface` only when the whole surface participates in an interaction.
+
 ### Layering (z-index tiers)
 
 Overlapping/sticky UI claims a fixed tier (lower sits behind); never invent an arbitrary value — add a row here instead:

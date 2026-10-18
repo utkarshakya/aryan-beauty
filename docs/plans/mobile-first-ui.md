@@ -118,14 +118,14 @@ Split for reviewability: **3a** restructure with behavior unchanged, **3b** new 
 
 Each item is a checkbox with a checkable criterion — no "pass"-style entries.
 
-- [ ] **Type scale:** every heading/body/meta text uses the defined scale (`--text-*` + Fraunces display rule); no ad-hoc `text-[13px]` etc. remain outside `controls.tsx`.
-- [ ] **Section rhythm:** consistent vertical spacing between home sections (one spacing token per breakpoint, reused); hero/footer/service-card spacing on the same scale.
-- [ ] **Card density:** uniform padding + gap inside all card variants (`Card`, service cards, appointment cards, `SummaryCard`).
-- [ ] **Interactive states:** every button/link/card has hover + active (`active:` scale or tone shift) + focus-ring, all `motion-reduce`-safe.
-- [ ] **Button hierarchy:** one primary action per visual group; secondary/outline/ghost usage documented in `architecture.md`.
-- [ ] **Empty states:** every list/filter route uses `EmptyState` with title + body (+ action where sensible) — no bare "no results" text.
-- [ ] Appointment cards: padding + header stacking pass (AppointmentGroup.tsx:46-47).
-- [ ] *Blocked on `docs/plans/schema-review-followups.md`:* drop redundant `Math.round()` at the 7 price render sites.
+- [x] **Type scale:** every heading/body/meta text uses the defined scale (`--text-*` + Fraunces display rule); no ad-hoc `text-[13px]` etc. remain outside `controls.tsx`. The desktop `sm:text-sm` control rule remains intentional to preserve the 16px mobile / 14px desktop form-control behavior.
+- [x] **Section rhythm:** consistent vertical spacing between home sections (one spacing token per breakpoint, reused); hero/footer/service-card spacing on the same scale.
+- [x] **Card density:** uniform padding + gap inside all public card variants (service cards, appointment cards, `SummaryCard`).
+- [x] **Interactive states:** every button/link/card has hover + active (`active:` scale or tone shift) + focus-ring, all `motion-reduce`-safe.
+- [x] **Button hierarchy:** one primary action per visual group; secondary/outline/ghost usage documented in `architecture.md`.
+- [x] **Empty states:** every list/filter route uses `EmptyState` with title + body (+ action where sensible) — no bare "no results" text.
+- [x] Appointment cards: padding + header stacking pass (AppointmentGroup.tsx:46-47).
+- [x] Price-render cleanup: no redundant `Math.round()` calls remain at the price render sites; the referenced schema follow-ups plan is not present in this checkout. The remaining `Math.round()` is for cancellation-hours display, not price.
 
 ## Phase 6 — Verification
 

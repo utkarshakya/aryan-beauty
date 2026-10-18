@@ -31,7 +31,7 @@ export default function ServicesFilter({
       : services.filter((s) => s.category === activeCategory);
 
   return (
-    <Container className="py-12 sm:py-20">
+    <Container className="py-section sm:py-section-lg">
       <PageHeader
         title="Our Services"
         subtitle="Browse our range of professional beauty services and book online."
@@ -62,7 +62,7 @@ export default function ServicesFilter({
               );
             })}
           </div>
-          <p className="mb-7 text-center text-xs text-muted sm:mb-10 sm:text-sm" role="status">
+          <p className="mb-7 text-center text-meta text-muted sm:mb-10 sm:text-body" role="status">
             Showing {filteredServices.length}{" "}
             {filteredServices.length === 1 ? "service" : "services"}
           </p>

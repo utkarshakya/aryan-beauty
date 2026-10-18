@@ -17,7 +17,7 @@ function labelClasses(step: BookingStep, currentStep: BookingStep) {
 export default function Stepper({ currentStep }: { currentStep: BookingStep }) {
   return (
     <div>
-      <p role="status" className="text-xs font-semibold tracking-wide text-primary">
+      <p role="status" className="text-meta font-semibold tracking-wide text-primary">
         Step {currentStep} of {BOOKING_STEPS.length}
       </p>
 
@@ -33,7 +33,7 @@ export default function Stepper({ currentStep }: { currentStep: BookingStep }) {
         })}
       </ol>
 
-      <ol className="mt-2 flex justify-between gap-2 text-xs">
+      <ol className="mt-2 flex justify-between gap-2 text-meta">
         {BOOKING_STEPS.map((title, index) => {
           const step = (index + 1) as BookingStep;
           const isCurrent = step === currentStep;

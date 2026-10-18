@@ -40,7 +40,7 @@ const TABS: AdminTab[] = [
 ];
 
 function tabClass(active: boolean) {
-  return `inline-flex min-h-[44px] items-center border-b-2 px-3 transition-colors focus-ring ${
+  return `inline-flex min-h-[44px] items-center border-b-2 px-3 text-body transition-[color,border-color,transform] duration-fast ease-out active:scale-[0.98] focus-ring ${
     active
       ? "border-primary font-medium text-foreground"
       : "border-transparent text-muted hover:border-border hover:text-foreground"
@@ -69,7 +69,7 @@ export default function AdminTabBar() {
                 <Link
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
-                  className={`text-sm ${tabClass(active)}`}
+                  className={`text-body ${tabClass(active)}`}
                 >
                   {tab.label}
                 </Link>

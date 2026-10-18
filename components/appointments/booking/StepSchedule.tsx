@@ -90,7 +90,7 @@ export default function StepSchedule({
       {!selectedDate ? null : slotFailed ? (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-danger-soft px-3 py-2.5 text-xs text-danger sm:text-sm"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-danger-soft px-3 py-2.5 text-meta text-danger sm:text-body"
         >
           <span>
             Couldn&apos;t load available times. Check your connection and try
@@ -129,7 +129,7 @@ export default function StepSchedule({
         />
       ) : (
         <div>
-          <p className="mb-1.5 block text-sm font-medium text-foreground">
+          <p className="mb-1.5 block text-body font-medium text-foreground">
             Available time
           </p>
           <SlotChips

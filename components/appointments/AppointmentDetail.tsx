@@ -101,7 +101,7 @@ export default function AppointmentDetail({
           >
             Customer
           </h2>
-          <dl className="mt-3 space-y-3 text-sm">
+          <dl className="mt-3 space-y-3 text-body">
             <div>
               <dt className="text-muted">Name</dt>
               <dd className="mt-1 font-medium text-foreground">
@@ -147,7 +147,7 @@ export default function AppointmentDetail({
           >
             Service
           </h2>
-          <dl className="mt-3 space-y-3 text-sm">
+          <dl className="mt-3 space-y-3 text-body">
             <div>
               <dt className="text-muted">Name</dt>
               <dd className="mt-1 font-medium text-foreground">
@@ -179,7 +179,7 @@ export default function AppointmentDetail({
           >
             Schedule
           </h2>
-          <dl className="mt-3 space-y-3 text-sm">
+          <dl className="mt-3 space-y-3 text-body">
             <div>
               <dt className="text-muted">Date</dt>
               <dd className="mt-1 font-medium text-foreground">
@@ -206,7 +206,7 @@ export default function AppointmentDetail({
           >
             Notes
           </h2>
-          <p className="mt-3 whitespace-pre-wrap text-sm text-foreground">
+          <p className="mt-3 whitespace-pre-wrap text-body text-foreground">
             {appointment.notes || "No notes on this booking."}
           </p>
         </section>

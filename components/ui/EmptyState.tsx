@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 export const emptyStateClasses =
-  "rounded-card border border-dashed border-border p-5 text-center sm:p-8";
+  "rounded-card border border-dashed border-border bg-muted-soft/40 p-5 text-center sm:p-8";
 
 type CommonProps = {
   className?: string;
@@ -36,8 +36,8 @@ export function EmptyState({
           {icon}
         </div>
       )}
-      <p className="text-sm font-medium text-foreground">{title}</p>
-      {body && <div className="mt-1 text-sm text-muted">{body}</div>}
+      <p className="text-body font-medium text-foreground">{title}</p>
+      {body && <div className="mt-1 text-body text-muted">{body}</div>}
       {actions && (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           {actions}

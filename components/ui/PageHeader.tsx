@@ -35,7 +35,7 @@ export function PageHeader({
       {backHref && (
         <Link
           href={backHref}
-          className="mb-1 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-strong focus-ring"
+          className="mb-1 inline-flex min-h-[44px] items-center gap-1.5 text-body font-medium text-primary transition-colors hover:text-primary-strong focus-ring"
         >
           <svg
             aria-hidden="true"
@@ -53,19 +53,19 @@ export function PageHeader({
         </Link>
       )}
       {eyebrow && (
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">
+        <p className="text-meta font-medium uppercase tracking-wide text-primary">
           {eyebrow}
         </p>
       )}
       <h1
-        className={`text-2xl font-bold tracking-tight text-foreground sm:text-3xl${
+        className={`text-title font-bold tracking-tight text-foreground sm:text-section${
           eyebrow || backHref ? " mt-1" : ""
         }`}
       >
         {title}
       </h1>
       {subtitle && (
-        <p className="mt-2 text-sm text-muted sm:text-base">{subtitle}</p>
+        <p className="mt-2 text-body text-muted sm:text-body-lg">{subtitle}</p>
       )}
     </>
   );
