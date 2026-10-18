@@ -129,10 +129,10 @@ Each item is a checkbox with a checkable criterion — no "pass"-style entries.
 
 ## Phase 6 — Verification
 
-- [ ] `npm run db:validate` → `typecheck` → `lint` → `test` → `build`.
-- [ ] **Add one dev-only a11y tool** (choose at this point: `@axe-core/cli` or Lighthouse CI with a stored config) and run it against `/` and `/services`.
-- [ ] Lighthouse mobile ≥90 on `/` and `/services`, measured against the known Clerk `prefetchUI` ceiling (that avenue stays closed — no headless-Clerk redesign).
-- [ ] Manual matrix at 320 / 390 / 768 px, dark + light:
+- [x] `npm run db:validate` → `typecheck` → `lint` → `test` → `build`.
+- [x] **Add one dev-only a11y tool**: `@axe-core/cli` is installed and reports zero violations on `/` and `/services` (the home route has one manual-review item).
+- [ ] Lighthouse mobile ≥90 on `/` and `/services`, measured against the known Clerk `prefetchUI` ceiling (that avenue stays closed — no headless-Clerk redesign). Current local scores: 54 (`/`) and 62 (`/services`); investigate with seeded data and deployment-like Clerk conditions. Engineering follow-up complete: the home route now loads business settings and service cards in parallel.
+- [ ] Manual matrix at 320 / 390 / 768 px, dark + light (pending: no in-app browser session is available in this environment):
   - no focus-zoom on any input; tap targets ≥44px (standalone controls);
   - keyboard-only pass: skip-link works, logical focus order, focus visible on every interactive element, heading hierarchy sane, contrast spot-check on muted/surface text;
   - wizard happy path, Back preserves state, slot-load error → Retry works;

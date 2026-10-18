@@ -1,6 +1,6 @@
 import Container from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
-import { getBusinessSettingsForDisplay } from "@/lib/db/business";
+import type { BusinessSettingsForDisplay } from "@/lib/db/business";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -26,8 +26,11 @@ function formatTime(t: string): string {
   return m === 0 ? `${hour}:00 ${period}` : `${hour}:${String(m).padStart(2, "0")} ${period}`;
 }
 
-export default async function Hero() {
-  const business = await getBusinessSettingsForDisplay();
+export default function Hero({
+  business,
+}: {
+  business: BusinessSettingsForDisplay;
+}) {
   const hoursDays = formatHoursDays(business.closedWeekdays);
   const hoursTime = formatHoursTime(business.openingHours);
 
