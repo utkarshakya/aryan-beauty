@@ -1,109 +1,55 @@
-import { Button, ButtonLink } from "@/components/ui";
+"use client";
 
-type BookingSuccessData = {
-  serviceName: string;
-  startTime: string;
-  name: string;
-  phone: string | null;
-};
+import { useEffect } from "react";
 
 function CheckIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-6 w-6"
-      aria-hidden="true"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
       <path d="M20 6 9 17l-5-5" />
     </svg>
   );
 }
 
-export default function BookingSuccess({
-  success,
-  phoneDisplay,
-  phoneHref,
-  onBookAnother,
-}: {
-  success: BookingSuccessData;
-  phoneDisplay: string;
-  phoneHref: string;
-  onBookAnother: () => void;
-}) {
-  const { serviceName, startTime, name, phone } = success;
-  const formatted = startTime
-    ? new Date(startTime).toLocaleString("en-IN", {
-        dateStyle: "full",
-        timeStyle: "short",
-      })
-    : "";
+function CloseIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="h-4 w-4">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+export default function BookingSuccess({ onDismiss }: { onDismiss: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 5000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
 
   return (
-    <div
+    <section
+      aria-labelledby="booking-success-title"
+      className="mx-auto flex max-w-2xl items-start gap-3 rounded-card border border-success/30 bg-background p-4 shadow-card sm:p-5"
       role="status"
       aria-live="polite"
-      className="rounded-card border border-success/30 bg-success-soft p-4 sm:p-8"
     >
-      <div className="flex flex-col items-center text-center">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-success text-background sm:h-12 sm:w-12">
-          <CheckIcon />
-        </span>
-        <h2 className="mt-3 text-section font-bold tracking-tight sm:mt-4 sm:text-stat">
-          Booking request sent
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success-soft text-success">
+        <CheckIcon />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h2 id="booking-success-title" className="text-body font-semibold text-foreground">
+          Appointment request sent
         </h2>
-        <p className="mt-2 text-muted">Thank you, {name}!</p>
-      </div>
-
-      <dl className="mt-5 space-y-2 rounded-control border border-border bg-background p-3 text-meta sm:mt-6 sm:p-4 sm:text-body">
-        <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
-          <dt className="font-medium text-foreground">Service</dt>
-          <dd className="text-muted sm:text-right">{serviceName}</dd>
-        </div>
-        <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
-          <dt className="font-medium text-foreground">When</dt>
-          <dd className="text-muted sm:text-right">{formatted}</dd>
-        </div>
-        {phone && (
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
-            <dt className="font-medium text-foreground">Phone</dt>
-            <dd className="text-muted sm:text-right">{phone}</dd>
-          </div>
-        )}
-      </dl>
-
-      <div className="mt-5 rounded-control bg-success-soft p-3 text-meta sm:mt-6 sm:p-4 sm:text-body">
-        <p className="font-medium text-foreground">What happens next?</p>
-        <p className="mt-1 text-muted">
-          We&apos;ll contact you using your account details to confirm your
-          appointment. If the time isn&apos;t available, we&apos;ll help you
-          pick another slot.
+        <p className="mt-1 text-meta text-muted sm:text-body">
+          Your request has been sent and will be approved soon.
         </p>
       </div>
-
-      <p className="mt-5 text-center text-meta text-muted sm:mt-6 sm:text-body">
-        Questions?{" "}
-        <a
-          href={phoneHref}
-          className="font-medium text-primary transition-colors hover:text-primary-strong"
-        >
-          Call us on {phoneDisplay}
-        </a>
-      </p>
-
-      <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-6 sm:flex-row sm:gap-3">
-        <Button type="button" variant="secondary" onClick={onBookAnother}>
-          Book another appointment
-        </Button>
-        <ButtonLink href="/services" variant="ghost">
-          Browse services
-        </ButtonLink>
-      </div>
-    </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss appointment confirmation"
+        className="-my-2 -mr-2 flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-neutral-soft hover:text-foreground focus-ring"
+      >
+        <CloseIcon />
+      </button>
+    </section>
   );
 }

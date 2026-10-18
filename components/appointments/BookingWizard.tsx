@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  startTransition,
   useActionState,
   useEffect,
   useRef,
@@ -37,19 +36,17 @@ const PHONE_RE = /^[6-9]\d{9}$/;
 export default function BookingWizard({
   services,
   preselectedServiceId,
-  phoneDisplay,
-  phoneHref,
   hoursDays,
   hoursTime,
   timeZone,
+  onBookingComplete,
 }: {
   services: Service[];
   preselectedServiceId?: number;
-  phoneDisplay: string;
-  phoneHref: string;
   hoursDays: string;
   hoursTime: string;
   timeZone: string;
+  onBookingComplete: () => void;
 }) {
   // A service chosen from a service card skips the first step entirely.
   const startStep: BookingStep = preselectedServiceId ? 2 : 1;
@@ -188,19 +185,6 @@ export default function BookingWizard({
         ? Boolean(selectedDate) && Boolean(selectedSlot) && !loadingSlots && !slotFailed
         : true;
 
-  const resetToStart = () => {
-    goToStep(1);
-    setSelectedServiceId(
-      preselectedServiceId != null ? String(preselectedServiceId) : "",
-    );
-    setSelectedDate("");
-    setSelectedSlot("");
-    setPhone("");
-    setSlotState({ key: "", slots: [] });
-    setSlotErrorKey(null);
-    setClientPhoneError(null);
-  };
-
   const submit = (formData: FormData) => {
     const submittedPhone = String(formData.get("phone") ?? "").trim();
     if (submittedPhone && !PHONE_RE.test(submittedPhone)) {
@@ -214,17 +198,7 @@ export default function BookingWizard({
   if (state && "success" in state) {
     return (
       <BookingSuccess
-        success={state.success}
-        phoneDisplay={phoneDisplay}
-        phoneHref={phoneHref}
-        onBookAnother={() => {
-          const resetData = new FormData();
-          resetData.set("__reset", "1");
-          resetToStart();
-          startTransition(() => {
-            formAction(resetData);
-          });
-        }}
+        onDismiss={onBookingComplete}
       />
     );
   }

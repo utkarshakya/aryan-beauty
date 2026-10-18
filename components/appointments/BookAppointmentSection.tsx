@@ -8,16 +8,12 @@ import BookingWizard from "./BookingWizard";
 export default function BookAppointmentSection({
   services,
   preselectedServiceId,
-  phoneDisplay,
-  phoneHref,
   hoursDays,
   hoursTime,
   timeZone,
 }: {
   services: Service[];
   preselectedServiceId?: number;
-  phoneDisplay: string;
-  phoneHref: string;
   hoursDays: string;
   hoursTime: string;
   timeZone: string;
@@ -35,11 +31,10 @@ export default function BookAppointmentSection({
         <BookingWizard
           services={services}
           preselectedServiceId={preselectedServiceId}
-          phoneDisplay={phoneDisplay}
-          phoneHref={phoneHref}
           hoursDays={hoursDays}
           hoursTime={hoursTime}
           timeZone={timeZone}
+          onBookingComplete={() => setOpen(false)}
         />
       </div>
     );

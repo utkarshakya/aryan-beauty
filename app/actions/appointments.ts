@@ -161,6 +161,7 @@ export async function createAppointment(
       return { serviceName: service.name, startTime };
     });
 
+    revalidatePath("/appointments");
     return {
       success: {
         serviceName: result.serviceName,
