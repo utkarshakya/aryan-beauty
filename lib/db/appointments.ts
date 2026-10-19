@@ -28,6 +28,56 @@ export type CancellationState = {
   error?: string;
 };
 
+
+/**
+ * Convert a business-local wall-clock date/time into an absolute instant.
+ * The iterative correction avoids interpreting the value in the server's
+ * local time zone. Invalid/nonexistent local times are rejected.
+ */
+function businessLocalDateTimeToInstant(
+  date: string,
+  time: string,
+  timeZone: string,
+): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const targetAsUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
+  let candidate = targetAsUtc;
+
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const parts = formatter.formatToParts(new Date(candidate));
+    const values = Object.fromEntries(
+      parts.filter((part) => part.type !== "literal").map((part) => [part.type, Number(part.value)]),
+    );
+    const representedAsUtc = Date.UTC(
+      values.year,
+      values.month - 1,
+      values.day,
+      values.hour,
+      values.minute,
+      values.second,
+    );
+    const correction = targetAsUtc - representedAsUtc;
+    if (correction === 0) {
+      return new Date(candidate);
+    }
+    candidate += correction;
+  }
+
+  throw new RangeError(`Local date/time ${date} ${time} does not exist in time zone ${timeZone}`);
+}
+
 // ─── Customer Queries ───────────────────────────────────────────────────────
 
 export async function getAppointmentsByCustomerId(
@@ -98,7 +148,7 @@ export async function getAvailableSlots(
   });
   if (!service) return [];
 
-  const dayOfWeek = new Date(date + "T00:00:00").getDay();
+  // `date` is a business-local calendar date, so derive its weekday in UTC.\n  const dayOfWeek = new Date(date + "T00:00:00Z").getUTCDay();
   const dayName = WEEKDAY_NAMES[dayOfWeek];
 
   if (business.closedWeekdays.includes(dayOfWeek)) {
@@ -118,8 +168,7 @@ export async function getAvailableSlots(
   const [openHour, openMin] = dayHours.open.split(":").map(Number);
   const [closeHour, closeMin] = dayHours.close.split(":").map(Number);
 
-  const opening = new Date(`${date}T${String(openHour).padStart(2, "0")}:${String(openMin).padStart(2, "0")}:00`);
-  const closing = new Date(`${date}T${String(closeHour).padStart(2, "0")}:${String(closeMin).padStart(2, "0")}:00`);
+  const opening = businessLocalDateTimeToInstant(date, dayHours.open, business.timeZone);\n  const closing = businessLocalDateTimeToInstant(date, dayHours.close, business.timeZone);
 
   const appointments = await prisma.appointment.findMany({
     where: {
