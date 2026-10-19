@@ -81,6 +81,38 @@ describe("inactive services", () => {
   });
 });
 
+describe("business time zone", () => {
+  it("interprets opening hours in the configured business time zone, not the server time zone", async () => {
+    const originalTimeZone = process.env.TZ;
+    process.env.TZ = "UTC";
+
+    try {
+      const service = await seedService("Haircut", true, 30);
+      const { getBusinessSettingsForAvailability } = await import("@/lib/db/business");
+      await getBusinessSettingsForAvailability();
+      await prisma.businessSettings.update({
+        where: { id: 1 },
+        data: { timeZone: "Asia/Kolkata" },
+      });
+
+      const date = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+      const slots = await getAvailableSlots(service.id, date);
+      const openingSlot = slots.find((slot) => slot.value === `${date}T03:30:00.000Z`);
+
+      expect(openingSlot).toBeDefined();
+      expect(openingSlot?.label).toMatch(/9:00/);
+    } finally {
+      if (originalTimeZone === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = originalTimeZone;
+      }
+    }
+  });
+});
+
 describe("booking conflicts", () => {
   const DURATION = 30;
 
