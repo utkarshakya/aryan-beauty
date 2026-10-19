@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { BusinessSettings, Prisma } from "@prisma/client";
+import { cache } from "react";
 
 export type BusinessSettingsFormData = {
   name: string;
@@ -47,7 +48,7 @@ export async function getBusinessSettings(): Promise<BusinessSettings | null> {
   return prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
 }
 
-export async function getBusinessSettingsOrCreate(): Promise<BusinessSettings> {
+async function fetchBusinessSettingsOrCreate(): Promise<BusinessSettings> {
   let settings = await prisma.businessSettings.findFirst({
     orderBy: { id: "asc" },
   });
@@ -102,6 +103,19 @@ export async function getBusinessSettingsOrCreate(): Promise<BusinessSettings> {
   }
   return settings;
 }
+
+/**
+ * Request-scoped dedup: a public page and the `Footer` rendered from its
+ * layout both need the singleton row, so this collapses to one read per
+ * request. The write on first call stays put — it is idempotent, and the
+ * `P2002` retry above already covers the create race, so running it once per
+ * request instead of once per caller is the correct behaviour.
+ *
+ * `cache()` is React's request-scope memoization, not `next/cache`; the row
+ * is never shared between requests. The display/availability mappers below
+ * stay uncached so each caller builds its own object from the shared row.
+ */
+export const getBusinessSettingsOrCreate = cache(fetchBusinessSettingsOrCreate);
 
 export async function getBusinessSettingsForAvailability(): Promise<BusinessSettingsForAvailability> {
   const settings = await getBusinessSettingsOrCreate();

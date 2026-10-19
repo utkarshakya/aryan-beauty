@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Service } from "@prisma/client";
+import { cache } from "react";
 
 export type ServiceWithAppointments = Service & {
   _count: {
@@ -23,12 +24,19 @@ export async function getAllServices(): Promise<ServiceWithAppointments[]> {
   });
 }
 
-export async function getActiveServices() {
+async function fetchActiveServices() {
   return prisma.service.findMany({
     where: { active: true },
     orderBy: [{ category: "asc" }, { name: "asc" }],
   });
 }
+
+/**
+ * Request-scoped dedup — several components on the same render ask for the
+ * active catalogue. React's `cache()` (not the `next/cache` directive): the
+ * result is per-request only and is never shared across requests.
+ */
+export const getActiveServices = cache(fetchActiveServices);
 
 export async function getServiceById(id: number) {
   return prisma.service.findUnique({ where: { id } });

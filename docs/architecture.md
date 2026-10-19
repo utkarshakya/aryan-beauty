@@ -69,10 +69,28 @@ Unused tokens are pruned from the built CSS until a component uses them — that
 
 ### Visual polish conventions
 
-- Use the token-backed `text-meta`, `text-body`, `text-body-lg`, `text-title`, `text-section`, and `text-display` utilities for interface copy. Avoid arbitrary text sizes except the 16px mobile form-control override in `controls.tsx`.
+- Use the token-backed `text-meta`, `text-body`, `text-body-lg`, `text-title`, `text-section`, and `text-display` utilities for interface copy. Avoid arbitrary text sizes except the 16px mobile form-control override in `controls.tsx` — that one is load-bearing, see below.
 - Use `py-section sm:py-section-lg` for full-width public sections so mobile and desktop vertical rhythm stays consistent.
 - Use `primary` for the one main action in a group, `secondary` for a related positive alternative, `outline` for a neutral choice, and `ghost` for low-emphasis navigation or dismissal. Keep destructive actions in `danger` or the `ActionButton` danger tone.
 - Interactive surfaces use the shared motion tokens and reduced-motion kill-switch. Buttons and pills provide hover, active, and visible-focus states; cards use `interactive-surface` only when the whole surface participates in an interaction.
+
+### Mobile root font: px for touch targets, 16px for inputs
+
+`app/globals.css` shrinks the root font on small screens, which quietly breaks any rem-sized control:
+
+| Viewport | Root font | `min-h-11` (2.75rem) | `min-h-12` (3rem) |
+|---|---|---|---|
+| ≥640px | 100% = 16px | 44px ✓ | 48px ✓ |
+| ≤639px | 93.75% = 15px | 41.25px ✗ | 45px ✓ |
+| ≤359px | 90% = 14.4px | 39.6px ✗ | 43.2px ✗ |
+
+- **Touch targets use px literals.** `min-h-[44px]`, `h-[44px] w-[44px]` — never `min-h-11`, which silently renders under 44px on every phone and worse at 320px. This covers standalone controls only: inline text actions (`ActionButton` used inside a sentence) are exempt under WCAG 2.2 target size, so do not blanket-apply it.
+- **Rem is still correct where it tracks the root font on purpose.** `AdminTabBar`'s `sticky top-14 sm:top-16` and the header's `h-14`/`h-16` are deliberately rem: the bar must sit flush against the header at every breakpoint, so it has to shrink with it.
+- **Form controls are `text-[16px] sm:text-sm` on purpose.** At 14px under the 93.75% root they render ~13px, and iOS Safari auto-zooms any focused field below 16px — mid-booking, on the phone-number step. The desktop 14px is intentional; do not "tidy" the mobile value back to `text-sm`.
+
+### Loading convention
+
+Pages `await` their data directly — there is deliberately no `<Suspense>` and no streaming anywhere in the app. Each route segment owns a `loading.tsx` built on `Skeleton`/`SkeletonGroup` (from `components/ui/Skeleton.tsx`, which carries `role="status"`). Route failures are handled by a segment `error.tsx` (plus `global-error.tsx` for root-layout failures), both built on the shared `ErrorState`; admin boundaries render inside the admin shell so navigation survives a crash. Do not introduce `<Suspense>` as a performance optimisation — it changes the loading UX that was designed and verified.
 
 ### Layering (z-index tiers)
 
@@ -155,6 +173,7 @@ Every protected page and every Server Action must perform a server-side check. S
 - Appointment snapshots (`serviceName`, `servicePrice`, `serviceDurationMin`) captured at booking time preserve historical accuracy.
 - `BusinessSettings` is a singleton (one row) controlling scheduling rules and marketing content.
 - `Appointment.status` is a 3-value enum (`pending`/`confirmed`/`cancelled`) with Completed derived from a past `endTime`; `Service.price` is whole rupees (integer); `Service.category` is a fixed allowlist.
+- **Caching: request-scoped only, via React `cache()`.** `next.config.ts` has no `cacheComponents`, so every data page is `force-dynamic` and there is no full-route cache — which means the `revalidatePath()` calls in the server actions currently have nothing to invalidate and are inert. That is known, not a bug to chase. Per-request dedup uses `cache()` imported from `react` (request-scope memoization, *not* `next/cache`), wrapped around the raw DB read rather than the display mapper, so a shared writable row is never aliased across callers. Shared-caching public data across requests (and switching to `cacheTag`/`updateTag`) needs `cacheComponents: true`, which turns on Partial Prerendering app-wide and conflicts with the no-`Suspense` loading convention above — treat it as its own project.
 
 ## Error Handling and Logging
 

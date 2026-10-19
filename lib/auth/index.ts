@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ type AppUserAccess = {
  * Environment IDs exist only to provision the first privileged records and
  * to guarantee that the configured super admin can recover access.
  */
-async function getAppUserAccess(userId: string): Promise<AppUserAccess | null> {
+async function fetchAppUserAccess(userId: string): Promise<AppUserAccess | null> {
   if (getSuperAdminUserIds().includes(userId)) {
     return prisma.user.upsert({
       where: { clerkUserId: userId },
@@ -69,6 +70,18 @@ async function getAppUserAccess(userId: string): Promise<AppUserAccess | null> {
     select: { role: true, status: true },
   });
 }
+
+/**
+ * Request-scoped dedup. The Navbar's access check, `requireActiveUser()` and
+ * the page's own user read all ask for the same id during one render, and
+ * `requireOwnerAdmin()` asks twice — this collapses them to a single query
+ * (and a single bootstrap upsert/create) per request.
+ *
+ * `cache()` is React's request-scope memoization, not the `next/cache`
+ * directive: the result lives only for this render and is never shared
+ * between users or requests.
+ */
+const getAppUserAccess = cache(fetchAppUserAccess);
 
 // ─── Auth Guards ────────────────────────────────────────────────────────────
 

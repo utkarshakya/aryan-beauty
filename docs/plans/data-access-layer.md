@@ -1,14 +1,14 @@
-# Data access layer — per-request dedup and bounded queries
+# Data access layer — per-request dedup, bounded queries, and launch verification
 
 Status: Ready to implement. Next: Phase 1.
-Scope: `lib/db/`, `lib/auth/`, and the three `(site)` pages that inline Prisma. No client-side fetching, no cross-request caching, no new runtime deps.
+Scope: `lib/db/`, `lib/auth/`, and the three `(site)` pages that inline Prisma. No client-side fetching, no cross-request caching, no new runtime deps. Phases 6-7 carry the outstanding launch verification from the finished UI work — they are not code changes.
 Decisions (locked): there is **no separate backend** — do **not** route server components through HTTP; the fix is in-process `cache()` dedup plus bounded SQL; only public-safe reads (active services, business settings) are candidates for cross-request caching and that is deferred to a later plan; per-user data must never be shared-cached.
 
 ## Findings this plan is based on
 
 **Premise correction.** `docs/architecture.md:5` — *"There is no separate frontend or backend service to run."* This is one Next.js full-stack app deployed as a single Netlify app. A server component calling `prisma` is the server doing its own IO, not a client reaching into the database. Adding `fetch("/api/...")` would insert a network round trip plus serialize/deserialize in front of the *same* Postgres query — strictly slower, and it buys nothing because the route handler has no cache either. The real complaint ("this is slow") is valid; the proposed mechanism is not.
 
-**Nothing is cached anywhere.** No `cache()`, no `unstable_cache`, no `'use cache'`, no `cacheComponents` in `next.config.ts` (which contains only `allowedDevOrigins`). Consequence: every `revalidatePath()` in the five `app/actions/*` files is a **no-op** — all 7 data pages are `force-dynamic`, so there is no full-route cache entry to invalidate. The "refresh after mutation" intent is currently inert. Fixing that needs `cacheComponents: true` + `cacheTag`, which enables Partial Prerendering app-wide and makes all rendering dynamic-by-default — that collides with the zero-Suspense decision at `docs/plans/mobile-first-ui.md:61` and deserves its own plan.
+**Nothing is cached anywhere.** No `cache()`, no `unstable_cache`, no `'use cache'`, no `cacheComponents` in `next.config.ts` (which contains only `allowedDevOrigins`). Consequence: every `revalidatePath()` in the five `app/actions/*` files is a **no-op** — all 7 data pages are `force-dynamic`, so there is no full-route cache entry to invalidate. The "refresh after mutation" intent is currently inert. Fixing that needs `cacheComponents: true` + `cacheTag`, which enables Partial Prerendering app-wide and makes all rendering dynamic-by-default — that collides with the standing no-`<Suspense>` loading convention (pages await directly, each segment carries a `loading.tsx`), so it deserves its own plan.
 
 **The same row is read 3× per render.** On `/appointments`: `Navbar`'s `hasAdminAccess` → `getAppUserAccess` (`lib/auth/index.ts:47`), then `requireActiveUser()` → `getAppUserAccess` again, then `prisma.user.findUnique` for the *same* user a third time at `app/(site)/appointments/page.tsx:53`. React `cache()` collapses these to one. The repo never imports `cache` from `react`. `requireOwnerAdmin()` (`lib/auth/index.ts:121-123`) is 2 queries by itself.
 
@@ -27,6 +27,10 @@ Decisions (locked): there is **no separate backend** — do **not** route server
 ## Standing rules (apply to every phase)
 
 - **Definition of done per phase:** `npm run lint` → `typecheck` → `test` → `build` pass before a phase is checked off.
+- **`npm run test` empties the development database** — it truncates `Appointment`, `BusinessSettings`, `Customer`, `Service`, and `User`, and does not reseed. Confirm `.env`'s `DATABASE_URL` points at the dev database before running it, never production (`docs/scripts.md`). Run `npm run db:seed` afterwards if you want demo data back.
+- **`npm run build` fails while `npm run dev` is running.** The dev server writes `.next/dev/types/validator.ts` and the build's TypeScript pass type-checks it. Stop the dev server before building.
+- **Work on a branch off `develop`; leave `main` untouched.**
+- **Measured, not assumed.** Do not tick a checkbox because the build is green, and do not report a check you did not run. Record actual command output.
 - **No new runtime deps.** `cache()` comes from `react`, already installed.
 - **`cache()` wraps the raw DB read, not the display mapper.** Memoize the query; let callers build their own view of the result. This keeps a shared, possibly writable row from being aliased across callers.
 - **`cache()` keys on arguments** — a memoized function with an optional `take`/`limit` correctly produces separate entries per value. No manual key management.
@@ -34,14 +38,16 @@ Decisions (locked): there is **no separate backend** — do **not** route server
 - **Do not touch `revalidatePath`, `next.config.ts`, or add `cacheComponents`** in this plan.
 - **Do not add API routes or `fetch` calls** in this plan.
 
-## Phase 1 — Per-request dedup with React `cache()`
+## Phase 1 — Per-request dedup with React `cache()` — CODE DONE, DoD INCOMPLETE
 
-- [ ] Wrap `getAppUserAccess` (`lib/auth/index.ts:47`) in `cache()`. Biggest single win: collapses the Navbar/guard/page triple lookup to one on every page, and drops `requireOwnerAdmin` to a single query. Key is the `userId` string, so the `null` early-return in `hasAdminAccess` (`lib/auth/index.ts:76`) still short-circuits before the memoized function is reached.
-- [ ] Wrap `getBusinessSettingsOrCreate` (`lib/db/business.ts:50`) in `cache()`. Page + `Footer` share one read. It writes on first call, but it is already idempotent — the `P2002` retry at `lib/db/business.ts:85-96` handles the race, so collapsing to one call per request is correct. Leave `getBusinessSettingsForDisplay`/`getBusinessSettingsForAvailability` uncached so each builds its own object from the shared row.
-- [ ] Wrap `getActiveServices` (`lib/db/services.ts:26`) in `cache()`.
-- [ ] Confirm `cache()` is imported from `react` (not `next/cache`) — this is request-scope memoization, not the cache directive.
+- [x] Wrap `getAppUserAccess` (`lib/auth/index.ts:47`) in `cache()`. Biggest single win: collapses the Navbar/guard/page triple lookup to one on every page, and drops `requireOwnerAdmin` to a single query. Key is the `userId` string, so the `null` early-return in `hasAdminAccess` (`lib/auth/index.ts:76`) still short-circuits before the memoized function is reached. Done as `fetchAppUserAccess` + `const getAppUserAccess = cache(fetchAppUserAccess)` — the function stays module-private, so the export surface is unchanged.
+- [x] Wrap `getBusinessSettingsOrCreate` (`lib/db/business.ts:50`) in `cache()`. Page + `Footer` share one read. It writes on first call, but it is already idempotent — the `P2002` retry at `lib/db/business.ts:85-96` handles the race, so collapsing to one call per request is correct. Leave `getBusinessSettingsForDisplay`/`getBusinessSettingsForAvailability` uncached so each builds its own object from the shared row. Confirmed still uncached and still calling the cached reader.
+- [x] Wrap `getActiveServices` (`lib/db/services.ts:26`) in `cache()`.
+- [x] Confirm `cache()` is imported from `react` (not `next/cache`) — this is request-scope memoization, not the cache directive.
+- **Verified:** `typecheck` ✓ `build` ✓ (Next 16.3, all 13 routes dynamic as before) and `eslint` clean on the three changed files. **Verified by experiment:** `cache()` called outside a React render calls straight through without memoizing and without throwing — so `tests/db/appointments.test.ts:78`, which calls `getActiveServices()` directly, still hits the database exactly as before.
+- **Two consequences to be aware of, both intended:** (1) a rejected promise is memoized too, so a transient failure (e.g. the `P2002` bootstrap-create race) now fails the whole request instead of succeeding on a later caller's retry — louder, not quieter, but it is a behaviour change. (2) Both wrapped functions can *write* (super-admin upsert, bootstrap create, settings create-once). That is safe here because the write is idempotent and runs once per request either way, but it means `cache()` here is dedup-with-side-effects, not a pure read cache.
 
-**Phase 1 DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ `build` ✓ + manual query-count check on `/` and `/admin` via the Postgres query log.
+**Phase 1 DoD — NOT met yet:** `typecheck` ✓ `build` ✓, `eslint` ✓ on changed files only (full-repo `npm run lint` exceeded a 3-minute timeout on this machine and was not completed). Still owed: `npm run test` (⚠ empties the dev database — confirm `.env` first), and the manual query-count check on `/` and `/admin` via the Postgres query log.
 
 ## Phase 2 — Bounded appointment queries
 
@@ -74,15 +80,36 @@ Decisions (locked): there is **no separate backend** — do **not** route server
 
 **Phase 4 DoD:** `lint` ✓ `typecheck` ✓ `test` ✓ `build` ✓, committed separately from Phases 1–3 so it can be reverted alone.
 
-## Phase 5 — Verification
+## Phase 5 — Verification (data layer)
 
-- [ ] `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+- [ ] `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` (stop the dev server first).
 - [ ] Query count on `/appointments`: expect **7 → 5** (Navbar user read, guard user read, page user read, customer+appointments, services, page business read, footer business read → one shared user read, two bounded appointment reads, one services read, one shared business read).
 - [ ] Confirm `npm test` still passes at or above the current count, and that `tests/db/appointments.test.ts` covers the new helpers against the real DB via `tests/helpers/db.ts`.
 
+## Phase 6 — Launch verification backlog (carried from the finished UI work)
+
+Not code work — these are the items the completed UI/mobile-first plan left open, kept here so nothing is dropped on the floor. Both sub-phases are **blocked until a browser is available**; the code is already shipped and neither item may be ticked on the strength of a passing build.
+
+### 6a. Performance and accessibility
+
+- [ ] Re-measure **Lighthouse mobile on `/` and `/services`**, target ≥90. Baseline to beat: **80 (`/`)** and **79 (`/services`)**; the gap is primarily LCP (3.9s / 3.7s) and main-thread JavaScript. Measure again *after* Phase 5 and record before/after — the dedup plus the now-parallel awaits should have moved server response time.
+- [ ] The Clerk `prefetchUI` ceiling is **closed**: no headless-Clerk redesign is in scope. If the score still misses 90 with the third-party JS accounted for, say so with the numbers rather than claiming success.
+- [ ] Re-run the already-installed `@axe-core/cli` (`npm run a11y`) on `/` and `/services` — it reported zero violations with one manual-review item on the home route. Do not install another a11y dependency.
+
+### 6b. Manual viewport matrix
+
+- [ ] At **320 / 390 / 768 px**, in **light and dark**:
+  - no focus-zoom on any input; tap targets ≥44px on standalone controls (remember the px-literal rule in `docs/architecture.md` — `min-h-11` is 39.6px at 320px);
+  - keyboard-only pass: skip link works, logical focus order, focus visible on every interactive element, sane heading hierarchy, contrast spot-check on muted/surface text;
+  - booking wizard happy path, Back preserves state, slot-load error → Retry recovers;
+  - admin tab bar active states and horizontal scroll at 320px; dashboard Filters disclosure opens on mobile and is always open ≥640px;
+  - no dark-mode flash on load;
+  - toasts never cover the wizard's sticky action bar; `ConfirmDialog` focus trap, Escape and backdrop dismissal behave.
+- [ ] The real-phone pass is **not** in this plan — it stays a pre-launch item in `docs/product.md`. This plan only records the dependency.
+
 ## Out of scope (recorded, not fixed here)
 
-- **All `revalidatePath()` calls are currently no-ops** under `force-dynamic`. Real cross-request caching needs `cacheComponents: true` + `'use cache'` + `cacheTag`/`cacheLife`, with `revalidatePath` swapped for `updateTag`. Blast radius: all 8 pages, every segment `loading.tsx`, and the PPR/streaming decision from `docs/plans/mobile-first-ui.md:61`. Worth its own plan.
+- **All `revalidatePath()` calls are currently no-ops** under `force-dynamic`. Real cross-request caching needs `cacheComponents: true` + `'use cache'` + `cacheTag`/`cacheLife`, with `revalidatePath` swapped for `updateTag`. Blast radius: all 8 pages, every segment `loading.tsx`, and the no-`Suspense` loading convention recorded in `docs/architecture.md` ("Loading convention"). Worth its own plan.
 - **`getBusinessSettingsForDisplay` stays uncached across requests** — page and `Footer` each build their own display object from the shared row. Cheap, and it avoids handing the same mutable object to unrelated callers.
 - **Per-user data (`customer`, appointments) is never shared-cached.** It is bounded now, which is what this plan set out to fix; further caching is a privacy and correctness problem, not a performance one.
 - **`getBusinessSettingsForDisplay` is still called twice per public request.** Phase 1 collapses the *query*; collapsing the *render* would mean lifting business settings into the site layout and passing it down, which is a component-graph change with no meaningful win at this scale.
