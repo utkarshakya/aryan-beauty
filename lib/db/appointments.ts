@@ -148,7 +148,8 @@ export async function getAvailableSlots(
   });
   if (!service) return [];
 
-  // `date` is a business-local calendar date, so derive its weekday in UTC.\n  const dayOfWeek = new Date(date + "T00:00:00Z").getUTCDay();
+  // `date` is a business-local calendar date, so derive its weekday in UTC.
+  const dayOfWeek = new Date(date + "T00:00:00Z").getUTCDay();
   const dayName = WEEKDAY_NAMES[dayOfWeek];
 
   if (business.closedWeekdays.includes(dayOfWeek)) {
@@ -165,10 +166,8 @@ export async function getAvailableSlots(
     return [];
   }
 
-  const [openHour, openMin] = dayHours.open.split(":").map(Number);
-  const [closeHour, closeMin] = dayHours.close.split(":").map(Number);
-
-  const opening = businessLocalDateTimeToInstant(date, dayHours.open, business.timeZone);\n  const closing = businessLocalDateTimeToInstant(date, dayHours.close, business.timeZone);
+  const opening = businessLocalDateTimeToInstant(date, dayHours.open, business.timeZone);
+  const closing = businessLocalDateTimeToInstant(date, dayHours.close, business.timeZone);
 
   const appointments = await prisma.appointment.findMany({
     where: {

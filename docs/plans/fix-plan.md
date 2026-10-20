@@ -31,14 +31,21 @@ Scope: booking correctness, data-access efficiency, remaining public-site polish
 - **Booking time-zone correctness for slot generation:** `businessLocalDateTimeToInstant` (`lib/db/appointments.ts:37`) interprets opening/closing hours in the configured business zone; `getAvailableSlots` derives weekday from the business-local calendar date. Regression test added (`tests/db/appointments.test.ts`, commits `660b575` + `c1c010a`).
 - **UI/mobile-first work** from the merged branches (booking wizard, admin tab bar/filters, toast/confirm layer, skeletons, a11y script) — shipped; only polish leftovers and verification remain.
 
-## Phase A — Close the outstanding DoD gaps from completed phases
+## Phase A — Close the outstanding DoD gaps from completed phases — DONE 2026-10-20
 
-- [ ] Confirm `.env` `DATABASE_URL` is the dev database, then run `npm run test`; record the count. `npm run db:seed` afterwards if demo data is wanted.
-- [ ] Full-repo `npm run lint` (Phase 1 only recorded a changed-files pass — the full run previously exceeded a 3-minute timeout; retry and record, note the timeout if it recurs rather than skipping silently).
-- [ ] Manual query-count check on `/` and `/admin` (and `/appointments`) via the Postgres query log — confirm the shared user read and shared business-settings read collapsed as designed.
-- [ ] Re-measure `/appointments` query count against the 7 → 5 expectation (see Phase G), and record the actual number even if it differs.
+- [x] `.env` `DATABASE_URL` confirmed as the dev database (Supabase pooler `aws-0-ap-northeast-1.pooler.supabase.com`, Clerk test-mode keys, user-confirmed) before running tests.
+- [x] `npm run test`: **91/91 passed** (5 files, 69.3s) against the real dev DB. `npm run db:seed` restored after (6 services).
+- [x] Full-repo `npm run lint`: **PASS** — but only after Phase A caught a real defect: the merged time-zone commit (`c1c010a`) left **literal `\n` artifacts inside `lib/db/appointments.ts`** (lines 151/171), breaking both lint and typecheck on the branch as merged. Fixed by restoring real newlines; also removed the 4 now-unused `openHour/openMin/closeHour/closeMin` vars. Verified no other source file contains the artifact.
+- [x] `npm run typecheck`: **PASS** (after the fix).
+- [x] `npm run build`: **PASS** (dev server confirmed stopped; 13 routes, same dynamic footprint as Phase 1 recorded).
+- [x] Query counts measured on `next start` with `DEBUG=prisma:driver-adapter:pg`, one request per server instance (counted `js::query_raw` events):
+  - `/` → **2** (`BusinessSettings` ×1 shared page+Footer, `Service` ×1) — dedup confirmed.
+  - `/services` → **2** (same pattern).
+  - `/appointments` (unauthenticated) → **1** (`BusinessSettings` only; no user-table reads — the session-less path short-circuits before the DB).
+  - `/admin` (unauthenticated) → **1** (same).
+- [ ] **Deferred, needs an authenticated session:** the `/appointments` **7 → 5** count (Navbar/guard/page user read collapse + the two bounded appointment reads). Unauthenticated requests never reach those reads; measuring the authenticated path requires a signed-in browser session — carry to Phase H's manual pass, or measure on demand when a session is available.
 
-**Exit criteria:** all four commands' output recorded; dedup verified by query log, not by inspection.
+**Exit criteria:** met for every measurable item; the authenticated query count is explicitly recorded as deferred, not ticked.
 
 ## Phase B — Bounded appointment queries and pages onto `lib/db/`
 
