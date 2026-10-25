@@ -22,9 +22,11 @@ app/              routes, pages, layouts, server actions, and HTTP route handler
   admin/          owner/staff admin pages
   api/            HTTP route handlers (Clerk webhooks)
   actions/        Server Actions grouped by domain
-  components/     page-specific components
-components/       reusable visual components
+components/       reusable components grouped by domain
   ui/             shared primitives (Button, Container, Card, Badge, PageHeader, EmptyState, SectionHeading, SummaryCard, ActionButton, FormBanner, Toast, Dialog, Skeleton, ErrorState, FilterPill, form controls)
+  layout/         site chrome shared by (site) and admin (Navbar, NavbarClient, AccountButton, ThemeToggle, Footer)
+  home/           homepage sections (Hero, ServicesPreview)
+  services/       service components (public ServiceCard/ServicesFilter/EmptyServices and admin ServiceForm/ServiceEditor)
   appointments/   appointment-specific components
     booking/      booking-wizard shell and its per-step components
   admin/          admin-area components (tab bar, filter disclosure)
@@ -52,6 +54,8 @@ tests/            Vitest tests with helpers
 | Reusable forms, cards, lists, navigation, UI primitives | `components/` |
 | Prisma queries and transactions | `lib/db/` |
 | Prisma client, authorization, business configuration | `lib/` |
+
+**Import rule:** cross-folder imports always use the `@/` alias; relative imports (`./`) may only reach within the same folder. Parent-relative imports (`../`) and `@/app/components` are lint errors (`eslint.config.mjs`). A domain's folder grows vertically (e.g. `appointments/booking/`); promote a domain to `features/<domain>/` only when it owns its own actions, components, and types together.
 
 A server page may read from `lib/db/` directly. A mutation must be a Server Action and must validate input and authorize the caller itself.
 
@@ -100,8 +104,8 @@ Overlapping/sticky UI claims a fixed tier (lower sits behind); never invent an a
 |---|---|---|
 | auto | page content | default |
 | `z-30` | admin tab bar (sticky under the header) | `components/admin/AdminTabBar.tsx` |
-| `z-40` | site header | `app/components/NavbarClient.tsx` |
-| `z-50` | account-menu panel | `app/components/AccountButton.tsx` |
+| `z-40` | site header | `components/layout/NavbarClient.tsx` |
+| `z-50` | account-menu panel | `components/layout/AccountButton.tsx` |
 | `z-[60]` | toast tray | `components/ui/Toast.tsx` |
 | `z-[70]` | booking-wizard sticky action bar | `components/appointments/BookingWizard.tsx` |
 | top layer | `ConfirmDialog` | `components/ui/Dialog.tsx` (native `<dialog>` — above every z-index) |

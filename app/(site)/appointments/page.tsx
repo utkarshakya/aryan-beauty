@@ -6,7 +6,7 @@ import Container from "@/components/ui/Container";
 import { PageHeader, SectionHeading } from "@/components/ui";
 import BookAppointmentSection from "@/components/appointments/BookAppointmentSection";
 import AppointmentGroup from "@/components/appointments/AppointmentGroup";
-import EmptyServices from "@/app/components/EmptyServices";
+import EmptyServices from "@/components/services/EmptyServices";
 
 const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

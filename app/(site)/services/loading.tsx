@@ -1,6 +1,6 @@
 import Container from "@/components/ui/Container";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
-import { serviceGridClasses } from "@/app/components/serviceGrid";
+import { serviceGridClasses } from "@/components/services/serviceGrid";
 
 export default function Loading() {
   return (

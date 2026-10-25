@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getBusinessSettingsForDisplay } from "@/lib/db/business";
-import Hero from "@/app/components/Hero";
-import ServicesPreview from "@/app/components/ServicesPreview";
+import Hero from "@/components/home/Hero";
+import ServicesPreview from "@/components/home/ServicesPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -22,4 +22,3 @@ export default async function Home() {
     </>
   );
 }
-

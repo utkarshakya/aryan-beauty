@@ -1,5 +1,5 @@
-import ServiceCard from "./ServiceCard";
-import { serviceGridClasses } from "./serviceGrid";
+import ServiceCard from "@/components/services/ServiceCard";
+import { serviceGridClasses } from "@/components/services/serviceGrid";
 import Container from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui";

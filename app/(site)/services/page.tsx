@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getBusinessSettingsForDisplay } from "@/lib/db/business";
-import ServicesFilter from "@/app/components/ServicesFilter";
+import ServicesFilter from "@/components/services/ServicesFilter";
 
 export const dynamic = "force-dynamic";
 
