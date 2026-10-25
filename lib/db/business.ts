@@ -44,10 +44,6 @@ export type BusinessSettingsForDisplay = {
   closedWeekdays: number[];
 };
 
-export async function getBusinessSettings(): Promise<BusinessSettings | null> {
-  return prisma.businessSettings.findFirst({ orderBy: { id: "asc" } });
-}
-
 async function fetchBusinessSettingsOrCreate(): Promise<BusinessSettings> {
   let settings = await prisma.businessSettings.findFirst({
     orderBy: { id: "asc" },

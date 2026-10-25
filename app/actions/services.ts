@@ -6,7 +6,6 @@ import { SERVICE_CATEGORIES } from "@/lib/constants";
 import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
 import {
   getAllServices,
-  getActiveServices,
   createService,
   updateService,
   toggleService,
@@ -18,10 +17,6 @@ const isActiveValue = (value: FormDataEntryValue | null) =>
 export async function getServicesAction() {
   await requireOwnerAdmin();
   return getAllServices();
-}
-
-export async function getActiveServicesAction() {
-  return getActiveServices();
 }
 
 export async function createServiceAction(

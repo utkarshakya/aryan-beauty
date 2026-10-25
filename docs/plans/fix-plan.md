@@ -1,6 +1,6 @@
 # Fix branch — unified implementation plan
 
-Status: Phases A–B done (evidence recorded in-line). Next: Phase C — dead-code cleanup, as its own commit. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
+Status: Phases A–C done (evidence recorded in-line; C is its own commit). Next: Phase D — concurrent double-booking protection, the correctness-critical one. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
 Branch: `fix` (created from `data-access-dedup`, which merged `ai/ui-polishing` and `develop`). All work happens here; `develop` and `main` stay untouched.
 Scope: booking correctness, data-access efficiency, remaining public-site polish, and launch verification — consolidated from `docs/plans/data-access-layer.md` and `docs/plans/booking-correctness-and-data-access-plan.md` (both deleted; git history is the archive).
 
@@ -76,14 +76,23 @@ Scope: booking correctness, data-access efficiency, remaining public-site polish
 
 **Exit criteria:** DoD commands pass with recorded output; new tests pass against the real DB; public routes byte-count identical to Phase A. The authenticated query count and authenticated render parity are explicitly deferred, not ticked.
 
-## Phase C — Dead-code cleanup (separate commit)
+## Phase C — Dead-code cleanup (separate commit) — DONE 2026-10-25
 
-- [ ] Re-confirm zero importers immediately before deleting; re-run the grep after.
-- [ ] Delete: `getUpcomingAppointmentsByCustomer`, `getRecentHistory`, `getAppointmentsByCustomerId`, `getCustomerWithAppointments` (`lib/db/appointments.ts`), `getCustomerById` (`lib/db/customers.ts`), `getBusinessSettings` (`lib/db/business.ts`), unused read actions `getMyProfile`, `getCustomerDetailAction` (`app/actions/customers.ts`), `getActiveServicesAction` (`app/actions/services.ts`).
-- [ ] **Keep** `getCustomerWithAppointments` in `customers.ts` (used by `app/actions/customers.ts:118`) and **keep** `getActiveServices` in `services.ts` — both are stubbed in `tests/actions/error-shape.test.ts`, which mocks by module export name. Delete only the `appointments.ts` duplicate.
-- [ ] Note: deleting `getActiveServicesAction` (the one read action with no `require*()` guard) removes an inconsistency rather than fixing it.
+- [x] Zero importers re-confirmed immediately before deleting (grep across `lib/`, `app/`, `components/`, `tests/`), and re-run after — **no matches remain** for any deleted name outside this plan.
+- [x] Deleted: `getUpcomingAppointmentsByCustomer`, `getRecentHistory`, `getAppointmentsByCustomerId`, `getCustomerWithAppointments` (duplicate in `lib/db/appointments.ts`), `getCustomerById` (`lib/db/customers.ts`), `getBusinessSettings` (`lib/db/business.ts`), `getMyProfile` and `getCustomerDetailAction` (`app/actions/customers.ts`), `getActiveServicesAction` (`app/actions/services.ts`). Unused imports (`prisma`/`getCustomerByUserId`/`CustomerProfile` in customers actions, `getActiveServices` in services actions) dropped with them.
+- [x] **Kept** `getCustomerWithAppointments` in `customers.ts` and `getActiveServices` in `services.ts`; `tests/actions/error-shape.test.ts` mocks by export name and was left untouched. Only the `appointments.ts` duplicate went.
+- [x] Note stands: deleting `getActiveServicesAction` (the one read action with no `require*()` guard) removes an inconsistency rather than fixing it — and it also removes an unguarded, remotely-callable `"use server"` export, which shrinks the attack surface.
 
-**Exit criteria:** DoD commands pass; committed separately from Phases B/D so it reverts alone.
+**Consequences recorded (not silently absorbed):**
+
+- Deleting `getCustomerDetailAction` — the only caller — leaves `getCustomerWithAppointments` (`lib/db/customers.ts:59`) with **zero callers**. It is kept because the plan says keep it; a follow-up should either use it or drop it.
+- Deleting `getMyProfile` likewise leaves `getCustomerByUserId` (`lib/db/customers.ts:12`) with zero callers. It is **not** on the delete list, so it was left alone — same follow-up.
+- `tests/db/appointments.test.ts` lost one case, *"returns only the requesting customer's appointments"*, because it exercised `getAppointmentsByCustomerId`. The same property is covered by *"never returns another user's appointments"* in the new `user-keyed appointment lists` suite. Test count 97 → **96**.
+- The freshly committed `docs/backend-api-audit.md` (rows for `getMyProfile`, `getCustomerDetailAction`, `getActiveServicesAction`) and `docs/plans/backend-hardening-plan.md` (items 11 and 15) now describe actions that no longer exist — deletion resolves those items outright. **Those docs were not edited** (separate plan, out of scope here); they need a refresh by their owner.
+
+**Evidence (2026-10-25):** `npm run lint` **exit 0**; `npm run typecheck` **exit 0**; `npm run test` → **96/96 passed** (5 files, 82.60s) against the real dev DB, `npm run db:seed` after → **6 services**; `npm run build` → **exit 0** with the dev server confirmed stopped, 13 routes — same footprint as Phases A/B.
+
+**Exit criteria:** met — DoD commands pass with recorded output; ready to commit on its own so it reverts alone.
 
 ## Phase D — Concurrent double-booking protection
 

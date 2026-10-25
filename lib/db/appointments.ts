@@ -80,38 +80,6 @@ function businessLocalDateTimeToInstant(
 
 // ─── Customer Queries ───────────────────────────────────────────────────────
 
-export async function getAppointmentsByCustomerId(
-  customerId: number
-): Promise<AppointmentWithRelations[]> {
-  return prisma.appointment.findMany({
-    where: { customerId },
-    include: { service: true, customer: true },
-    orderBy: { startTime: "desc" },
-  });
-}
-
-export async function getUpcomingAppointmentsByCustomer(
-  customerId: number,
-  now: Date = new Date()
-): Promise<AppointmentWithRelations[]> {
-  const appointments = await getAppointmentsByCustomerId(customerId);
-  return appointments.filter(
-    (a) => a.startTime >= now && a.status !== "cancelled"
-  );
-}
-
-export async function getRecentHistory(
-  customerId: number,
-  limit: number = 10
-): Promise<AppointmentWithRelations[]> {
-  const appointments = await getAppointmentsByCustomerId(customerId);
-  const upcoming = await getUpcomingAppointmentsByCustomer(customerId);
-  const upcomingIds = new Set(upcoming.map((a) => a.id));
-  return appointments
-    .filter((a) => !upcomingIds.has(a.id))
-    .slice(0, limit);
-}
-
 /** Cap on the upcoming list — generous so the UI never silently truncates. */
 export const MAX_UPCOMING = 50;
 /** Cap on the history list. */
@@ -163,18 +131,6 @@ export async function getAppointmentById(
   return prisma.appointment.findUnique({
     where: { id },
     include: { customer: true, service: true },
-  });
-}
-
-export async function getCustomerWithAppointments(customerId: number) {
-  return prisma.customer.findUnique({
-    where: { id: customerId },
-    include: {
-      appointments: {
-        include: { service: true },
-        orderBy: { startTime: "desc" },
-      },
-    },
   });
 }
 

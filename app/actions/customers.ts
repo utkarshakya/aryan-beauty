@@ -5,27 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
 import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
 import {
-  getCustomerByUserId,
   getWalkInCustomers,
   linkWalkInCustomer,
   updateCustomerProfile,
-  getCustomerWithAppointments,
-  type CustomerProfile,
   type WalkInCustomer,
 } from "@/lib/db/customers";
 
 // ─── Customer Profile ───────────────────────────────────────────────────────
-
-export async function getMyProfile(): Promise<CustomerProfile | null> {
-  const userId = await requireActiveUser();
-
-  const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!appUser) return null;
-
-  return getCustomerByUserId(appUser.id);
-}
 
 export async function updateMyProfile(
   _prevState: { errors?: Record<string, string>; success?: string },
@@ -111,9 +97,4 @@ export async function linkWalkInCustomerAction(
   }
 
   return { success: "Walk-in customer linked successfully" };
-}
-
-export async function getCustomerDetailAction(customerId: number) {
-  await requireAdmin();
-  return getCustomerWithAppointments(customerId);
 }

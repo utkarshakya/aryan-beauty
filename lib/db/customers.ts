@@ -28,25 +28,6 @@ export async function getCustomerByUserId(
   });
 }
 
-export async function getCustomerById(
-  id: number
-): Promise<CustomerProfile | null> {
-  return prisma.customer.findUnique({
-    where: { id },
-    include: {
-      user: {
-        select: {
-          clerkUserId: true,
-          email: true,
-          name: true,
-          role: true,
-          status: true,
-        },
-      },
-    },
-  });
-}
-
 export async function getWalkInCustomers(): Promise<WalkInCustomer[]> {
   return prisma.customer.findMany({
     where: { userId: null },

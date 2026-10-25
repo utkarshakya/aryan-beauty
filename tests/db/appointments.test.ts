@@ -12,7 +12,6 @@ import {
   confirmAppointment,
   adminCancelAppointment,
   restoreAppointment,
-  getAppointmentsByCustomerId,
   getUpcomingAppointmentsForUser,
   getRecentHistoryForUser,
   MAX_HISTORY,
@@ -186,19 +185,6 @@ describe("ownership", () => {
 
     expect(await cancelAppointment(appointment.id, bob.id)).toBe(false);
     expect(await cancelAppointment(appointment.id, alice.id)).toBe(true);
-  });
-
-  it("returns only the requesting customer's appointments", async () => {
-    const service = await seedService();
-    const { customer: alice } = await seedCustomer("Alice");
-    const { customer: bob } = await seedCustomer("Bob");
-    const day = futureDate(1, 12);
-    await seedAppointment(alice.id, service.id, day, "pending");
-    await seedAppointment(bob.id, service.id, futureDate(2, 12), "pending");
-
-    const aliceAppointments = await getAppointmentsByCustomerId(alice.id);
-    expect(aliceAppointments).toHaveLength(1);
-    expect(aliceAppointments[0].customerId).toBe(alice.id);
   });
 });
 
