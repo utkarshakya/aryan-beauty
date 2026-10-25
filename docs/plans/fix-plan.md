@@ -1,6 +1,6 @@
 # Fix branch — unified implementation plan
 
-Status: Ready to implement. Next: Phase A.
+Status: Phases A–B done (evidence recorded in-line). Next: Phase C — dead-code cleanup, as its own commit. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
 Branch: `fix` (created from `data-access-dedup`, which merged `ai/ui-polishing` and `develop`). All work happens here; `develop` and `main` stay untouched.
 Scope: booking correctness, data-access efficiency, remaining public-site polish, and launch verification — consolidated from `docs/plans/data-access-layer.md` and `docs/plans/booking-correctness-and-data-access-plan.md` (both deleted; git history is the archive).
 
@@ -47,20 +47,34 @@ Scope: booking correctness, data-access efficiency, remaining public-site polish
 
 **Exit criteria:** met for every measurable item; the authenticated query count is explicitly recorded as deferred, not ticked.
 
-## Phase B — Bounded appointment queries and pages onto `lib/db/`
+## Phase B — Bounded appointment queries and pages onto `lib/db/` — DONE 2026-10-25
 
-- [ ] Replace `getUpcomingAppointmentsByCustomer` and `getRecentHistory` (`lib/db/appointments.ts:93,103`) — both currently fetch every appointment and filter in memory — with two helpers keyed on the **app-user id**, filtering through the relation so no customer lookup is needed:
-  - `getUpcomingAppointmentsForUser(userId, now?)` — `where: { customer: { userId }, startTime: { gte: now }, status: { not: "cancelled" } }`, `orderBy: { startTime: "desc" }`, `take: MAX_UPCOMING`.
-  - `getRecentHistoryForUser(userId, now?, limit = 10)` — `where: { customer: { userId }, OR: [{ startTime: { lt: now } }, { status: "cancelled" }] }`, `orderBy: { startTime: "desc" }`, `take: limit`.
-- [ ] The `OR` arm is load-bearing: a **cancelled future booking is not upcoming** and must still appear in history.
-- [ ] `now` defaults to `new Date()` and is a parameter so tests can pin it. Keep `MAX_UPCOMING` generous.
-- [ ] Drop the vestigial `a && a.startTime` guards (`startTime`/`endTime` are non-nullable).
-- [ ] Return `Appointment` rows **unjoined** — `AppointmentGroup` renders only denormalized columns (`serviceName`/`servicePrice`/`serviceDurationMin`, `startTime`/`endTime`/`status`).
-- [ ] `app/(site)/appointments/page.tsx` becomes a single `Promise.all` over the four helpers (settings, services, upcoming, history); move `MAX_HISTORY` and the split into `lib/db`; delete the `prisma` import. **Leave the `Number("abc")` → `NaN` guard on `?serviceId=` alone** — it is load-bearing.
-- [ ] `app/(site)/services/page.tsx` → `getActiveServices()`; `app/(site)/page.tsx` → `getActiveServices(3)` via an optional `take` param (no-arg callers in `app/actions/services.ts` and tests are unaffected).
-- [ ] Re-grep `prisma` imports under `app/` afterwards — `not-found.tsx` and `Footer.tsx` still legitimately use it.
+- [x] Two helpers keyed on the **app-user id**, filtering through the relation — no customer lookup, no in-memory filtering:
+  - `getUpcomingAppointmentsForUser(userId, now?)` (`lib/db/appointments.ts`) — `where: { customer: { userId }, startTime: { gte: now }, status: { not: "cancelled" } }`, `orderBy: { startTime: "desc" }`, `take: MAX_UPCOMING`.
+  - `getRecentHistoryForUser(userId, now?, limit = MAX_HISTORY)` — `where: { customer: { userId }, OR: [{ startTime: { lt: now } }, { status: "cancelled" }] }`, `orderBy: { startTime: "desc" }`, `take: limit`.
+  - Both return unjoined `Appointment` rows; `now` defaults to `new Date()` and is a parameter; `MAX_UPCOMING = 50` (generous); `MAX_HISTORY = 10` moved out of the page into `lib/db/appointments.ts`.
+- [x] The `OR` arm is covered by a test: a cancelled future booking lands in history and never in upcoming.
+- [x] The vestigial `a && a.startTime` guards went away with the page's in-memory filter; `getAvailableSlots`' own guards were left alone (out of this phase's scope).
+- [x] `app/(site)/appointments/page.tsx` is a single `Promise.all` over the four helpers (settings, services, upcoming, history) and the `prisma` import is deleted. The `Number("abc")` → `NaN` guard on `?serviceId=` is untouched.
+  - Supporting change: `fetchAppUserAccess` now also selects `id`, and a new cached `getAppUserId(clerkUserId)` (`lib/auth/index.ts`) exposes it — so the Navbar check, `requireActiveUser()` and the page share **one** `User` read instead of the page adding its own. The page falls back to id `-1` (matches no customer) in the impossible case, mirroring the old code.
+- [x] `app/(site)/services/page.tsx` → `getActiveServices()`; `app/(site)/page.tsx` → `getActiveServices(3)` via the new optional `take` param (no-arg callers in `app/actions/services.ts` and tests unaffected; `take` is part of the `cache()` key).
+- [x] Re-grep `prisma` imports under `app/`: **zero** remaining in any page/component. The only `app/` importers left are `app/actions/appointments.ts` and `app/actions/customers.ts`, which legitimately use `prisma` for transactions/upserts. **Recorded discrepancy:** the expectation that `not-found.tsx` and `Footer.tsx` still import `@/lib/prisma` is stale — `Footer` reads through `getBusinessSettingsForDisplay()` and neither `not-found.tsx` file imports prisma at all. Nothing to fix, the note was simply wrong.
 
-**Exit criteria:** DoD commands pass; new `tests/db/appointments.test.ts` cases (cancelled-future → history; history capped at `limit`; upcoming excludes cancelled) pass against the real DB via `tests/helpers/db.ts`; `/`, `/services`, `/appointments` render identically (split, `?serviceId=` preselect, empty-services state); query log shows `/appointments` at **5** reads (was 7).
+**Evidence (2026-10-25, dev DB + Clerk test keys re-confirmed before running):**
+
+- `npm run lint` → **exit 0**. `npm run typecheck` → **exit 0**.
+- `npm run test` → **97/97 passed** (5 files, 91.70s; re-run after the final touch: 97/97 in 83.90s) against the real dev DB — 91 baseline + 6 new cases (cancelled-future → history; upcoming excludes cancelled; history capped at `limit`; history defaults to `MAX_HISTORY`; unjoined rows; no cross-user leakage). `npm run db:seed` after → **6 services**.
+- `npm run build` → **exit 0** (dev server confirmed stopped — only the two MCP node processes were running): 13 routes + middleware proxy, same footprint as Phase A.
+- Query log on `next start` with `DEBUG=prisma:driver-adapter:pg` (events land on **stderr**, one request per instance):
+  - `/` → **2** (`BusinessSettings` ×1 shared page+Footer, `Service` ×1 with `LIMIT 3` — proves the `take` param).
+  - `/services` → **2** (same pattern).
+  - `/appointments` (unauthenticated) → **1** (`BusinessSettings` only; the response is the Clerk sign-in shell, the page itself does not render).
+  - `/admin` (unauthenticated) → **1**.
+  - All four match Phase A's recorded baselines exactly — moving the pages onto `lib/db/` changed no public-route query count.
+- **Not measured — authenticated `/appointments` 7 → 5.** Still blocked on a signed-in browser session, exactly as Phase A recorded. Composition by inspection: 1 user read (Navbar + guard + page share one cached `fetchAppUserAccess`) + `BusinessSettings` + `Service` + upcoming + history = **5**. The checkbox stays unticked until Phase H's manual pass can measure it.
+- Render parity: `/` (3 service cards) and `/services` (6 services) fetched as HTML from `next start`, both 200 with real content; `/appointments` unauthenticated still returns the Clerk sign-in shell — no behaviour change. Authenticated parity (upcoming/history split, `?serviceId=` preselect, empty-services state) needs a session → Phase H.
+
+**Exit criteria:** DoD commands pass with recorded output; new tests pass against the real DB; public routes byte-count identical to Phase A. The authenticated query count and authenticated render parity are explicitly deferred, not ticked.
 
 ## Phase C — Dead-code cleanup (separate commit)
 

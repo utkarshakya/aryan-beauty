@@ -24,17 +24,20 @@ export async function getAllServices(): Promise<ServiceWithAppointments[]> {
   });
 }
 
-async function fetchActiveServices() {
+async function fetchActiveServices(take?: number) {
   return prisma.service.findMany({
     where: { active: true },
     orderBy: [{ category: "asc" }, { name: "asc" }],
+    take,
   });
 }
 
 /**
  * Request-scoped dedup — several components on the same render ask for the
  * active catalogue. React's `cache()` (not the `next/cache` directive): the
- * result is per-request only and is never shared across requests.
+ * result is per-request only and is never shared across requests. The
+ * optional `take` is part of the cache key, so a limited preview never
+ * satisfies (or poisons) an unbounded caller.
  */
 export const getActiveServices = cache(fetchActiveServices);
 

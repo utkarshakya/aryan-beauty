@@ -112,6 +112,51 @@ export async function getRecentHistory(
     .slice(0, limit);
 }
 
+/** Cap on the upcoming list — generous so the UI never silently truncates. */
+export const MAX_UPCOMING = 50;
+/** Cap on the history list. */
+export const MAX_HISTORY = 10;
+
+/**
+ * The customer's upcoming visits, keyed on the application user id and
+ * filtered through the relation so no `Customer` lookup is needed. A
+ * cancelled booking is never upcoming, at any date.
+ */
+export async function getUpcomingAppointmentsForUser(
+  userId: number,
+  now: Date = new Date()
+): Promise<Appointment[]> {
+  return prisma.appointment.findMany({
+    where: {
+      customer: { userId },
+      startTime: { gte: now },
+      status: { not: "cancelled" },
+    },
+    orderBy: { startTime: "desc" },
+    take: MAX_UPCOMING,
+  });
+}
+
+/**
+ * The customer's recent history: everything that is not upcoming. The `OR`
+ * arm is load-bearing — a cancelled booking still sits in the future but has
+ * already happened from the customer's point of view, so it belongs here.
+ */
+export async function getRecentHistoryForUser(
+  userId: number,
+  now: Date = new Date(),
+  limit: number = MAX_HISTORY
+): Promise<Appointment[]> {
+  return prisma.appointment.findMany({
+    where: {
+      customer: { userId },
+      OR: [{ startTime: { lt: now } }, { status: "cancelled" }],
+    },
+    orderBy: { startTime: "desc" },
+    take: limit,
+  });
+}
+
 export async function getAppointmentById(
   id: number
 ): Promise<AppointmentWithRelations | null> {

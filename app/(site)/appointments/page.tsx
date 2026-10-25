@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
-import { requireActiveUser } from "@/lib/auth";
+import { getAppUserId, requireActiveUser } from "@/lib/auth";
 import { getBusinessSettingsForDisplay } from "@/lib/db/business";
+import { getActiveServices } from "@/lib/db/services";
+import {
+  getRecentHistoryForUser,
+  getUpcomingAppointmentsForUser,
+} from "@/lib/db/appointments";
 import Container from "@/components/ui/Container";
 import { PageHeader, SectionHeading } from "@/components/ui";
 import BookAppointmentSection from "@/components/appointments/BookAppointmentSection";
@@ -39,8 +43,6 @@ export const metadata: Metadata = {
   description: "View and manage your appointments at Unknown Beauty.",
 };
 
-const MAX_HISTORY = 10;
-
 export default async function AppointmentsPage({
   searchParams,
 }: {
@@ -48,28 +50,18 @@ export default async function AppointmentsPage({
 }) {
   const { serviceId } = await searchParams;
   const requestedServiceId = Number(serviceId);
-  const userId = await requireActiveUser();
+  const clerkUserId = await requireActiveUser();
+  // `requireActiveUser()` already redirected when the row is missing, so this
+  // only guards the impossible: id -1 matches no customer, so both lists come
+  // back empty rather than erroring.
+  const appUserId = (await getAppUserId(clerkUserId)) ?? -1;
 
-  const appUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  const [customer, services, business] = await Promise.all([
-    prisma.customer.findUnique({
-      where: { userId: appUser?.id ?? -1 },
-      include: {
-        appointments: {
-          orderBy: { startTime: "desc" },
-        },
-      },
-    }),
-    prisma.service.findMany({
-      where: { active: true },
-      orderBy: [{ category: "asc" }, { name: "asc" }],
-    }),
+  const [services, business, upcoming, history] = await Promise.all([
+    getActiveServices(),
     getBusinessSettingsForDisplay(),
+    getUpcomingAppointmentsForUser(appUserId),
+    getRecentHistoryForUser(appUserId),
   ]);
-
-  const now = new Date();
 
   // Only honour a `?serviceId=` that names an active service. Number("abc") is
   // NaN, which is truthy — without this the wizard would open on a service that
@@ -79,15 +71,6 @@ export default async function AppointmentsPage({
   )
     ? requestedServiceId
     : undefined;
-
-  const upcoming =
-    customer?.appointments.filter(
-      (a) => a && a.startTime && new Date(a.startTime) >= now && a.status !== "cancelled",
-    ) ?? [];
-  const history =
-    customer?.appointments
-      .filter((a) => a && !upcoming.some((u) => u.id === a.id))
-      .slice(0, MAX_HISTORY) ?? [];
 
   return (
     <Container size="narrow" className="py-10 sm:py-16">

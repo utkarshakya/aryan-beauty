@@ -13,6 +13,9 @@ import {
   adminCancelAppointment,
   restoreAppointment,
   getAppointmentsByCustomerId,
+  getUpcomingAppointmentsForUser,
+  getRecentHistoryForUser,
+  MAX_HISTORY,
 } from "@/lib/db/appointments";
 
 beforeEach(async () => {
@@ -32,6 +35,13 @@ function futureDate(days: number, hours = 0, minutes = 0) {
 
 function ymd(d: Date) {
   return d.toISOString().slice(0, 10);
+}
+
+function pastDate(days: number, hours = 12, minutes = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
 }
 
 async function seedCustomer(name = "Alice") {
@@ -233,5 +243,96 @@ describe("guarded status transitions", () => {
     expect(await restoreAppointment(upcoming.id)).toBe(true);
     expect(await restoreAppointment(upcoming.id)).toBe(false);
     expect(await restoreAppointment(past.id)).toBe(false);
+  });
+});
+
+describe("user-keyed appointment lists", () => {
+  it("sends a cancelled future booking to history, never to upcoming", async () => {
+    const service = await seedService();
+    const { user, customer } = await seedCustomer("Alice");
+    const cancelled = await seedAppointment(customer.id, service.id, futureDate(1, 12), "cancelled");
+
+    const now = new Date();
+    const upcoming = await getUpcomingAppointmentsForUser(user.id, now);
+    const history = await getRecentHistoryForUser(user.id, now);
+
+    expect(upcoming.map((a) => a.id)).not.toContain(cancelled.id);
+    expect(history.map((a) => a.id)).toContain(cancelled.id);
+  });
+
+  it("keeps cancelled bookings out of upcoming while a confirmed booking stays", async () => {
+    const service = await seedService();
+    const { user, customer } = await seedCustomer("Alice");
+    const confirmed = await seedAppointment(customer.id, service.id, futureDate(2, 12), "confirmed");
+    await seedAppointment(customer.id, service.id, futureDate(3, 12), "cancelled");
+
+    const upcoming = await getUpcomingAppointmentsForUser(user.id, new Date());
+
+    expect(upcoming.map((a) => a.id)).toEqual([confirmed.id]);
+  });
+
+  it("caps history at the requested limit, newest first", async () => {
+    const service = await seedService();
+    const { user, customer } = await seedCustomer("Alice");
+    const oldest = await seedAppointment(customer.id, service.id, pastDate(3));
+    const middle = await seedAppointment(customer.id, service.id, pastDate(2));
+    const newest = await seedAppointment(customer.id, service.id, pastDate(1));
+
+    const history = await getRecentHistoryForUser(user.id, new Date(), 2);
+
+    expect(history.map((a) => a.id)).toEqual([newest.id, middle.id]);
+    expect(history.map((a) => a.id)).not.toContain(oldest.id);
+  });
+
+  it("defaults history to MAX_HISTORY entries", async () => {
+    const service = await seedService();
+    const { user, customer } = await seedCustomer("Alice");
+    for (let days = 1; days <= MAX_HISTORY + 2; days += 1) {
+      await seedAppointment(customer.id, service.id, pastDate(days));
+    }
+
+    const history = await getRecentHistoryForUser(user.id, new Date());
+
+    expect(history).toHaveLength(MAX_HISTORY);
+  });
+
+  it("returns unjoined rows — only the denormalized columns the list renders", async () => {
+    const service = await seedService();
+    const { user, customer } = await seedCustomer("Alice");
+    await seedAppointment(customer.id, service.id, futureDate(1, 12), "confirmed");
+    await seedAppointment(customer.id, service.id, pastDate(1), "confirmed");
+
+    const now = new Date();
+    const [upcomingRow] = await getUpcomingAppointmentsForUser(user.id, now);
+    const [historyRow] = await getRecentHistoryForUser(user.id, now);
+
+    for (const row of [upcomingRow, historyRow]) {
+      expect(row).not.toHaveProperty("customer");
+      expect(row).not.toHaveProperty("service");
+      expect(row.serviceName).toBeTruthy();
+      expect(typeof row.servicePrice).toBe("number");
+      expect(typeof row.serviceDurationMin).toBe("number");
+    }
+  });
+
+  it("never returns another user's appointments", async () => {
+    const service = await seedService();
+    const { user: aliceUser, customer: alice } = await seedCustomer("Alice");
+    const { user: bobUser, customer: bob } = await seedCustomer("Bob");
+    await seedAppointment(alice.id, service.id, futureDate(1, 12), "confirmed");
+    await seedAppointment(alice.id, service.id, pastDate(1), "confirmed");
+    await seedAppointment(bob.id, service.id, futureDate(2, 12), "confirmed");
+
+    const now = new Date();
+    const aliceUpcoming = await getUpcomingAppointmentsForUser(aliceUser.id, now);
+    const aliceHistory = await getRecentHistoryForUser(aliceUser.id, now);
+    const bobUpcoming = await getUpcomingAppointmentsForUser(bobUser.id, now);
+
+    expect(aliceUpcoming).toHaveLength(1);
+    expect(aliceUpcoming[0].customerId).toBe(alice.id);
+    expect(aliceHistory).toHaveLength(1);
+    expect(aliceHistory[0].customerId).toBe(alice.id);
+    expect(bobUpcoming).toHaveLength(1);
+    expect(bobUpcoming[0].customerId).toBe(bob.id);
   });
 });

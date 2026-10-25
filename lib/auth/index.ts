@@ -36,6 +36,7 @@ const getBootstrapAdminUserIds = () =>
   getUserIds(process.env.BOOTSTRAP_ADMIN_CLERK_USER_IDS);
 
 type AppUserAccess = {
+  id: number;
   role: "super_admin" | "admin" | "staff" | "customer";
   status: "active" | "disabled";
 };
@@ -51,13 +52,13 @@ async function fetchAppUserAccess(userId: string): Promise<AppUserAccess | null>
       where: { clerkUserId: userId },
       create: { clerkUserId: userId, role: "super_admin", status: "active" },
       update: { role: "super_admin", status: "active" },
-      select: { role: true, status: true },
+      select: { id: true, role: true, status: true },
     });
   }
 
   const existingUser = await prisma.user.findUnique({
     where: { clerkUserId: userId },
-    select: { role: true, status: true },
+    select: { id: true, role: true, status: true },
   });
   if (existingUser) return existingUser;
 
@@ -67,7 +68,7 @@ async function fetchAppUserAccess(userId: string): Promise<AppUserAccess | null>
 
   return prisma.user.create({
     data: { clerkUserId: userId, role: "admin", status: "active" },
-    select: { role: true, status: true },
+    select: { id: true, role: true, status: true },
   });
 }
 
@@ -82,6 +83,16 @@ async function fetchAppUserAccess(userId: string): Promise<AppUserAccess | null>
  * between users or requests.
  */
 const getAppUserAccess = cache(fetchAppUserAccess);
+
+/**
+ * Resolves the Clerk id to the application user's database id through the
+ * same memoized read the guards already perform, so a page that needs the id
+ * does not add a second `User` query to the request.
+ */
+export async function getAppUserId(clerkUserId: string): Promise<number | null> {
+  const appUser = await getAppUserAccess(clerkUserId);
+  return appUser?.id ?? null;
+}
 
 // ─── Auth Guards ────────────────────────────────────────────────────────────
 
