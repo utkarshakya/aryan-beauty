@@ -1,6 +1,6 @@
 # Fix branch — unified implementation plan
 
-Status: Phases A–D done (evidence recorded in-line; C is `8848de4`, D landed as its own standalone revertable commit, not pushed). Next: Phase E — business-settings validation and authorization review. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
+Status: Phases A–E done (evidence recorded in-line; C is `8848de4`, D is `6cdbcc3`, neither pushed; E is uncommitted). Next: Phase F — business-local dashboard day. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
 Branch: `fix` (created from `data-access-dedup`, which merged `ai/ui-polishing` and `develop`). All work happens here; `develop` and `main` stay untouched.
 Scope: booking correctness, data-access efficiency, remaining public-site polish, and launch verification — consolidated from `docs/plans/data-access-layer.md` and `docs/plans/booking-correctness-and-data-access-plan.md` (both deleted; git history is the archive).
 
@@ -165,15 +165,104 @@ ALTER TABLE "Appointment"
 
 **Committed as a single correctness commit on `fix` (not pushed)** — migration + `lib/errors.ts` + `app/actions/appointments.ts` + 3 test files + this plan update — so it reverts alone.
 
-## Phase E — Business-settings validation and authorization review
+## Phase E — Business-settings validation and authorization review — DONE 2026-10-26
 
-- [ ] Validate settings server-side before writing: JSON shape, opening/closing format and ordering, weekday values, closure dates, IANA time-zone identifier, numeric bounds (`slotIntervalMin`, `minBookingNoticeMin`, `cancellationCutoffMin`).
-- [ ] Reject malformed input with a clear field/form error — never silently coerce malformed JSON to empty defaults and save.
-- [ ] Tests: valid settings, malformed JSON, invalid times, invalid weekdays/dates/zones, numeric boundaries.
-- [ ] Review each Server Action's authorization at the action boundary (active user, owner/admin, staff, customer ownership, role changes). Keep webhook signature verification and role-assignment trust boundaries intact.
-- [ ] No broad auth refactors — only changes justified by a failing test or a clearly duplicated request-scoped read.
+Scope decisions taken before any code change (owner-approved, 2026-10-26):
 
-**Exit criteria:** DoD commands pass; invalid settings cannot be persisted; authorization regression tests pass.
+- **No zod.** The non-negotiable "no new runtime dependencies" beats `docs/plans/backend-hardening-plan.md`'s "install zod if missing". Validators are hand-rolled in `lib/validation/business.ts` (the shared location that plan asks for); its doc line needs an owner refresh (same treatment as the Phase C doc drift).
+- **Fix the silently dropped marketing fields** (`phoneDisplay`, `phoneHref`, `addressLine2`, `tagline`, `description` are submitted by the form but never read by the action, so those edits are lost on every save).
+- **Fix the `closedWeekdays` weekday-convention bug** found while specifying "weekday values" validation — see E.2.
+- **Remove `"use server"` from `lib/auth/sync.ts`** (hardening-plan item 19, High) here, justified by the review; leave the `users.ts` guard placement alone (guards exist one call deep — evidence in E.6).
+- **Include walk-in link target validation** (hardening-plan item 17) — it is a customer-ownership check at an action boundary.
+
+### E.0 Findings of the authorization review (recorded before code changes)
+
+Every `"use server"` export in the repo, guard at the action boundary (`app/actions/*.ts` = 5 files, 19 exports; plus `lib/auth/sync.ts` = 8 exports that should never have been exports):
+
+| File | Guard at the boundary | Verdict |
+|---|---|---|
+| `app/actions/users.ts` (5) | `getStaffUsersAction`, `inviteStaffAction`: `requireOwnerAdmin` first statement. `updateRoleAction`/`disableUserAction`/`restoreUserAction`: **no statement-level guard** — `setUserRole`/`disableUser`/`restoreUser` run `requireOwnerAdmin` one call deep, *outside* their `try`. | Keep as-is (E.6 has the no-session evidence). Finding F1 below. |
+| `app/actions/services.ts` (4) | `requireOwnerAdmin` first statement on all four | OK |
+| `app/actions/customers.ts` (3) | `updateMyProfile` → `requireActiveUser` + self-scoped by `appUser.id`; `getWalkInCustomersAction`/`linkWalkInCustomerAction` → `requireAdmin` | Guard OK; **link target unchecked** → E.4 |
+| `app/actions/business.ts` (2) | `requireOwnerAdmin` first statement on both | Guard OK; **input unchecked** → E.1 |
+| `app/actions/appointments.ts` (10) | `requireActiveUser` (customer-scoped: `cancelMyAppointment` filters by own `customer.id`) / `requireAdmin` (admin paths) on all ten | OK |
+| `lib/auth/sync.ts` (8) | 4 fully unguarded (`upsertUserFromClerk`, `syncPublicMetadata`, `softDeleteUser`, `getOrCreateUser`) + 4 guarded, **but the whole file is a network endpoint** | **Fix in E.5** |
+
+Findings recorded, **not** fixed here:
+
+- **F1 — swallowed redirect.** `updateRoleAction`/`disableUserAction`/`restoreUserAction` catch every error, so the `NEXT_REDIRECT` thrown by the guard is converted into `{ ok: false, error: <digest> }` instead of navigating. The write is still blocked (guard runs before any DB touch — tested in E.6); only the denial UX/`digest` text differs from every other action. Restructuring the try/catch is a UX change outside this phase.
+- **F2** — `getBusinessSettingsAction` returns the internal `id` (hardening #3, Future Phase 6 with DTOs).
+- **F3** — `inviteStaffAction` trusts Clerk invitation errors only after `requireOwnerAdmin`; fine. Webhook signature verification (`svix`, `app/api/webhooks/clerk/route.ts:23-27`) and the role-assignment trust boundary (`roleFromPublicMetadata`, super-admin env allow-list) are intact and must not change.
+- **F4** — `docs/backend-api-audit.md` / `docs/plans/backend-hardening-plan.md` rows for items 17/18/19 become stale once this phase lands; **not edited here** (separate plan, its owner refreshes them).
+
+### E.1 Server-side settings validation
+
+- [x] `lib/validation/business.ts` — one pure function `parseBusinessSettingsForm(formData)` returning `{ ok: true, data } | { ok: false, errors }`. `data` is `Partial<BusinessSettingsFormData>` (`updateBusinessSettings` already takes Partial). No `"use server"`, no prisma, `import type` only from `lib/db/business`.
+- [x] **Never coerce.** Raw JSON fields must be present and parseable — parse failure returns a field error; the `{}`/`[]` silent fallbacks in `app/actions/business.ts:29,39,46` are deleted. Missing required field → field error, never a default. Numeric fields parse from the raw string with `/^\d+$/` (today `Number("")` → `0` passes the `>= 0` checks for `minBookingNoticeMin`/`cancellationCutoffMin`).
+- [x] **Rules** (error keys are the field names, messages in the existing "Enter a valid …" style):
+  - `name`: required, ≤100 (unchanged). `phone`, `address`: present-or-empty, ≤30 / ≤200 (caps are new).
+  - Marketing fields (`phoneDisplay` ≤50, `phoneHref` ≤100, `addressLine2` ≤200, `tagline` ≤150, `description` ≤1000): **absent → key omitted from `data`** (preserves the stored value); present → trimmed and length-checked. No format rules invented (see E.0 — a `tel:`/`https:` prefix rule could invalidate existing rows).
+  - `timeZone`: non-empty and accepted by `new Intl.DateTimeFormat("en-US", { timeZone })` in a try/catch — that is IANA ids **including aliases and fixed offsets like `+05:30`** (V8 accepts offsets — measured, not assumed — and `businessLocalDateTimeToInstant` honours them at runtime, so rejecting them would be inventing a rule); rejects `""`, `Mars/Olympus`, bare `Kolkata`.
+  - `openingHours`: plain object (not array/null/string), keys ⊆ the 7 weekday names, each value `{ open, close }` strings matching `^([01]\d|2[0-3]):[0-5]\d$`, and `open < close` (lexicographic compare is exact for `HH:MM`). `{}` allowed (means "every day closed-by-hours", which `getAvailableSlots` already treats as no slots). **No overnight hours** — `close > open` stays the rule; the product has no overnight scheduling. A literal `null` JSON body is rejected too (`parseJsonField` distinguishes "missing"/"null" from a valid parse — the first draft did not, and that gap is why `INVALID` exists).
+  - `closedWeekdays`: JSON array of integers 0–6, **0 = Monday … 6 = Sunday (ISO)** after E.2.
+  - `closures`: JSON array; each entry an object with `date` matching `YYYY-MM-DD` **and** round-tripping `new Date(date).toISOString().slice(0, 10)` (calendar-valid, so `2026-02-31` is rejected), `reason` non-empty after trim and ≤200.
+  - `slotIntervalMin` 5–120 (unchanged), `minBookingNoticeMin` 0–10080, `cancellationCutoffMin` 0–10080 — the 7-day upper bounds are **new**; defaults (30/60/120) unaffected.
+- [x] `app/actions/business.ts` calls the parser after `requireOwnerAdmin()`; on `{ ok: false }` return `{ errors }` **before** `updateBusinessSettings` (test asserts the db function is never called). On success pass `data` through; `revalidatePath` calls and the success string unchanged.
+- [x] `components/business/BusinessSettingsForm.tsx` displays every new error key: `error={errors.timeZone}` and `error` props on the marketing/`phone`/`address` `Field`s, plus a `FormBanner tone="danger"` for `errors.openingHours` in the Opening-hours section and `errors.closures` in the Closures section (otherwise the server rejects and the user sees nothing). Client `validate()` stays as-is — the server is authoritative and its errors are now visible; mirroring would just drift again.
+
+### E.2 Weekday convention bug (`closedWeekdays`) — proof first, then fix
+
+- [x] **Reproduce before touching code** (`tests/db/closed-weekdays.test.ts`, dates computed at least a week ahead so the booking-notice filter can't fake a result; the test also asserts its own `futureWeek()` really returns a Monday/Tuesday/Sunday):
+  - **Pre-fix** (stash of `lib/constants.ts` + `lib/db/appointments.ts`, so both old files run together): `Tests 2 failed | 2 passed` — exactly the two convention tests, each failing with `expected [ …(18 slots) ] to deeply equal []`; the helper-sanity and empty-list tests passed, so the harness was sound.
+  - **Post-fix:** `4 passed`.
+  - **Honest detour:** the first reproduction run was invalid — the test's "next Monday" formula added a day when the base date *was* a Monday, so both runs failed for the helper's own reason and looked identical. The helper was fixed and the sanity test added before the evidence above was accepted.
+- [x] **Fix (ISO end-to-end, one convention repo-wide):**
+  - `lib/constants.ts` — reorder `WEEKDAY_NAMES` to monday-first and comment that it is the ISO order shared with the settings form (`0 = Monday`).
+  - `lib/db/appointments.ts:153` — derive the ISO weekday once: `const dayOfWeek = (new Date(date + "T00:00:00Z").getUTCDay() + 6) % 7`, used for both `WEEKDAY_NAMES[dayOfWeek]` and `closedWeekdays.includes(dayOfWeek)`, with a comment naming the convention. Single reader, single expression; verified the only consumer of `WEEKDAY_NAMES` order is `appointments.ts:154` and the `WeekdayName` type has no other user.
+  - The form is unchanged (already ISO), validation documents ISO (E.1).
+- [x] Data check before merge: dev DB has **one** `BusinessSettings` row — `{"id":1,"name":"Aryan Beauty","closedWeekdays":[]}`. No row's meaning changes; no migration or backfill needed.
+
+### E.3 Persist the dropped marketing fields
+
+- [x] The five fields flow form → action → `updateBusinessSettings` (regression test asserts they arrive in the full 15-key `data` payload; a second test asserts that **omitting** them leaves them out of the payload rather than writing `""`).
+
+### E.4 Walk-in link target validation (`linkWalkInCustomerAction`)
+
+- [x] After the existing id/format checks and `requireAdmin()`, validate against the DB before linking:
+  - customer exists → else `{ errors: { form: "Customer not found" } }`;
+  - customer is an unlinked walk-in (`userId === null`) → else `"This customer is already linked to a user"`;
+  - target `appUser` exists (already there) → else existing `"Clerk user not found in database"`;
+  - no `Customer` row already has `userId = appUser.id` → else `"This user is already linked to another customer"`.
+  - Domain errors return **before** `linkWalkInCustomer`, unchanged `{ errors: { form } }` contract, never `GENERIC_FORM_ERROR`.
+- [x] Tests: happy path links; each of the four rejections leaves both rows untouched (`tests/actions/walk-in-link.test.ts`, 6 cases incl. a no-session denial).
+- [x] **Recorded test change, made as planned:** `tests/actions/error-shape.test.ts` now seeds a real unlinked customer (and uses its id) so the domain checks pass and the mocked `linkWalkInCustomer` rejection is still what's under test.
+
+### E.5 Remove the accidental server-action surface in `lib/auth/sync.ts`
+
+- [x] `"use server"` deleted from `lib/auth/sync.ts:1` (replaced with a comment explaining why it must not come back). The file's importers are all server code: `app/api/webhooks/clerk/route.ts` (route handler), `app/auth/redirect/page.tsx` (server component), `app/actions/users.ts` ("use server" action file). Client components touch `@/lib/auth` only via `import type` (`StaffTable.tsx:21`, `AuthStatusBadge.tsx:3`); `Navbar.tsx` is a server component. `npm run build` passing (13 routes) is the proof that nothing client-side broke.
+- [x] **No `server-only` package** — that would be a new runtime dependency; the build result plus the E.6 source-scan test carry the guarantee instead.
+- [x] Consequence verified: `setUserRole`/`disableUser`/`restoreUser`/`updateUserRole` keep their `requireOwnerAdmin`/`requireSuperAdmin` guards for server callers — `tests/auth/staff-management.test.ts` (15 cases) and `tests/auth/authorization.test.ts` (12) green **unchanged**; `upsertUserFromClerk`/`softDeleteUser` reachable from the svix-verified webhook only (route untouched, F3).
+- [x] **Not doing:** hoisting guards to the top of the three `users.ts` actions (E.0 F1 — protection already holds; that's a UX change, not an authz fix).
+
+### E.6 Authorization regression tests
+
+- [x] New `tests/auth/server-action-surface.test.ts` (5 cases):
+  - **Source scan:** exactly the five `app/actions/*.ts` files declare `"use server"`; `lib/auth/sync.ts` does not (regression guard for E.5 — no runtime way exists to assert "not a network endpoint").
+  - **No session → no write:** `updateRoleAction(target, "staff")`, `disableUserAction(target)`, `restoreUserAction(target)` with `auth()` returning null → `{ ok: false }`, target's `role`/`status` unchanged in the DB, and `clerkClient` never called (evidence for the E.0 verdict on `users.ts`, and it also pins F1's observed shape); `updateBusinessSettingsAction` with no session → rejects `NEXT_REDIRECT` and no `BusinessSettings` row is read or written.
+  - Reused the `@clerk/nextjs/server` + `next/navigation` mocking style of `tests/auth/authorization.test.ts`; the role-tier matrix stays in that file.
+- [x] Authorization behaviour that must stay green **unchanged**: `tests/auth/authorization.test.ts`, `tests/auth/staff-management.test.ts`, webhook signature handling (review only — no route change).
+
+### E.7 Evidence (2026-10-26)
+
+- [x] `.env` `DATABASE_URL` re-confirmed before testing (Supabase pooler `aws-0-ap-northeast-1`, dev), and no listener on 3000/3001 before `npm run build`.
+- [x] `npm run lint` → **exit 0**.
+- [x] `npm run typecheck` → first run **failed**: `lib/validation/business.ts(148,45): error TS2769` — `Object.entries` on `object | null` after the `typeof` narrow. Fixed with an explicit `parsed === null` branch; second run → **exit 0**.
+- [x] `npm run test` → **187/187 passed** (11 files, 158.06s) against the real dev DB. Phase D baseline 112 + **75 new**: 60 settings-validation (`tests/actions/business-settings-validation.test.ts`), 6 walk-in, 5 action-surface, 4 weekday. `npm run db:seed` after → **6 services**.
+- [x] `npm run build` → **exit 0**: **13 routes + middleware proxy**, identical footprint to Phases A–D.
+- [x] Weekday reproduction output and dev-DB `closedWeekdays` query: recorded in E.2.
+- **Self-corrections during the phase (recorded, not hidden):** the walk-in test's "user already linked" case first passed `otherUser` instead of the taken user (would have missed the check — caught by the red run and fixed); the source-scan test needed its expected list sorted the same way as the scan; the weekday date helper bug in E.2.
+
+**Exit criteria:** met — DoD commands pass with recorded output; invalid settings cannot be persisted (every rejection case asserts `updateBusinessSettings` was never called); the weekday convention has a proof test with a pre-fix failure on record; the walk-in link target is validated at the action boundary; `lib/auth/sync.ts` is no longer a server-action surface (build + source scan); authorization regression tests pass.
 
 ## Phase F — Business-local dashboard day (time-zone leftover)
 
