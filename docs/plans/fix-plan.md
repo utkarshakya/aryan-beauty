@@ -1,6 +1,6 @@
 # Fix branch — unified implementation plan
 
-Status: Phases A–C done (evidence recorded in-line; C is its own commit). Next: Phase D — concurrent double-booking protection, the correctness-critical one. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
+Status: Phases A–D done (evidence recorded in-line; C is `8848de4`, D landed as its own standalone revertable commit, not pushed). Next: Phase E — business-settings validation and authorization review. Two deferred items ride along to Phase H: the authenticated `/appointments` query count and the authenticated render pass.
 Branch: `fix` (created from `data-access-dedup`, which merged `ai/ui-polishing` and `develop`). All work happens here; `develop` and `main` stay untouched.
 Scope: booking correctness, data-access efficiency, remaining public-site polish, and launch verification — consolidated from `docs/plans/data-access-layer.md` and `docs/plans/booking-correctness-and-data-access-plan.md` (both deleted; git history is the archive).
 
@@ -96,15 +96,74 @@ Scope: booking correctness, data-access efficiency, remaining public-site polish
 
 ## Phase D — Concurrent double-booking protection
 
-- [ ] Document the exact overlap rule (single stylist/slot model; appointments must not overlap while active; cancelled rows are free). Match current product behaviour — no staff-specific scheduling exists today.
-- [ ] Reproduce the race: test that fires two conflicting booking requests concurrently against PostgreSQL and shows both currently succeed.
-- [ ] Choose and document a database-safe strategy **before** implementing: transaction with locking, or a PostgreSQL exclusion/constraint migration, whichever fits the schema and rules. Prefer a DB-level guarantee over advisory app locking.
-- [ ] Losing request gets the existing friendly conflict response — never a raw DB error.
-- [ ] Cancellation/restore interact correctly with the guarantee (cancelled appointments free their slot; `restoreAppointment` must hit the same protection).
-- [ ] Regression tests: concurrent conflict (only one wins), non-overlapping concurrent bookings (both win), cancelled slot rebookable, transaction rollback leaves no partial rows.
-- [ ] If a migration is required, include it and test against the project's supported PostgreSQL before merge.
+### D.0 The overlap rule (documented before any code change)
 
-**Exit criteria:** DoD commands pass; conflicting simultaneous requests cannot both create active overlapping appointments; normal booking and cancellation flows unchanged.
+- **One resource.** The whole `Appointment` table is a single schedule: one stylist/chair at a time. No per-stylist, per-service or per-customer scoping — that is exactly what `getAvailableSlots` (`lib/db/appointments.ts:173`) and the pre-insert check in `createAppointment` (`app/actions/appointments.ts:124`) do today. No staff-specific scheduling exists.
+- **Half-open interval.** An appointment occupies `[startTime, endTime)`. Two appointments conflict iff
+  `a.startTime < b.endTime AND a.endTime > b.startTime` — touching endpoints (10:00–10:30 and 10:30–11:00) do **not** conflict.
+- **Only active rows participate.** `status <> 'cancelled'`. `pending` and `confirmed` both occupy the slot (a booking is born `pending`, and `restoreAppointment` turns a `cancelled` row back into `confirmed`). Cancelled rows are free and rebookable.
+- **No past/completed carve-out.** A completed appointment still occupies its interval; bookings only exist in the future, so nothing changes in practice.
+- **Restore is a re-entry** into the active set and must satisfy the same rule.
+
+### D.0b Strategy chosen: PostgreSQL exclusion constraint (before implementation)
+
+```sql
+ALTER TABLE "Appointment"
+  ADD CONSTRAINT "Appointment_no_overlap"
+  EXCLUDE USING gist (tsrange("startTime", "endTime", '[)') WITH &&)
+  WHERE (status <> 'cancelled');
+```
+
+- Chosen over transaction-level/`advisory` app locking because the plan prefers a **DB-level guarantee**; it protects every write path (booking, restore, and anything added later) without relying on each caller taking a lock.
+- `tsrange` matches Prisma's `DateTime` → `timestamp(3)`; `[)` encodes the half-open rule; range types have built-in GiST support, so **no extension is required**.
+- The existing in-transaction pre-check is kept as the fast path (friendly message, no wasted work); the constraint is the guarantee when the two race.
+- Race losers get an error at `INSERT`/`UPDATE` time → mapped to the **existing** friendly conflict response, never a raw DB error.
+- `restoreAppointment`'s `updateMany` re-evaluates the predicate on the `cancelled → confirmed` transition, so it inherits the same protection.
+- Verified before writing: dev DB has **0** `Appointment` rows and **0** overlapping active pairs, so the constraint applies without a data cleanup pass. `prisma migrate status` → *13 migrations found, Database schema is up to date*.
+
+- [x] Document the exact overlap rule (single stylist/slot model; appointments must not overlap while active; cancelled rows are free). Match current product behaviour — no staff-specific scheduling exists today. — **D.0 above.**
+- [x] Reproduce the race: test that fires two conflicting booking requests concurrently against PostgreSQL and shows both currently succeed. — **reproduced 4/4 runs, see Evidence.**
+- [x] Choose and document a database-safe strategy **before** implementing: transaction with locking, or a PostgreSQL exclusion/constraint migration, whichever fits the schema and rules. Prefer a DB-level guarantee over advisory app locking. — **D.0b above, written before any code change.**
+- [x] Losing request gets the existing friendly conflict response — never a raw DB error.
+- [x] Cancellation/restore interact correctly with the guarantee (cancelled appointments free their slot; `restoreAppointment` must hit the same protection).
+- [x] Regression tests: concurrent conflict (only one wins), non-overlapping concurrent bookings (both win), cancelled slot rebookable, transaction rollback leaves no partial rows.
+- [x] If a migration is required, include it and test against the project's supported PostgreSQL before merge.
+
+### D.1 What changed
+
+- **`prisma/migrations/20261026111500_appointment_no_overlap/migration.sql`** — the partial exclusion constraint from D.0b. Hand-written (the schema has no way to express it) and applied with `prisma migrate deploy`.
+- **`lib/errors.ts`** — new `isScheduleConflict(error)`. Matches SQLSTATE `23P01` anywhere in the Prisma/driver-adapter error chain *or* the `Appointment_no_overlap` constraint name, so a unique/FK/check violation still falls through to `GENERIC_FORM_ERROR`.
+- **`app/actions/appointments.ts`** — the race loser's error is mapped to the same `SLOT_TAKEN_MESSAGE` the pre-check already used; `restoreAppointmentAction` maps it to a domain message (`"That slot has been booked by someone else…"` → `ok: false`) and does **not** log it as a server error. The in-transaction pre-check was left untouched as the fast path.
+- The booking transaction itself is unchanged: same friendly-message contract, same rollback semantics.
+
+### D.2 Evidence (2026-10-26, dev DB + Clerk test keys re-confirmed: `pk_test_`/`sk_test_`, `aws-0-ap-northeast-1`)
+
+**Pre-fix (race reproduced).** New `tests/actions/booking-race.test.ts` fires two `createAppointment` calls for the *same* slot through `Promise.all`, released together by a gate so both clear the availability re-validation before either opens its transaction:
+
+- Runs 1–4: **`expected [ { success: … }, …(1) ] to have a length of 1 but got 2`** — both conflicting bookings succeeded, every time. Reproduction is stable, not a coin flip.
+- The non-overlapping control case passed both before and after (both bookings win) — so the harness is not simply serialising the requests.
+
+**Migration.** `npx prisma migrate deploy` → *14 migrations found… All migrations have been successfully applied*. `npx prisma migrate status` → *14 migrations found, Database schema is up to date*. Applied against the project's supported PostgreSQL (Supabase direct connection, `db.vkfdxqskccuqthidywyb.supabase.co:5432`). Dev DB had 0 appointments / 0 overlapping pairs beforehand, so no data cleanup was needed.
+
+**Constraint behaviour, probed directly against the database** before wiring the action (temporary script, since deleted):
+
+- overlapping `INSERT` → `PrismaClientKnownRequestError`, `code: P2039`, `meta.driverAdapterError.cause.code: 23P01`, `originalMessage: conflicting key value violates exclusion constraint "Appointment_no_overlap"`
+- overlapping `UPDATE` (`cancelled → confirmed`, i.e. restore) → same error
+- overlapping `INSERT` with `status = 'cancelled'` → **allowed** (predicate correct)
+
+**Post-fix:** `tests/actions/booking-race.test.ts` → 4/4 runs green.
+
+**DoD commands (recorded output):**
+
+- `npm run lint` → **exit 0**
+- `npm run typecheck` → **exit 0**
+- `npm run test` → **112/112 passed** (7 files, 127.53s) against the real dev DB. `npm run db:seed` after → **6 services**.
+  - 96 baseline + 16 new: 2 concurrency (`tests/actions/booking-race.test.ts`), 6 DB-level overlap (`tests/db/appointments.test.ts`), 8 `isScheduleConflict` (`tests/errors.test.ts`).
+- `npm run build` → **exit 0** (dev server confirmed stopped — no listener on 3000/3001): **13 routes + middleware proxy**, identical footprint to Phases A/B/C.
+
+**Exit criteria:** met — conflicting simultaneous requests can no longer both create active overlapping appointments (enforced by the database, not by app-level locking); the non-booking flows are untouched and every pre-existing test still passes unchanged.
+
+**Committed as a single correctness commit on `fix` (not pushed)** — migration + `lib/errors.ts` + `app/actions/appointments.ts` + 3 test files + this plan update — so it reverts alone.
 
 ## Phase E — Business-settings validation and authorization review
 

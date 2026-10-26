@@ -16,6 +16,7 @@ import {
   getRecentHistoryForUser,
   MAX_HISTORY,
 } from "@/lib/db/appointments";
+import { isScheduleConflict } from "@/lib/errors";
 
 beforeEach(async () => {
   await resetDb();
@@ -148,6 +149,119 @@ describe("booking conflicts", () => {
 
     const slots = await getAvailableSlots(service.id, date);
     expect(slots.some((s) => s.value.includes("T10:00"))).toBe(true);
+  });
+});
+
+describe("appointment overlap guarantee (enforced by the database)", () => {
+  const slot = () => futureDate(10, 10);
+
+  it("rejects an insert overlapping an active appointment", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const at = slot();
+    await seedAppointment(customer.id, service.id, at, "confirmed", 30);
+
+    await expect(
+      seedAppointment(
+        customer.id,
+        service.id,
+        new Date(at.getTime() + 15 * 60_000),
+        "pending",
+        30,
+      ),
+    ).rejects.toThrow(/Appointment_no_overlap/);
+  });
+
+  it("allows intervals that only touch — the rule is half-open", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const at = slot();
+    await seedAppointment(customer.id, service.id, at, "confirmed", 30);
+
+    await expect(
+      seedAppointment(
+        customer.id,
+        service.id,
+        new Date(at.getTime() + 30 * 60_000),
+        "pending",
+        30,
+      ),
+    ).resolves.toHaveProperty("id");
+  });
+
+  it("ignores cancelled rows, so their slot is rebookable", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const at = slot();
+    await seedAppointment(customer.id, service.id, at, "cancelled", 30);
+
+    await expect(
+      seedAppointment(customer.id, service.id, at, "pending", 30),
+    ).resolves.toHaveProperty("id");
+  });
+
+  it("frees a slot the moment its appointment is cancelled", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const at = slot();
+    const existing = await seedAppointment(
+      customer.id,
+      service.id,
+      at,
+      "confirmed",
+      30,
+    );
+
+    // Flip the status directly: what is under test is the slot, not the
+    // cancellation cutoff rule (covered by "cancellation cutoff" below).
+    await prisma.appointment.update({
+      where: { id: existing.id },
+      data: { status: "cancelled" },
+    });
+
+    await expect(
+      seedAppointment(customer.id, service.id, at, "pending", 30),
+    ).resolves.toHaveProperty("id");
+  });
+
+  it("refuses to restore a cancelled appointment whose slot has been rebooked", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const at = slot();
+    const cancelled = await seedAppointment(
+      customer.id,
+      service.id,
+      at,
+      "cancelled",
+      30,
+    );
+    await seedAppointment(customer.id, service.id, at, "confirmed", 30);
+
+    const error = await restoreAppointment(cancelled.id).then(
+      () => null,
+      (thrown: unknown) => thrown,
+    );
+
+    expect(error).toBeTruthy();
+    expect(isScheduleConflict(error)).toBe(true);
+    const reloaded = await prisma.appointment.findUnique({
+      where: { id: cancelled.id },
+    });
+    expect(reloaded?.status).toBe("cancelled");
+  });
+
+  it("still restores when the slot is free", async () => {
+    const service = await seedService();
+    const { customer } = await seedCustomer();
+    const cancelled = await seedAppointment(
+      customer.id,
+      service.id,
+      slot(),
+      "cancelled",
+      30,
+    );
+
+    await expect(restoreAppointment(cancelled.id)).resolves.toBe(true);
   });
 });
 

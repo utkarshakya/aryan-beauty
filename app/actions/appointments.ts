@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { AppointmentStatus, Prisma } from "@prisma/client";
 import { requireActiveUser, requireAdmin } from "@/lib/auth";
-import { GENERIC_FORM_ERROR, logServerError } from "@/lib/errors";
+import {
+  GENERIC_FORM_ERROR,
+  isScheduleConflict,
+  logServerError,
+} from "@/lib/errors";
 import {
   getAvailableSlots,
   createAppointmentTx,
@@ -32,6 +36,9 @@ export type {
 const INDIAN_PHONE_RE = new RegExp("^[6-9]\\d{9}$");
 const DATE_RE = new RegExp("^\\d{4}-\\d{2}-\\d{2}$");
 const initialState: BookingState = { errors: {} };
+/** Shown when a slot is taken — whether the action's own check caught it or the database did. */
+const SLOT_TAKEN_MESSAGE =
+  "Sorry, that time is already booked. Please choose another slot.";
 
 // ─── Customer Actions ───────────────────────────────────────────────────────
 
@@ -173,10 +180,15 @@ export async function createAppointment(
   } catch (error) {
     if (error instanceof Error && error.message === "Time slot unavailable") {
       return {
-        errors: {
-          startTime:
-            "Sorry, that time is already booked. Please choose another slot.",
-        },
+        errors: { startTime: SLOT_TAKEN_MESSAGE },
+      };
+    }
+    if (isScheduleConflict(error)) {
+      // The slot was taken between the availability check and the insert —
+      // `Appointment_no_overlap` caught it, so the loser must see the same
+      // friendly message rather than a raw database error.
+      return {
+        errors: { startTime: SLOT_TAKEN_MESSAGE },
       };
     }
     if (error instanceof Error && error.message === "Service not found") {
@@ -293,6 +305,15 @@ export async function restoreAppointmentAction(id: number) {
       revalidatePath(`/admin/appointments/${id}`);
     }
   } catch (error) {
+    if (isScheduleConflict(error)) {
+      // Restoring is a re-entry into the active schedule, so the cancelled
+      // slot may have been rebooked meanwhile. Not a server fault — report it
+      // as the domain outcome it is and leave the row cancelled.
+      return {
+        ok: false,
+        error: "That slot has been booked by someone else, so this appointment cannot be restored.",
+      };
+    }
     logServerError("restoreAppointmentAction", error);
     return { ok: false, error: GENERIC_FORM_ERROR };
   }
