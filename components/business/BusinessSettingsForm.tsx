@@ -150,7 +150,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
               maxLength={100}
             />
           </Field>
-          <Field label="Phone">
+          <Field label="Phone" error={errors.phone}>
             <Input
               type="tel"
               inputMode="tel"
@@ -159,20 +159,20 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
               onChange={(e) => setPhone(e.target.value)}
             />
           </Field>
-          <Field label="Address" className="sm:col-span-2">
+          <Field label="Address" className="sm:col-span-2" error={errors.address}>
             <Textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               rows={2}
             />
           </Field>
-          <Field label="Address line 2" className="sm:col-span-2">
+          <Field label="Address line 2" className="sm:col-span-2" error={errors.addressLine2}>
             <Input
               value={addressLine2}
               onChange={(e) => setAddressLine2(e.target.value)}
             />
           </Field>
-          <Field label="Phone (storage)">
+          <Field label="Phone (storage)" error={errors.phone}>
             <Input
               type="tel"
               inputMode="tel"
@@ -181,7 +181,7 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
               onChange={(e) => setPhone(e.target.value)}
             />
           </Field>
-          <Field label="Phone (display)">
+          <Field label="Phone (display)" error={errors.phoneDisplay}>
             <Input
               type="tel"
               inputMode="tel"
@@ -190,26 +190,26 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
               onChange={(e) => setPhoneDisplay(e.target.value)}
             />
           </Field>
-          <Field label="Phone (href)">
+          <Field label="Phone (href)" error={errors.phoneHref}>
             <Input
               value={phoneHref}
               onChange={(e) => setPhoneHref(e.target.value)}
             />
           </Field>
-          <Field label="Tagline" className="sm:col-span-2">
+          <Field label="Tagline" className="sm:col-span-2" error={errors.tagline}>
             <Input
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
             />
           </Field>
-          <Field label="Description" className="sm:col-span-2">
+          <Field label="Description" className="sm:col-span-2" error={errors.description}>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
             />
           </Field>
-          <Field label="Time zone">
+          <Field label="Time zone" error={errors.timeZone}>
             <Select
               value={timeZone}
               onChange={(e) => setTimeZone(e.target.value)}
@@ -228,6 +228,9 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
           title="Opening hours"
           description="Uncheck a day to mark it as closed. Closed days won&apos;t show available slots."
         />
+        {errors.openingHours && (
+          <FormBanner tone="danger">{errors.openingHours}</FormBanner>
+        )}
         <div className="space-y-2">
           {WEEKDAYS.map(day => {
             const closed = isClosed(day, closedWeekdays, openingHours);
@@ -280,6 +283,11 @@ export default function BusinessSettingsForm({ settings }: { settings: BusinessS
           description="Add specific dates when the parlour is closed (holidays, vacation, etc.)."
         />
         <div className="flex flex-wrap gap-2">
+          {errors.closures && (
+            <FormBanner tone="danger" className="w-full">
+              {errors.closures}
+            </FormBanner>
+          )}
           <Input
             type="date"
             autoComplete="off"
