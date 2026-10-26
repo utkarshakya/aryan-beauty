@@ -1,4 +1,10 @@
-"use server";
+// Deliberately NOT a "use server" module: every export here used to become a
+// network-callable server action, including helpers with no caller
+// authentication (upsertUserFromClerk, syncPublicMetadata, softDeleteUser,
+// getOrCreateUser). All importers are server code — the svix-verified Clerk
+// webhook, the /auth/redirect server component, and app/actions/users.ts —
+// so plain server functions are the right shape. Guarded exports below keep
+// running their requireOwnerAdmin/requireSuperAdmin checks for those callers.
 
 import { prisma } from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
