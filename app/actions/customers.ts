@@ -88,6 +88,31 @@ export async function linkWalkInCustomerAction(
       return { errors: { form: "Clerk user not found in database" } };
     }
 
+    // The listing only shows unlinked walk-ins, but the action is the
+    // trust boundary: never relink a customer that already belongs to
+    // someone, and never link a user who already has a customer profile.
+    const customer = await prisma.customer.findUnique({
+      where: { id: customerId },
+    });
+    if (!customer) {
+      return { errors: { form: "Customer not found" } };
+    }
+    if (customer.userId !== null) {
+      return {
+        errors: { form: "This customer is already linked to a user" },
+      };
+    }
+
+    const existingCustomerForUser = await prisma.customer.findFirst({
+      where: { userId: appUser.id },
+      select: { id: true },
+    });
+    if (existingCustomerForUser) {
+      return {
+        errors: { form: "This user is already linked to another customer" },
+      };
+    }
+
     await linkWalkInCustomer(customerId, appUser.id);
     revalidatePath("/admin");
     revalidatePath("/appointments");

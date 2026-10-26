@@ -288,10 +288,15 @@ describe("server-action error shape: customers", () => {
     await prisma.user.create({
       data: { clerkUserId: "u-walkin", role: "customer", status: "active" },
     });
+    // The action now validates its targets first, so the seed must satisfy
+    // them: an unlinked walk-in customer for an unlinked user.
+    const customer = await prisma.customer.create({
+      data: { name: "Walk-in", userId: null },
+    });
     dbCustomersMock.linkWalkInCustomer.mockRejectedValue(dbFailure());
 
     const formData = new FormData();
-    formData.set("customerId", "1");
+    formData.set("customerId", String(customer.id));
     formData.set("clerkUserId", "u-walkin");
 
     const result = await linkWalkInCustomerAction({ errors: {} }, formData);
