@@ -149,8 +149,11 @@ export async function getAvailableSlots(
   });
   if (!service) return [];
 
-  // `date` is a business-local calendar date, so derive its weekday in UTC.
-  const dayOfWeek = new Date(date + "T00:00:00Z").getUTCDay();
+  // `date` is a business-local calendar date. JS weekdays are Sunday-first
+  // (`getUTCDay()`), but `closedWeekdays` and `WEEKDAY_NAMES` use the ISO
+  // order (0 = Monday … 6 = Sunday) that the settings form writes — convert
+  // once here so ticking "Monday closed" closes Monday.
+  const dayOfWeek = (new Date(date + "T00:00:00Z").getUTCDay() + 6) % 7;
   const dayName = WEEKDAY_NAMES[dayOfWeek];
 
   if (business.closedWeekdays.includes(dayOfWeek)) {
